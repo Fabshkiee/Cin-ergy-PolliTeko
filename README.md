@@ -1,2 +1,2 @@
-# Cin-ergy-s-PolliTeko
+# Cin-ergy-PolliTeko
 PolliTeko
