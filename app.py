@@ -25,15 +25,17 @@ def home():
 @app.route('/login', methods=['POST'])
 def login():
     user_id = request.form['userID']
+    password = request.form['password']
+    all_data = sheet.get_all_values()
     
     
-    user_ids = sheet.col_values(1)
     
-    if user_id in user_ids:
-        session['user_id'] = user_id
-        return redirect('/dashboard')
-    else:
-        return render_template('index.html', error="User ID not found")
+    for row in all_data:
+        if len(row)>=2:
+            if row[0] == user_id and row[1] == password:
+                session['user_id'] = user_id
+                return redirect('/dashboard')
+    return render_template('index.html', error="User ID not found")
         
         
 @app.route('/dashboard')
