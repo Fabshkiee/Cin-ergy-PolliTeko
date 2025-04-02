@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sequential Multiple Choice Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        .card.active {
+            display: block;
+        }
+        .options {
+            margin: 15px 0;
+        }
+        .option {
+            margin: 8px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .option:hover {
+            background-color: #f0f0f0;
+        }
+        .option.selected {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        button.back {
+            background-color: #6c757d;
+        }
+        button.submit {
+            background-color: #28a745;
+        }
+        .results {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #d4edda;
+            background-color: #d4edda;
+            border-radius: 4px;
+        }
+        .button-container {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Multiple Choice Quiz</h1>
+    
+    <div id="card1" class="card active">
+        <h3>Question 1</h3>
+        <p>What is the capital of France?</p>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 1)">Berlin</div>
+            <div class="option" onclick="selectOption(this, 1)">Madrid</div>
+            <div class="option" onclick="selectOption(this, 1)">Paris</div>
+            <div class="option" onclick="selectOption(this, 1)">Rome</div>
+        </div>
+        <div class="button-container">
+            <button id="next1" onclick="nextQuestion(1)" disabled>Next</button>
+        </div>
+    </div>
+    
+    <div id="card2" class="card">
+        <h3>Question 2</h3>
+        <p>Which planet is known as the Red Planet?</p>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 2)">Venus</div>
+            <div class="option" onclick="selectOption(this, 2)">Mars</div>
+            <div class="option" onclick="selectOption(this, 2)">Jupiter</div>
+            <div class="option" onclick="selectOption(this, 2)">Saturn</div>
+        </div>
+        <div class="button-container">
+            <button class="back" onclick="prevQuestion(2)">Back</button>
+            <button id="next2" onclick="nextQuestion(2)" disabled>Next</button>
+        </div>
+    </div>
+    
+    <div id="card3" class="card">
+        <h3>Question 3</h3>
+        <p>What is the largest mammal?</p>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 3)">Elephant</div>
+            <div class="option" onclick="selectOption(this, 3)">Blue Whale</div>
+            <div class="option" onclick="selectOption(this, 3)">Giraffe</div>
+            <div class="option" onclick="selectOption(this, 3)">Polar Bear</div>
+        </div>
+        <div class="button-container">
+            <button class="back" onclick="prevQuestion(3)">Back</button>
+            <button id="next3" onclick="nextQuestion(3)" disabled>Next</button>
+        </div>
+    </div>
+    
+    <div id="card4" class="card">
+        <h3>Question 4</h3>
+        <p>Which language is primarily used for web development?</p>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 4)">Java</div>
+            <div class="option" onclick="selectOption(this, 4)">Python</div>
+            <div class="option" onclick="selectOption(this, 4)">JavaScript</div>
+            <div class="option" onclick="selectOption(this, 4)">C++</div>
+        </div>
+        <div class="button-container">
+            <button class="back" onclick="prevQuestion(4)">Back</button>
+            <button id="next4" onclick="nextQuestion(4)" disabled>Next</button>
+        </div>
+    </div>
+    
+    <div id="card5" class="card">
+        <h3>Question 5</h3>
+        <p>Who painted the Mona Lisa?</p>
+        <div class="options">
+            <div class="option" onclick="selectOption(this, 5)">Vincent van Gogh</div>
+            <div class="option" onclick="selectOption(this, 5)">Pablo Picasso</div>
+            <div class="option" onclick="selectOption(this, 5)">Leonardo da Vinci</div>
+            <div class="option" onclick="selectOption(this, 5)">Michelangelo</div>
+        </div>
+        <div class="button-container">
+            <button class="back" onclick="prevQuestion(5)">Back</button>
+            <button id="next5" class="submit" onclick="nextQuestion(5)">Submit Quiz</button>
+        </div>
+    </div>
+    
+    <div id="results" class="results">
+        <h3>Quiz Results</h3>
+        <p>Your score: <span id="score">0</span> out of 5</p>
+        <button onclick="resetQuiz()">Take Quiz Again</button>
+    </div>
+
+    <script>
+        const correctAnswers = {
+            1: "Paris",
+            2: "Mars",
+            3: "Blue Whale",
+            4: "JavaScript",
+            5: "Leonardo da Vinci"
+        };
+        
+        const userAnswers = {};
+        let currentQuestion = 1;
+        
+        function selectOption(optionElement, questionNum) {
+            // Remove selected class from all options in this question
+            const options = optionElement.parentElement.children;
+            for (let i = 0; i < options.length; i++) {
+                options[i].classList.remove('selected');
+            }
+            
+            // Add selected class to clicked option
+            optionElement.classList.add('selected');
+            
+            // Store the user's answer
+            userAnswers[questionNum] = optionElement.textContent;
+            
+            // Enable the next button
+            document.getElementById(`next${questionNum}`).disabled = false;
+        }
+        
+        function nextQuestion(currentQ) {
+            // Hide current question
+            document.getElementById(`card${currentQ}`).classList.remove('active');
+            
+            if (currentQ < 5) {
+                // Show next question
+                document.getElementById(`card${currentQ + 1}`).classList.add('active');
+                currentQuestion = currentQ + 1;
+                
+                // Preselect any previously selected answer
+                preselectAnswer(currentQ + 1);
+            } else {
+                // Quiz is complete - show results
+                calculateScore();
+                document.getElementById('results').style.display = 'block';
+            }
+        }
+        
+        function prevQuestion(currentQ) {
+            // Hide current question
+            document.getElementById(`card${currentQ}`).classList.remove('active');
+            
+            // Show previous question
+            document.getElementById(`card${currentQ - 1}`).classList.add('active');
+            currentQuestion = currentQ - 1;
+        }
+        
+        function preselectAnswer(questionNum) {
+            if (userAnswers[questionNum]) {
+                const options = document.querySelectorAll(`#card${questionNum} .option`);
+                options.forEach(option => {
+                    if (option.textContent === userAnswers[questionNum]) {
+                        option.classList.add('selected');
+                        document.getElementById(`next${questionNum}`).disabled = false;
+                    }
+                });
+            }
+        }
+        
+        function calculateScore() {
+            let score = 0;
+            for (let i = 1; i <= 5; i++) {
+                if (userAnswers[i] === correctAnswers[i]) {
+                    score++;
+                }
+            }
+            document.getElementById('score').textContent = score;
+        }
+        
+        function resetQuiz() {
+            // Clear selections
+            const selectedOptions = document.querySelectorAll('.selected');
+            selectedOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Disable all next buttons
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`next${i}`).disabled = true;
+            }
+            
+            // Clear user answers
+            for (let key in userAnswers) {
+                delete userAnswers[key];
+            }
+            
+            // Hide results and show first question
+            document.getElementById('results').style.display = 'none';
+            document.querySelector('.card.active').classList.remove('active');
+            document.getElementById('card1').classList.add('active');
+            currentQuestion = 1;
+        }
+    </script>
+</body>
+</html>
