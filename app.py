@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, B
 import gspread
 import os
 from google.oauth2.service_account import Credentials
-from candidatesAdd import getAllOptions, quizCard, candidatesBP
+
 
 
 
@@ -15,8 +15,9 @@ client = gspread.authorize(creds)
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
 workbook = client.open_by_key(sheet_id)
 sheet = workbook.worksheet("Sheet1")
+sheet2 = workbook.worksheet("pillars")
 
-app.register_blueprint(candidatesBP)
+
 
 @app.route('/')
 def home():
@@ -36,7 +37,7 @@ def login():
             if row[0] == user_id and row[1] == password:
                 session['user_id'] = user_id
                 return redirect('/dashboard')
-    return render_template('index.html', error="ID/Password is not found")
+    return render_template('index.html', error="User ID not found")
         
         
 @app.route('/dashboard')
@@ -44,8 +45,33 @@ def dashboard():
     if 'user_id' not in session:
         return redirect ('/')
     return render_template('landingpage.html')
-            
     
+    
+    
+    
+@app.route('/quiz')
+def quiz():
+    try:
+        # Get ALL non-empty cells in Column A
+        column_a = sheet2.col_values(1)  # Gets all values in Column A
+        options = [value.strip() for value in column_a if value.strip()]
+        
+        questions = [{
+            'id': 1,
+            'text': 'What is the capital of France?',
+            'options': options  # Now contains all non-empty A column values
+        }]
+        
+        return render_template('pretest.html', questions=questions)
+    
+    except Exception as e:
+        return f"Error loading quiz: {str(e)}", 500
+
+@app.route('/save-results', methods=['POST'])
+def save_results():
+    data = request.json
+    print("User selected:", data['answers'])
+    return jsonify({"status": "success"})
     
 if __name__ == '__main__':
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))

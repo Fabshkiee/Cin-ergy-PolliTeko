@@ -71,83 +71,36 @@
 <body>
     <h1>Multiple Choice Quiz</h1>
     
-    <div id="card1" class="card active">
-        <h3>Question 1</h3>
-        <p>What is the capital of France?</p>
+    {% for question in questions %}
+    <div id="card{{ question.id }}" class="card {% if question.id == 1 %}active{% endif %}">
+        <h3>Question {{ question.id }}</h3>
+        <p>{{ question.text }}</p>
         <div class="options">
-            <div class="option" onclick="selectOption(this, 1)">Berlin</div>
-            <div class="option" onclick="selectOption(this, 1)">Madrid</div>
-            <div class="option" onclick="selectOption(this, 1)">Paris</div>
-            <div class="option" onclick="selectOption(this, 1)">Rome</div>
+            {% for option in question.options %}
+            <div class="option" onclick="selectOption(this, {{ question.id }})" data-value="{{ option }}">
+                {{ option }}
+            </div>
+            {% endfor %}
         </div>
         <div class="button-container">
-            <button id="next1" onclick="nextQuestion(1)" disabled>Next</button>
+            {% if question.id > 1 %}
+            <button class="back" onclick="prevQuestion({{ question.id }})">Back</button>
+            {% else %}
+            <div></div> <!-- Spacer -->
+            {% endif %}
+            
+            {% if question.id < questions|length %}
+            <button id="next{{ question.id }}" onclick="nextQuestion({{ question.id }})" disabled>Next</button>
+            {% else %}
+            <button id="next{{ question.id }}" class="submit" onclick="submitQuiz()" disabled>Submit Quiz</button>
+            {% endif %}
         </div>
     </div>
-    
-    <div id="card2" class="card">
-        <h3>Question 2</h3>
-        <p>Which planet is known as the Red Planet?</p>
-        <div class="options">
-            <div class="option" onclick="selectOption(this, 2)">Venus</div>
-            <div class="option" onclick="selectOption(this, 2)">Mars</div>
-            <div class="option" onclick="selectOption(this, 2)">Jupiter</div>
-            <div class="option" onclick="selectOption(this, 2)">Saturn</div>
-        </div>
-        <div class="button-container">
-            <button class="back" onclick="prevQuestion(2)">Back</button>
-            <button id="next2" onclick="nextQuestion(2)" disabled>Next</button>
-        </div>
-    </div>
-    
-    <div id="card3" class="card">
-        <h3>Question 3</h3>
-        <p>What is the largest mammal?</p>
-        <div class="options">
-            <div class="option" onclick="selectOption(this, 3)">Elephant</div>
-            <div class="option" onclick="selectOption(this, 3)">Blue Whale</div>
-            <div class="option" onclick="selectOption(this, 3)">Giraffe</div>
-            <div class="option" onclick="selectOption(this, 3)">Polar Bear</div>
-        </div>
-        <div class="button-container">
-            <button class="back" onclick="prevQuestion(3)">Back</button>
-            <button id="next3" onclick="nextQuestion(3)" disabled>Next</button>
-        </div>
-    </div>
-    
-    <div id="card4" class="card">
-        <h3>Question 4</h3>
-        <p>Which language is primarily used for web development?</p>
-        <div class="options">
-            <div class="option" onclick="selectOption(this, 4)">Java</div>
-            <div class="option" onclick="selectOption(this, 4)">Python</div>
-            <div class="option" onclick="selectOption(this, 4)">JavaScript</div>
-            <div class="option" onclick="selectOption(this, 4)">C++</div>
-        </div>
-        <div class="button-container">
-            <button class="back" onclick="prevQuestion(4)">Back</button>
-            <button id="next4" onclick="nextQuestion(4)" disabled>Next</button>
-        </div>
-    </div>
-    
-    <div id="card5" class="card">
-        <h3>Question 5</h3>
-        <p>Who painted the Mona Lisa?</p>
-        <div class="options">
-            <div class="option" onclick="selectOption(this, 5)">Vincent van Gogh</div>
-            <div class="option" onclick="selectOption(this, 5)">Pablo Picasso</div>
-            <div class="option" onclick="selectOption(this, 5)">Leonardo da Vinci</div>
-            <div class="option" onclick="selectOption(this, 5)">Michelangelo</div>
-        </div>
-        <div class="button-container">
-            <button class="back" onclick="prevQuestion(5)">Back</button>
-            <button id="next5" class="submit" onclick="nextQuestion(5)">Submit Quiz</button>
-        </div>
-    </div>
+    {% endfor %}
     
     <div id="results" class="results">
         <h3>Quiz Results</h3>
-        <p>Your score: <span id="score">0</span> out of 5</p>
+        <p>Your score: <span id="score">0</span> out of {{ questions|length }}</p>
         <button onclick="resetQuiz()">Take Quiz Again</button>
     </div>
 
@@ -174,7 +127,7 @@
             optionElement.classList.add('selected');
             
             // Store the user's answer
-            userAnswers[questionNum] = optionElement.textContent;
+            userAnswers[questionNum] = optionElement.dataset.value;
             
             // Enable the next button
             document.getElementById(`next${questionNum}`).disabled = false;
@@ -184,13 +137,10 @@
             // Hide current question
             document.getElementById(`card${currentQ}`).classList.remove('active');
             
-            if (currentQ < 5) {
+            if (currentQ < {{ questions|length }}) {
                 // Show next question
                 document.getElementById(`card${currentQ + 1}`).classList.add('active');
                 currentQuestion = currentQ + 1;
-                
-                // Preselect any previously selected answer
-                preselectAnswer(currentQ + 1);
             } else {
                 // Quiz is complete - show results
                 calculateScore();
@@ -207,21 +157,26 @@
             currentQuestion = currentQ - 1;
         }
         
-        function preselectAnswer(questionNum) {
-            if (userAnswers[questionNum]) {
-                const options = document.querySelectorAll(`#card${questionNum} .option`);
-                options.forEach(option => {
-                    if (option.textContent === userAnswers[questionNum]) {
-                        option.classList.add('selected');
-                        document.getElementById(`next${questionNum}`).disabled = false;
-                    }
-                });
-            }
+        function submitQuiz() {
+            calculateScore();
+            document.getElementById('results').style.display = 'block';
+            document.querySelector('.card.active').classList.remove('active');
+            
+            // Send results to server (optional)
+            fetch('/save-results', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    answers: userAnswers
+                })
+            });
         }
         
         function calculateScore() {
             let score = 0;
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= {{ questions|length }}; i++) {
                 if (userAnswers[i] === correctAnswers[i]) {
                     score++;
                 }
@@ -237,7 +192,7 @@
             });
             
             // Disable all next buttons
-            for (let i = 1; i <= 5; i++) {
+            for (let i = 1; i <= {{ questions|length }}; i++) {
                 document.getElementById(`next${i}`).disabled = true;
             }
             
@@ -248,7 +203,7 @@
             
             // Hide results and show first question
             document.getElementById('results').style.display = 'none';
-            document.querySelector('.card.active').classList.remove('active');
+            document.querySelectorAll('.card').forEach(card => card.classList.remove('active'));
             document.getElementById('card1').classList.add('active');
             currentQuestion = 1;
         }

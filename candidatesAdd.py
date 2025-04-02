@@ -22,6 +22,7 @@ def getAllOptions():
     
 @candidatesBP.route('/quiz')
 def quizCard():
+    render_templates("pretest.html")
     options = getAllOptions()
     
     questions = [
