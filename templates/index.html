@@ -3,17 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <title>Page title</title>
-    <style src="/static/"></style>
+    <link rel="stylesheet" href="/static/login.css">
 </head>
 <body>
-    <form method="POST" action="/login">
-        <label for="userID">userID:
-        </label> <br>
-        <input type="text" id="userID" name="userID">
-        <button type="submit">Login</button>
-    </form>
-    {% if error%}
-      <p class="error">{{ error }}</p>
-    {% endif %}
+    <section class="authlogin">
+        <h1>LOG IN</h1>
+        <form class="form" method="POST" action="/login">
+            <label for="userID">Voter's ID number</label> 
+            <br>
+            <input class="input" type="text" id="userID" name="userID" placeholder="Enter your VIN" autocomplete="off">
+        </form>
+        <button type="submit">LOG IN</button>
+        <!--
+        {% if error%}
+          <p class="error">{{ error }}</p>
+        {% endif %}
+        
+        
+        -->
+    </section>
 </body>
 </html>
