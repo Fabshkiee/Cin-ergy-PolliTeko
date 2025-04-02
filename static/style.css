@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Montserrat:ital,wght@0,500;1,500&family=Oswald:wght@200..700&family=Poppins&family=Teko:wght@500&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
 * {
     padding: 0;
     margin: 0;
@@ -7,12 +6,19 @@
 }
 
 body {
-    font-family: 'Poppins', Arial, sans-serif;
+    font-family: 'Poppins';
     background-color: #FAF9F6;
     display: flex; /* Enable flexbox for centering */
     flex-direction: column;
     min-height: 100vh;
+    overflow: hidden;
+    overflow-y: scroll;
 }
+
+body::-webkit-scrollbar {
+    display: none; /* Hides the scrollbar for WebKit browsers (Chrome, Safari) */
+}
+
 
 html {
     scroll-behavior: smooth;
@@ -38,13 +44,15 @@ html {
 }
 
 .navbar li {
-    margin: 0 2.25rem;
+    margin: 0 2.5rem;
+    font-weight: 500;
 }
 
 .navbar li .logo {
     font-size: 2rem;
-    font-weight: bold;
-    color: #000000;
+    font-weight: 700;
+    line-height: normal;
+    color: #3B7DA6;
     display: flex;
     width: 44rem;
     height: 5rem;
@@ -59,6 +67,7 @@ html {
     font-size: 1rem;
 }
 
+
 .tagline{
         padding: 8rem 0 8rem;
         margin: 0 auto;
@@ -67,14 +76,16 @@ html {
         justify-content: center;
         align-items: center;
 }
+
 .tagline h1 {
     padding: 0rem 0 8rem;
     font-size: 2.5rem;
-    font-family: 'Poppins', Arial, sans-serif;
-    font-style: normal;
+    font-family: 'Poppins';
+    font-weight: 700;
     line-height: normal;
     text-align: center;
 }
+
 
 .tagline .btn{
     background-color: #000000;
@@ -142,4 +153,61 @@ html {
 
 .feature-card p {
     color: #666;
+}
+
+
+/*PiliTugma Section*/
+.PiliTugma{
+    padding: 8rem 0 8rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.PiliTugma h1 {
+    font-size: 2.5rem;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-style: normal;
+    line-height: normal;
+    text-align: center;
+    font-weight: 700;
+    padding-bottom: 1rem;
+}
+
+.PiliTugma p {
+    font-size: 1.2rem;
+    font-family: 'Poppins', Arial, sans-serif;
+    font-style: normal;
+    line-height: normal;
+    text-align: center;
+    padding-bottom: 4rem;
+
+}
+
+.PiliTugma .btn{
+    background-color: #000000;
+    color: #FFFFFF;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.PiliTugma .btn{
+    background-color: #000000;
+    color: #FFFFFF;
+    padding: 1rem 2rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.PiliTugma .btn:hover{
+    background-color: #2e2e2e;
 }
