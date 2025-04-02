@@ -2,25 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Page title</title>
+    <title>PolliTeko - Login</title>
     <link rel="stylesheet" href="/static/login.css">
 </head>
 <body>
     <section class="authlogin">
-            <h1>LOG IN</h1>
+        <h1>LOG IN</h1>
     <form class="form" method="POST" action="/login">
+        {% if error%}
+      <p class="error">{{ error }}</p>
+        {% endif %}
         <label for="userID">Voter's ID number</label> 
         <br>
-        <input class="input" type="text" id="userID" name="userID" placeholder="Enter your VIN" autocomplete="off">
+        <input class="inputID" type="text" id="userID" name="userID" placeholder="Enter your VIN" autocomplete="off">
         <br>
-        <label for="password">Password:
-        </label> <br>
-        <input type="text" id="password" name="password">
+        <label for="password">Password:</label> 
+        <br>
+        <div class="password-container">
+            <input type="password" id="password" name="password" placeholder="Enter your Password" autocomplete="off">
+            <input type="checkbox" id="showPassword" onclick="togglePassword()">
+        </div>
         <button type="submit">Login</button>
     </form>
+    
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const showPasswordCheckbox = document.getElementById('showPassword');
+            if (showPasswordCheckbox.checked) {
+                passwordField.type = 'text';
+            } else {
+                passwordField.type = 'password';
+            }
+        }
+    </script>
     </section>
-    {% if error%}
-      <p class="error">{{ error }}</p>
-    {% endif %}
 </body>
 </html>

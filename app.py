@@ -35,7 +35,7 @@ def login():
             if row[0] == user_id and row[1] == password:
                 session['user_id'] = user_id
                 return redirect('/dashboard')
-    return render_template('index.html', error="User ID not found")
+    return render_template('index.html', error="ID/Password is not found")
         
         
 @app.route('/dashboard')
