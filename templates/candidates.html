@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Candidates</title>
+    <style>
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Candidate List</h1>
+    
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Votes</th>
+        </tr>
+        {% for candidate in candidates %}
+        <tr>
+            <td>{{ candidate.name }}</td>
+            <td>{{ candidate.votes }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <h2>Add New Candidate</h2>
+    <form action="/add-candidate" method="POST">
+        <input type="text" name="name" placeholder="Candidate Name" required>
+        <button type="submit">Add</button>
+    </form>
+</body>
+</html>
