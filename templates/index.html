@@ -7,20 +7,20 @@
 </head>
 <body>
     <section class="authlogin">
-        <h1>LOG IN</h1>
-        <form class="form" method="POST" action="/login">
-            <label for="userID">Voter's ID number</label> 
-            <br>
-            <input class="input" type="text" id="userID" name="userID" placeholder="Enter your VIN" autocomplete="off">
-        </form>
-        <button type="submit">LOG IN</button>
-        <!--
-        {% if error%}
-          <p class="error">{{ error }}</p>
-        {% endif %}
-        
-        
-        -->
+            <h1>LOG IN</h1>
+    <form class="form" method="POST" action="/login">
+        <label for="userID">Voter's ID number</label> 
+        <br>
+        <input class="input" type="text" id="userID" name="userID" placeholder="Enter your VIN" autocomplete="off">
+        <br>
+        <label for="password">Password:
+        </label> <br>
+        <input type="text" id="password" name="password">
+        <button type="submit">Login</button>
+    </form>
     </section>
+    {% if error%}
+      <p class="error">{{ error }}</p>
+    {% endif %}
 </body>
 </html>
