@@ -41,6 +41,7 @@ html {
     padding: 4.0625rem 0;
     justify-content: space-between;
     align-items: center;
+    color: #000;
 }
 
 .navbar li {
@@ -84,11 +85,13 @@ html {
     font-weight: 700;
     line-height: normal;
     text-align: center;
+    color: var(--2, #3A7CA5);
+
 }
 
 
 .tagline .btn{
-    background-color: #000000;
+    background-color: #FFC964;
     color: #FFFFFF;
     padding: 1rem 2rem;
     border-radius: 2rem;
@@ -99,7 +102,7 @@ html {
 }
 
 .tagline .btn:hover{
-    background-color: #2e2e2e;
+    background-color: #f3bf5e;
 }
 
 
@@ -107,7 +110,8 @@ html {
     border-radius: 0rem;
     padding: 4rem 4rem 8rem;
     flex-shrink: 0;
-    background-color: #D9D9D9;
+    border-radius: 1.5625rem;
+    background: linear-gradient(102deg, #3A7CA5 0.34%, #81C3D7 99.66%);
     display: flex;
     flex-direction: column; /* Stack title and cards vertically */
     justify-content: center;
@@ -123,6 +127,7 @@ html {
     margin-bottom: 2rem;
     text-align: center;
     width: 100%;
+    color: #F5F5F5;
 }
 
 .feature-card-container {
@@ -132,8 +137,8 @@ html {
 }
 
 .feature-card {
-    max-height: 100;
-    height: 18rem;
+    width: 15.5625rem;
+    height: 20.8125rem;
     flex-shrink: 0; 
     padding: 0.5rem;
     border-radius: 0.5rem;
@@ -149,10 +154,23 @@ html {
 .feature-card h2 {
     margin-top: 1rem;
     font-size: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .feature-card p {
-    color: #666;
+    display: flex;
+    flex-direction: column; /* Stack title and cards vertically */
+    justify-content: center;
+    align-items: center;
+    margin: auto;
+    color: #000000;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 110%; /* 1.1rem */
+    width: 11.875rem;
 }
 
 
@@ -167,6 +185,8 @@ html {
 }
 
 .PiliTugma h1 {
+    color: var(--2, #3A7CA5);
+
     font-size: 2.5rem;
     font-family: 'Poppins', Arial, sans-serif;
     font-style: normal;
@@ -187,18 +207,7 @@ html {
 }
 
 .PiliTugma .btn{
-    background-color: #000000;
-    color: #FFFFFF;
-    padding: 1rem 2rem;
-    border-radius: 2rem;
-    text-decoration: none;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.PiliTugma .btn{
-    background-color: #000000;
+    background-color: #FFC964;;
     color: #FFFFFF;
     padding: 1rem 2rem;
     border-radius: 2rem;
@@ -209,21 +218,22 @@ html {
 }
 
 .PiliTugma .btn:hover{
-    background-color: #2e2e2e;
+    background-color: #f3bf5e;
 }
 
+/*question html */
+
+
 .questionsec {
+    display: flex; /* Use Flexbox for layout */
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Align items to the left */
+    gap: 1rem; /* Add spacing between items */
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    border-radius: 1.25rem;
     padding: 2rem;
     width: 90%; /* Responsive width */
     max-width: 70rem; /* Limit width on larger screens */
 }
-
 .questionsec h2 {
     font-size: 1.5rem;
     font-weight: 600;
@@ -233,52 +243,80 @@ html {
 
 .questionsec p {
     font-size: 1rem;
-    color: #555;
+    color: #ffffff;
     margin-bottom: 1rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
 
+.percentage {
+    width: 5.25rem;
+    height: 2.125rem;
+    flex-shrink: 0;
+    color: #F5F5F5;
+    border-radius: 0.625rem;
+    background: var(--3, #81C3D7);
+    margin: 0; /* Remove auto-centering */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center content inside the percentage box */
+    justify-content: center; /* Center content inside the percentage box */
+}
+
+.progress-container {
+    display: flex; /* Use Flexbox for layout */
+    flex-direction: row; /* Align percentage and progress bar in a row */
+    align-items: center; /* Vertically align items */
+    justify-content: center;
+    gap: 1rem; /* Add spacing between percentage and progress bar */
+    width: 100%; /* Ensure it spans the full width */
+}
+
 .progress {
     width: 100%;
-    height: 0.5rem;
+    max-width: 45rem;
+    height: 1rem;
     background: #E0E0E0;
     border-radius: 0.25rem;
-    margin-bottom: 2rem;
     position: relative;
+    margin-bottom: 1rem;
 }
 
 .progress::after {
     content: '';
     display: block;
-    width: 0%; /* Adjust this dynamically for progress */
+    width: 30%; /* Adjust this dynamically for progress */
     height: 100%;
-    background: #3B7DA6;
-    border-radius: 0.25rem;
+    border-radius: 1.875rem;
+    background: linear-gradient(90deg, var(--3, #81C3D7) 0%, #DCF7FF 100%);
     transition: width 0.3s ease;
 }
 
 .quescard {
-    background: #D9D9D9;
+    background: #ffffff;
     text-align: center;
     margin-bottom: 2rem;
     border-radius: 1.25rem;
     padding: 2rem;
     width: 90%; /* Responsive width */
     max-width: 70rem;
+    border-radius: 1.25rem;
+    border: 2px solid #BABABA;
+    
 }
 
 .quescard h2 {
     font-size: 1.25rem;
-    font-weight: 600;
+    font-weight: 400;
     margin-bottom: 1rem;
     color: #333;
+    
 }
 
 .quescard p {
     font-size: 1rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     text-align: left;
     flex-shrink: 0;
     color: #000;
@@ -287,16 +325,31 @@ html {
     font-style: normal;
     font-weight: 400;
     line-height: normal;
+    font-weight: 500;
+    
+}
+
+.quescard .p1 {
+    font-size: 1rem;
+    text-align: left;
+    flex-shrink: 0;
+    color: #000;
+    font-family: Poppins;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin: 0 auto;
 }
 
 .question {
-    display: flex;
-    flex-direction:row-reverse;
-    gap: 1rem;
-    width: 100%;
-    width: 85.1875rem;
-    height: 5.20481rem;
-    flex-shrink: 0;
+    display: grid; /* Use CSS Grid for layout */
+    grid-template-columns: 1fr 1fr; /* Two equal-width columns */
+    gap: 1.5rem; /* Space between grid items */
+    width: 100%; /* Full width of the container */
+    max-width: 70rem; /* Limit the width on larger screens */
+    margin: 0 auto; /* Center the grid horizontally */
+    padding-top: 1.5rem;
+
 }
 
 .question li {
@@ -305,18 +358,24 @@ html {
 
 .question li a {
     display: block;
-    padding: 1rem;
-    background: #F5F5F5;
+    padding: 2.5rem;
+    border-radius: 0.625rem;
+    border: 1px solid rgba(186, 186, 186, 0.67);
     border-radius: 0.5rem;
     text-align: center;
+    color: #000;
+    text-align: center;
+    font-family: 'Poppins';
     font-size: 1rem;
-    color: #333;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
     text-decoration: none;
     transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-.question li a:hover {
-    background: #3B7DA6;
-    color: #FFF;
+.question li a.selected {
+    border: 1px solid var(--3, #81C3D7);
+    background: #D9F6FF;
     transform: scale(1.02);
 }

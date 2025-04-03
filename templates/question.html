@@ -21,23 +21,38 @@
     </header>
 
     <section class="questionsec">
-        <h2>Progress</h2>
-        <p>0%</p>
-        <div class="progress bar"></div>
-    <div class="quescard">
-        <h2>Question 1</h2>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididuntut labore et dolore?
-        </p>
-        <p>Choose what applies best</p>
-    <div class="question">
-        <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
-        <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
-        <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
-        <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
-    </div>
-
-
-    </div>
-    
+        <div class="progress-container">
+            <p class="percentage">25%</p>
+            <div class="progress"></div>
+        </div>
+        <div class="quescard">
+            <h2>Question 1</h2>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
+                eiusmod tempor incididuntut labore et dolore?
+            </p>
+            <p class="p1">Choose what applies best</p>
+            <div class="question">
+                <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
+                <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
+                <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
+                <li><a>Lorem ipsum dolor sit amet, consectetur </a></li>
+            </div>
+        </div>
     </section>
+</body>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const options = document.querySelectorAll('.question li a');
+
+        options.forEach(option => {
+            option.addEventListener('click', () => {
+                // Remove 'selected' class from all options
+                options.forEach(opt => opt.classList.remove('selected'));
+
+                // Add 'selected' class to the clicked option
+                option.classList.add('selected');
+            });
+        });
+    });
+</script>
