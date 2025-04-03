@@ -60,17 +60,19 @@ def quiz():
     try:
         # Get ALL non-empty cells in Column A
         cells = sheet2.range('A2:A')  # Gets all cells from A2 downward
-        
         # Extract non-empty values (skip blank cells)
         options = [cell.value.strip() for cell in cells if cell.value.strip()]
         
-        questions = [{
+        # Define a single question object
+        question = {
             'id': 1,
             'text': 'What is the capital of France?',
-            'options': options  # Now contains all non-empty A column values
-        }]
+            'description': 'Choose what applies best',
+            'options': options  # Contains all non-empty A column values
+        }
         
-        return render_template('pretest.html', questions=questions)
+        # Render a template that matches your new HTML
+        return render_template('question.html', question=question)
     
     except Exception as e:
         return f"Error loading quiz: {str(e)}", 500
