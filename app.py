@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Blueprint, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, Blueprint
 import gspread
 import os
 from google.oauth2.service_account import Credentials
@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -37,7 +37,7 @@ def login():
             if row[0] == user_id and row[1] == password:
                 session['user_id'] = user_id
                 return redirect('/dashboard')
-    return render_template('index.html', error="ID or Password not found")
+    return render_template('index.html', error="User ID not found")
         
         
 @app.route('/dashboard')
@@ -46,19 +46,15 @@ def dashboard():
         return redirect ('/')
     return render_template('landingpage.html')
     
-@app.route('/PiliTugma')
-def pili_tugma():
-    if 'user_id' not in session:
-        return redirect ('/')
-    return render_template('PiliTugma.html')    
+    
     
     
 @app.route('/quiz')
 def quiz():
     try:
         # Get ALL non-empty cells in Column A
-        column_a = sheet2.col_values(1)  # Gets all values in Column A
-        options = [value.strip() for value in column_a if value.strip()]
+        column_a = sheet2.range('A2:A')  # Gets all values in Column A
+        options = [column_a.value.strip() for cell in column_a if column_a.value.strip()]
         
         questions = [{
             'id': 1,
@@ -78,4 +74,4 @@ def save_results():
     return jsonify({"status": "success"})
     
 if __name__ == '__main__':
-        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
