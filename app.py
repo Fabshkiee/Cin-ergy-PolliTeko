@@ -46,7 +46,11 @@ def dashboard():
         return redirect ('/')
     return render_template('landingpage.html')
     
-    
+@app.route('/PiliTugma')
+def pili_tugma():
+    if 'user_id' not in session:
+        return redirect ('/')
+    return render_template('PiliTugma.html')    
     
     
 @app.route('/quiz')
@@ -74,4 +78,4 @@ def save_results():
     return jsonify({"status": "success"})
     
 if __name__ == '__main__':
-        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+        app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
