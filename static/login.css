@@ -22,10 +22,10 @@ html {
 }
 
 .authlogin {
-    background-color: aquamarine;
     margin: 5rem auto;
     width: 30rem;
-    height: 34rem;
+    min-height: 34rem;
+    height: auto;
     align-items: center;
     padding: 5rem 5rem 5rem;
     border-radius: 1.25rem;
@@ -114,7 +114,7 @@ html {
     position: absolute;
     right: 0.75rem;
     width: 1.25rem;
-    height: 1.25rem;
+    min-height: 1.25rem;
     cursor: pointer;
 }
 
@@ -127,3 +127,13 @@ html {
     text-align: center; /* Optional: Ensure text is centered */
 }
 
+@media (max-width: 768px) {
+    .authlogin {
+        margin: 2rem auto;
+        padding: 1rem;
+        max-width: 30rem;
+        width: 90%;
+        min-height: 34rem;
+        height: auto;
+    }
+}

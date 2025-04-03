@@ -211,3 +211,112 @@ html {
 .PiliTugma .btn:hover{
     background-color: #2e2e2e;
 }
+
+.questionsec {
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 1.25rem;
+    padding: 2rem;
+    width: 90%; /* Responsive width */
+    max-width: 70rem; /* Limit width on larger screens */
+}
+
+.questionsec h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.questionsec p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 1rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.progress {
+    width: 100%;
+    height: 0.5rem;
+    background: #E0E0E0;
+    border-radius: 0.25rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.progress::after {
+    content: '';
+    display: block;
+    width: 0%; /* Adjust this dynamically for progress */
+    height: 100%;
+    background: #3B7DA6;
+    border-radius: 0.25rem;
+    transition: width 0.3s ease;
+}
+
+.quescard {
+    background: #D9D9D9;
+    text-align: center;
+    margin-bottom: 2rem;
+    border-radius: 1.25rem;
+    padding: 2rem;
+    width: 90%; /* Responsive width */
+    max-width: 70rem;
+}
+
+.quescard h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.quescard p {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
+    flex-shrink: 0;
+    color: #000;
+    font-family: Poppins;
+    font-size: 1.25rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.question {
+    display: flex;
+    flex-direction:row-reverse;
+    gap: 1rem;
+    width: 100%;
+    width: 85.1875rem;
+    height: 5.20481rem;
+    flex-shrink: 0;
+}
+
+.question li {
+    list-style: none;
+}
+
+.question li a {
+    display: block;
+    padding: 1rem;
+    background: #F5F5F5;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 1rem;
+    color: #333;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.question li a:hover {
+    background: #3B7DA6;
+    color: #FFF;
+    transform: scale(1.02);
+}
