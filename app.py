@@ -9,7 +9,7 @@ from google.oauth2.service_account import Credentials
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -46,19 +46,17 @@ def dashboard():
         return redirect ('/')
     return render_template('landingpage.html')
     
-@app.route('/PiliTugma')
-def pili_tugma():
-    if 'user_id' not in session:
-        return redirect ('/')
-    return render_template('PiliTugma.html')    
+    
     
     
 @app.route('/quiz')
 def quiz():
     try:
         # Get ALL non-empty cells in Column A
-        column_a = sheet2.range('A2:A')  # Gets all values in Column A
-        options = [column_a.value.strip() for cell in column_a if column_a.value.strip()]
+        cells = sheet2.range('A2:A')  # Gets all cells from A2 downward
+        
+        # Extract non-empty values (skip blank cells)
+        options = [cell.value.strip() for cell in cells if cell.value.strip()]
         
         questions = [{
             'id': 1,
