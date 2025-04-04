@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>LIST ALL POSITIONS</h1>
+    <form id="positionsForm" method="get">
+        <section>
+            <div id="positionsSection">
+                <label for="positions">POSITIONS IN YOUR ORGANIZATION</label>  
+                <input type="text" id="positions" name="positions[]" placeholder="Enter Positions">
+                
+                <label for="numbers">NUMBER OF PEOPLE TO FILL THE POSITION</label>  
+                <input type="number" id="numbers" name="numbers[]" value ="1" min="1" required>
+                
+                <button type="button" id="addPosition">ADD POSITION</button>
+
+                <p>Listed Positions and Numbers</p>
+                <ol id="positionsList"></ol>
+            </div>
+            <script>
+                let positions = [];
+                let numbers = [];
+
+                document.getElementById("addPosition").addEventListener('click', function() {
+                    const positionValue = document.getElementById('positions').value.trim();
+                    const numberValue = document.getElementById('numbers').value.trim();
+
+                    if (positionValue && numberValue) {
+                        positions.push(positionValue);
+                        numbers.push(numberValue);
+
+                        document.getElementById('positions').value = '';
+                        document.getElementById('numbers').value = '';
+
+                        updatePositionsList();
+                    }
+                });
+
+                function updatePositionsList() {
+                    const positionsList = document.getElementById('positionsList');
+
+                    // Clear existing list
+                    positionsList.innerHTML = '';
+
+                    // Update list with current data
+                    positions.forEach((pos, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = `${pos} - ${numbers[index]}`;
+
+                        const delButton = document.createElement('button');
+                        delButton.textContent = "Delete";
+                        delButton.type = "button";
+                        delButton.addEventListener('click', function() {
+                            positions.splice(index, 1);
+                            numbers.splice(index, 1);
+
+                            updatePositionsList();
+                        });
+
+                        li.appendChild(delButton);
+                        positionsList.appendChild(li);
+                    });
+                }
+            </script>
+        </section>
+    </form>
+</body>
+</html>
