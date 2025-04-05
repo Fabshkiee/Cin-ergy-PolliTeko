@@ -57,6 +57,11 @@
             
             <label for="Lname">LAST NAME</label>
             <input type="text" id="Lname" name="LastName" required placeholder="Candaganan">
+
+            <label for="position">POSITION</label>
+            <select id="position" name="position" required>
+                <option value="" disabled selected>Select Position</option>
+            </select>
         </div>
 
         <br>
@@ -182,6 +187,7 @@
         FirstName: document.getElementById("Fname").value,
         MiddleName: document.getElementById("Mname").value,
         LastName: document.getElementById("Lname").value,
+        Position: document.getElementById("position").value,
         region: document.getElementById("region").value,
         province: document.getElementById("province").value,
         city: document.getElementById("city").value,

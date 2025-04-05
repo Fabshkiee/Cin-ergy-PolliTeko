@@ -17,6 +17,9 @@ workbook = client.open_by_key(sheet_id)
 sheet = workbook.worksheet("logIn")
 sheet2 = workbook.worksheet("pillars")
 candidatesSheet = workbook.worksheet("candidates")
+educationsSheet = workbook.worksheet("education")
+leadershipsSheet = workbook.worksheet("leadership")
+achievementsSheet = workbook.worksheet("achievement")
 #candidatesSheet = client.open("candidates").sheet1
 
 
@@ -101,8 +104,8 @@ def submit():
         # Get the next available row (starts from Row 2 if empty, otherwise appends)
         next_row = len(candidatesSheet.get_all_values()) + 1
 
-        # Define column order (A=1, B=2, ..., Q=17)
-        columns = {
+        # ===== 1. Write to CANDIDATES sheet =====
+        candidates_data = {
             "A": data.get("FirstName", ""),       # Column 1
             "B": data.get("MiddleName", ""),      # Column 2
             "C": data.get("LastName", ""),        # Column 3
@@ -110,21 +113,31 @@ def submit():
             "E": data.get("province", ""),        # Column 5
             "F": data.get("city", ""),            # Column 6
             "G": data.get("biography", ""),       # Column 7
-            "H": data.get("bday", ""),           # Column 8
-            "I": data.get("Party", ""),           # Column 9
-            "J": ", ".join(data.get("education", [])),     # Column 10
-            "K": ", ".join(data.get("experience", [])),    # Column 11
-            "L": ", ".join(data.get("achievements", [])),   # Column 12
-            "M": data.get("ed", ""),              # Column 13
-            "N": data.get("hc", ""),              # Column 14
-            "O": data.get("cg", ""),             # Column 15
-            "P": data.get("econ", ""),           # Column 16
-            "Q": data.get("agri", "")            # Column 17
+            "H": data.get("bday", ""),            # Column 8
+            "I": f'=DATEDIF(H{next_row}, TODAY(), "Y")',  # Age formula
+            "J": data.get("Party", ""),           # Column 10
+            "N": data.get("ed", ""),              # Column 14
+            "O": data.get("hc", ""),              # Column 15
+            "P": data.get("cg", ""),              # Column 16
+            "Q": data.get("econ", ""),            # Column 17
+            "R": data.get("agri", "")            # Column 18
         }
 
-        # Write data to each column in the next available row
-        for col_letter, value in columns.items():
+        # Write to candidates sheet
+        for col_letter, value in candidates_data.items():
             candidatesSheet.update_acell(f"{col_letter}{next_row}", value)
+
+        # ===== 2. Write to EDUCATION sheet =====
+        education_data = ", ".join(data.get("education", []))
+        educationsSheet.update_acell(f"A{next_row}", education_data)  # Column A
+
+        # ===== 3. Write to LEADERSHIP sheet =====
+        leadership_data = ", ".join(data.get("experience", []))
+        leadershipsSheet.update_acell(f"A{next_row}", leadership_data)  # Column A
+
+        # ===== 4. Write to ACHIEVEMENTS sheet =====
+        achievements_data = ", ".join(data.get("achievements", []))
+        achievementsSheet.update_acell(f"A{next_row}", achievements_data)  # Column A
 
         return jsonify({"result": "success", "row": next_row})
 
