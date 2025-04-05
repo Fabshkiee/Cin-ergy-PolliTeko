@@ -32,16 +32,28 @@ def login():
     password = request.form['password']
     all_data = sheet.get_all_values()
     
-    
-    
+    # Check for admin credentials first
     for row in all_data:
-        if len(row)>=2:
+        if len(row) >= 3:  # Check all 3 columns exist
             if row[0] == user_id and row[1] == password:
                 session['user_id'] = user_id
-                return redirect('/dashboard')
-    return render_template('index.html', error="User ID not found")
+                session['is_admin'] = (row[2].lower() == 'true' or row[2] == '1')
+                
+                if session['is_admin']:
+                    return redirect('/admin-dashboard')
+                else:
+                    return redirect('/dashboard')
+
+# If no matching user was found, show error
+    return render_template('index.html', error="Invalid ID or password")
         
-        
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return redirect('/')
+    return render_template('addCandidate.html')
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
