@@ -73,6 +73,12 @@ def PiliTugma():
     if 'user_id' not in session:
         return redirect('/')
     return render_template('PiliTugma.html')
+
+@app.route('/voting')
+def voting():
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('voting.html')
     
 @app.route('/quiz')
 def quiz():

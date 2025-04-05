@@ -49,7 +49,36 @@ html {
 .navbar li {
     margin: 0 2.5rem;
     font-weight: 500;
+    transition: width 0.3s ease;
 }
+
+.navbar .navlinks {
+    position: relative;
+    display: inline-block;
+}
+
+.navbar .navlinks::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 0.2rem;
+    bottom: -0.40rem; 
+    background-color: #3B7DA6 ;
+    transition: width 0.4s ease;
+}
+
+.navbar .navlinks:hover::after {
+    width: 100%;
+    color: #3A7CA5;
+}
+
+.navbar .navlinks:hover::after {
+    right: 0;
+    width: 100%;
+}
+
 
 .navbar li .logo {
     font-family: 'abel';
@@ -68,7 +97,6 @@ html {
     color: #000000;
     font-size: 1rem;
 }
-
 
 .tagline{
         padding: 8rem 0 8rem;
