@@ -52,9 +52,6 @@ def PiliTugma():
         return redirect ('/')
     return render_template('PiliTugma.html')
     
-    
-    
-    
 @app.route('/quiz')
 def quiz():
     try:
