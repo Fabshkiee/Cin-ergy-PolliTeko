@@ -99,9 +99,18 @@ def addCandi():
 def submit():
     try:
         data = request.json
-        next_row = len(candidatesSheet.get_all_values()) + 1
+        
+        # Get next row for candidates sheet (this will be our master row number)
+        candidate_row = len(candidatesSheet.get_all_values()) + 1
+        
+        # First ensure all sheets have at least this many rows
+        for sheet in [educationsSheet, leadershipsSheet, achievementsSheet]:
+            current_rows = len(sheet.get_all_values())
+            if current_rows < candidate_row - 1:  # -1 because append_row adds a row
+                for _ in range(candidate_row - 1 - current_rows):
+                    sheet.append_row([""])  # Add empty rows if needed
 
-        # Write to candidates sheet
+        # Write candidate data
         candidates_data = {
             "A": data.get("FirstName", ""),
             "B": data.get("MiddleName", ""),
@@ -112,7 +121,7 @@ def submit():
             "G": data.get("city", ""),
             "H": data.get("biography", ""),
             "I": data.get("bday", ""),
-            "J": f'=DATEDIF(I{next_row}, TODAY(), "Y")',
+            "J": f'=DATEDIF(I{candidate_row}, TODAY(), "Y")',
             "K": data.get("Party", ""),
             "L": data.get("ed", ""),
             "M": data.get("hc", ""),
@@ -120,16 +129,21 @@ def submit():
             "O": data.get("econ", ""),
             "P": data.get("agri", "")
         }
-
+        
+        # Write to candidates sheet
         for col_letter, value in candidates_data.items():
-            candidatesSheet.update_acell(f"{col_letter}{next_row}", value)
+            candidatesSheet.update_acell(f"{col_letter}{candidate_row}", value)
 
-        # Write to other sheets
-        educationsSheet.append_row([", ".join(data.get("education", []))])
-        leadershipsSheet.append_row([", ".join(data.get("experience", []))])
-        achievementsSheet.append_row([", ".join(data.get("achievements", []))])
+        # Write to other sheets at the SAME row number
+        educationsSheet.update(f"A{candidate_row}", [[", ".join(data.get("education", []))]])
+        leadershipsSheet.update(f"A{candidate_row}", [[", ".join(data.get("experience", []))]])
+        achievementsSheet.update(f"A{candidate_row}", [[", ".join(data.get("achievements", []))]])
 
-        return jsonify({"result": "success", "row": next_row})
+        return jsonify({
+            "result": "success",
+            "row": candidate_row,
+            "message": f"Data written to row {candidate_row} across all sheets"
+        })
 
     except Exception as e:
         return jsonify({"result": "error", "message": str(e)})
