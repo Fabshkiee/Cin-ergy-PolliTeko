@@ -71,12 +71,15 @@ html {
 
 .navbar .navlinks:hover::after {
     width: 100%;
-    color: #3A7CA5;
 }
 
 .navbar .navlinks:hover::after {
     right: 0;
     width: 100%;
+}
+
+.navbar .navlinks:hover {
+    color: #3B7DA6;
 }
 
 

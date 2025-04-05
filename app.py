@@ -79,6 +79,13 @@ def voting():
     if 'user_id' not in session:
         return redirect('/')
     return render_template('voting.html')
+
+@app.route('/results')
+def results():
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('results.html')
+
     
 @app.route('/quiz')
 def quiz():
