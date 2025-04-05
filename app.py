@@ -70,13 +70,13 @@ def candidate():
         first_name_col = 0  # Column A (index 0)
         last_name_col = 2   # Column C (index 2)
         bio_col = 7         # Column H (index 7)
-        position_col = 11   # Column L (index 11)
+        position_col = 3    # Column D (index 3)
 
         # Skip the header row and filter candidates by position
         chairpersons = []
         vice_chairpersons = []
 
-        for row in all_data[1:]:  # Skip the header row
+        for index, row in enumerate(all_data[1:], start=2):  # Skip the header row, start row IDs at 2
             if len(row) > position_col:  # Ensure the row has enough columns
                 position = row[position_col].strip()
                 first_name = row[first_name_col].strip()
@@ -84,6 +84,7 @@ def candidate():
                 biography = row[bio_col].strip()
 
                 candidate = {
+                    "row_id": index,  # Add the row ID
                     "first_name": first_name,
                     "last_name": last_name,
                     "biography": biography
@@ -104,6 +105,56 @@ def candidate():
     except Exception as e:
         return f"Error fetching candidates: {str(e)}", 500
 
+@app.route('/api/candidate/<int:row_id>')
+def get_candidate_profile(row_id):
+    try:
+        # Fetch candidate data from the candidates sheet
+        candidate_row = candidatesSheet.row_values(row_id)
+        if not candidate_row:
+            return jsonify({"error": "Candidate not found"}), 404
+
+        # Ensure the row has enough columns
+        while len(candidate_row) < 16:  # Assuming 16 columns are required
+            candidate_row.append("")
+
+        education_row = educationsSheet.row_values(row_id)
+        leadership_row = leadershipsSheet.row_values(row_id)
+        achievement_row = achievementsSheet.row_values(row_id)
+
+        # Extract platform details
+        platforms = {
+            "Education": candidate_row[11],  # Column L
+            "Healthcare": candidate_row[12],  # Column M
+            "Clean Government": candidate_row[13],  # Column N
+            "Economy": candidate_row[14],  # Column O
+            "Agriculture": candidate_row[15],  # Column P
+        }
+
+        # Filter out empty platform details
+        platform_details = {key: value for key, value in platforms.items() if value.strip()}
+
+        # Extract candidate details
+        candidate = {
+            "first_name": candidate_row[0],
+            "middle_name": candidate_row[1],
+            "last_name": candidate_row[2],
+            "position": candidate_row[3],
+            "region": candidate_row[4],
+            "province": candidate_row[5],
+            "city": candidate_row[6],
+            "biography": candidate_row[7],
+            "birthday": candidate_row[8],
+            "age": candidate_row[9],
+            "party": candidate_row[10],
+            "platforms": platform_details,  # Include only non-empty platform details
+            "education": education_row if education_row else [],
+            "leadership": leadership_row if leadership_row else [],
+            "achievements": achievement_row if achievement_row else [],
+        }
+
+        return jsonify(candidate)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/dashboard')
 def dashboard():

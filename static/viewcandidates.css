@@ -1,0 +1,253 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2 {
+    text-align: center;
+    color: #333;
+}
+
+h1 {
+    font-size: 2.5rem;
+    margin-top: 2rem;
+}
+
+h2 {
+    font-size: 2rem;
+    margin: 1.5rem 0;
+}
+
+/* Candidates Section */
+.candidates {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.position {
+    margin-bottom: 3rem;
+}
+
+.position h2 {
+    color: #3B7DA6;
+    border-bottom: 2px solid #3B7DA6;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Candidate Cards */
+.candidate-card {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    width: 58.875rem;
+    height: 14.8125rem;
+    flex-shrink: 0;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    margin: 1rem;
+    text-align: left; /* Align text to the left */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative; /* Make the card a positioned container */
+}
+
+.candidate-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.candidate-card h3 {
+    color: var(--2, #3A7CA5);
+    text-align: center;
+    font-family: Poppins;
+    font-size: 1.5rem;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.candidate-card p {
+    color: #666;
+    font-family: Poppins;
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+
+}
+
+.candidate-image {
+    flex-shrink: 0;
+    width: 10rem;
+    height: 10rem;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+
+.candidate-details {
+    flex: 1; /* Allow the details to take up remaining space */
+    display: flex;
+    flex-direction: column; /* Stack the name, bio, and button vertically */
+    justify-content: space-between; /* Add space between elements */
+    height: 100%; /* Ensure the details take up the full height of the card */
+}
+
+.candidate-details h3 {
+    display: flex;
+    flex-direction: row;
+    font-size: 1.5rem;
+    color: #3A7CA5;
+    margin: 1.5rem 0rem 0.5rem 0; /* Add spacing to the right of the name */
+    white-space: nowrap; /* Prevent the name from wrapping */
+}
+
+.candidate-details p {
+    font-size: 1rem;
+    color: #666;
+    margin: 0; /* Remove default margins */
+    line-height: 1.5;
+    flex-grow: 1; /* Allow the biography to take up available space */
+}
+
+/* View Profile Button */
+.view-profile-btn {
+    display: inline-block;
+    background-color: #FFC964;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    position: absolute; /* Position the button relative to the card */
+    bottom: 1rem; /* Distance from the bottom of the card */
+    right: 1rem; /* Distance from the right of the card */
+}
+.view-profile-btn:hover {
+    background-color: #e6b556;
+    transform: scale(1.05);
+}
+
+/* Candidate List */
+.position ul {
+    display: flex;
+    flex-direction: column; /* Stack cards vertically */
+    align-items: center; /* Center cards horizontally */
+    padding: 0;
+    list-style: none;
+}
+
+.position li {
+    width: 100%;
+    margin: 1rem;
+}
+
+/* Modal2 Styles */
+/* Modal2 Styles */
+.modal2 {
+    display: none; /* Hidden by default */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal2-content {
+    background-color: #fff; /* White background */
+    color: #333; /* Dark text for readability */
+    margin: 5% auto;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 900px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    font-family: 'Poppins', sans-serif; /* Ensure consistent font */
+}
+
+.modal2-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal2-image img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 1.5rem;
+    border: 2px solid #ddd; /* Add a border for better visibility */
+}
+
+.modal2-header-details h2 {
+    font-size: 1.8rem;
+    margin: 0;
+    color: #3A7CA5; /* Blue color for the candidate's name */
+}
+
+.modal2-header-details p {
+    margin: 0.5rem 0;
+    color: #666; /* Gray text for additional details */
+}
+
+.modal2-body h3 {
+    margin-top: 1.5rem;
+    color: #3A7CA5; /* Blue headings for sections */
+}
+
+.modal2-body p,
+.modal2-body ul {
+    color: #333; /* Dark text for readability */
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.modal2-body ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+}
+
+.close-btn2 {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #666; /* Gray close button */
+    transition: color 0.3s ease;
+}
+
+.close-btn2:hover {
+    color: #000; /* Darker color on hover */
+}
+
+@media (max-width: 768px) {
+    .position li {
+        flex: 1 1 calc(50% - 2rem); /* 2 cards per row on smaller screens */
+        max-width: calc(50% - 2rem);
+    }
+}
+
+@media (max-width: 480px) {
+    .position li {
+        flex: 1 1 100%; /* 1 card per row on very small screens */
+        max-width: 100%;
+    }
+}

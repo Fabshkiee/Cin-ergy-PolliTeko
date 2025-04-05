@@ -1,99 +1,173 @@
-/* General Styles */
-body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f9f9f9;
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
+
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
-h1, h2 {
-    text-align: center;
-    color: #333;
+html {
+    scroll-behavior: smooth;
 }
 
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #FAF9F6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow: hidden;
+    overflow-y: auto;
+}
+
+body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Page Title */
 h1 {
-    font-size: 2.5rem;
-    margin-top: 2rem;
-}
-
-h2 {
-    font-size: 2rem;
-    margin: 1.5rem 0;
-}
-
-/* Candidates Section */
-.candidates {
-    padding: 2rem;
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-.position {
-    margin-bottom: 3rem;
-}
-
-.position h2 {
-    color: #3B7DA6;
-    border-bottom: 2px solid #3B7DA6;
-    display: inline-block;
-    padding-bottom: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-/* Candidate Cards */
-.candidate-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 1.5rem;
-    margin: 1rem;
     text-align: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #3A7CA5;
+    padding: 4rem 0;
 }
 
-.candidate-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+p{
+    margin: 1rem auto;
 }
 
-.candidate-card h3 {
-    font-size: 1.5rem;
+/* Candidate Form Container */
+#candidateForm {
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: #FFFFFF;
+    padding: 2rem 3rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Form Groupings */
+#candidateForm div,
+#candidateForm section {
+    margin-bottom: 1.5rem;
+}
+
+/* Form Labels */
+#candidateForm label {
+    display: block;
+    font-size: 1.2rem;
+    font-weight: 500;
     color: #333;
     margin-bottom: 0.5rem;
 }
 
-.candidate-card p {
+/* Form Inputs, Selects, and Textareas */
+#candidateForm input[type="text"],
+#candidateForm input[type="date"],
+#candidateForm select,
+#candidateForm textarea {
+    width: 100%;
+    padding: 0.75rem;
     font-size: 1rem;
-    color: #666;
-    line-height: 1.5;
+    border: 1px solid #000000;
+    border-radius: 0.5rem;
+    background-color: #FAF9F6;
+    transition: border 0.3s ease;
 }
 
-/* Candidate List */
-.position ul {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 0;
-    list-style: none;
+#candidateForm input[type="text"]:focus,
+#candidateForm input[type="date"]:focus,
+#candidateForm select:focus,
+#candidateForm textarea:focus {
+    border-color: #81C3D7;
+    outline: none;
 }
 
-.position li {
-    flex: 1 1 calc(33.333% - 2rem); /* 3 cards per row */
-    max-width: calc(33.333% - 2rem);
-    margin: 1rem;
+/* Dynamic List Section Headings */
+#educationalBackgroundSection label,
+#leadershipExperienceSection label,
+#achievementsSection label {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #3A7CA5;
 }
 
-@media (max-width: 768px) {
-    .position li {
-        flex: 1 1 calc(50% - 2rem); /* 2 cards per row on smaller screens */
-        max-width: calc(50% - 2rem);
+/* Buttons */
+#candidateForm button {
+    margin: 1rem auto;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+
+/* Submit and Reset Buttons */
+#submit {
+    background-color: #81C3D7;
+    color: #fff;
+}
+
+#reset {
+    background-color: #ECECEC;
+    color: #333;
+    margin-left: 1rem;
+}
+
+#candidateForm button:hover {
+    transform: scale(1.05);
+}
+
+/* Buttons for Adding Dynamic Items */
+#candidateForm button[type="button"] {
+    background-color: #FFC964;
+    color: #fff;
+    margin-top: 0.5rem;
+}
+
+/* Listed Items (e.g., Education, Experience, Achievements) */
+ol {
+    margin-top: 0.5rem;
+    padding-left: 1.5rem;
+}
+
+ol li {
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    color: #333;
+}
+
+ol li button{
+    margin-left: 3.5rem;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 600px) {
+    #candidateForm {
+        width: 95%;
+        padding: 1.5rem 1rem;
     }
-}
-
-@media (max-width: 480px) {
-    .position li {
-        flex: 1 1 100%; /* 1 card per row on very small screens */
-        max-width: 100%;
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    #candidateForm label {
+        font-size: 1rem;
+    }
+    
+    #candidateForm input[type="text"],
+    #candidateForm input[type="date"],
+    #candidateForm select,
+    #candidateForm textarea {
+        font-size: 0.9rem;
+    }
+    
+    #candidateForm button {
+        font-size: 0.9rem;
     }
 }

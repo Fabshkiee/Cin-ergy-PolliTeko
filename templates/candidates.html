@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/candidate.css">
+    <link rel="stylesheet" href="/static/viewcandidates.css">
     <title>Candidates</title>
 </head>
 <body>
@@ -15,7 +15,7 @@
                 <li><a id="home" class="logo" href="/dashboard">
                     <img src="/static/politekologo1.png" alt="Logo" style="height: 2rem; margin-right: 1.5rem;">POLL-IT-TEKO</a></li>
                 <li><a class="navlinks" href="/PiliTugma">PiliTugma</a></li>
-                <li><a class="navlinks" href="/candidates">Candidates</a></li>
+                <li><a class="navlinks" href="/candidate">Candidates</a></li>
                 <li><a class="navlinks" href="/voting">Voting</a></li>
                 <li><a class="navlinks" href="/results">Results</a></li>
             </ul>
@@ -24,8 +24,6 @@
 
     <!-- Candidates Section -->
     <section class="candidates">
-        <h1>Candidates</h1>
-
         <!-- Chairperson Section -->
         <div class="position">
             <h2>Chairperson</h2>
@@ -33,8 +31,13 @@
                 {% for candidate in chairpersons %}
                 <li>
                     <div class="candidate-card">
-                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                        <p>{{ candidate.biography }}</p>
+                        <div class="candidate-image">
+                            <img src="/static/default-profile.png" alt="Candidate Image">
+                        </div>
+                        <div class="candidate-details"><h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                            <p>{{ candidate.biography[:120] }}{% if candidate.biography|length > 120 %}...{% endif %}</p>
+                            <a class="view-profile-btn" data-id="{{ candidate.row_id }}">View Profile</a>
+                        </div>
                     </div>
                 </li>
                 {% endfor %}
@@ -48,13 +51,112 @@
                 {% for candidate in vice_chairpersons %}
                 <li>
                     <div class="candidate-card">
-                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                        <p>{{ candidate.biography }}</p>
+                        <div class="candidate-image">
+                            <img src="/static/default-profile.png" alt="Candidate Image">
+                        </div>
+                        <div class="candidate-details">
+                            <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                            <p>{{ candidate.biography[:120] }}{% if candidate.biography|length > 120 %}...{% endif %}</p>
+                            <!-- Corrected data-id attribute -->
+                            <a class="view-profile-btn" data-id="{{ candidate.row_id }}">View Profile</a>
+                        </div>
                     </div>
                 </li>
                 {% endfor %}
             </ul>
         </div>
     </section>
+
+<!--Modal Structure-->
+<div id="modal2" class="modal2">
+    <div class="modal2-content">
+        <span class="close-btn2" id="close-modal2">&times;</span>
+        <div class="modal2-header">
+            <div class="modal2-image">
+                <img id="modal2-image" src="/static/default-profile.png" alt="Candidate Image">
+            </div>
+            <div class="modal2-header-details">
+                <h2 id="modal2-name"></h2>
+                <p id="modal2-age-region"></p>
+                <p id="modal2-party"></p>
+            </div>
+        </div>
+        <div class="modal2-body">
+            <h3>Biography</h3>
+            <p id="modal2-biography"></p>
+
+            <h3>Portfolio</h3>
+            <div class="portfolio-section">
+                <h4>Educational Background</h4>
+                <ul id="modal2-education"></ul>
+
+                <h4>Leadership Experience</h4>
+                <ul id="modal2-leadership"></ul>
+
+                <h4>Achievements</h4>
+                <ul id="modal2-achievements"></ul>
+            </div>
+
+            <h3>Platforms</h3>
+            <ul id="modal2-platforms"></ul>
+        </div>
+    </div>
+</div>
 </body>
 </html>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+    const modal2 = document.getElementById('modal2');
+    const closeModal2 = document.getElementById('close-modal2');
+    const viewProfileButtons = document.querySelectorAll('.view-profile-btn');
+
+    viewProfileButtons.forEach((button) => {
+        button.addEventListener('click', () => {
+            const candidateId = button.getAttribute('data-id'); // Get the row ID from the data-id attribute
+
+            fetch(`/api/candidate/${candidateId}`) // Use the correct row ID
+                .then(response => response.json())
+                .then(data => {
+                    // Populate modal2 with candidate data
+                    document.getElementById('modal2-image').src = "/static/default-profile.png";
+                    document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
+                    document.getElementById('modal2-age-region').textContent = `${data.age} | ${data.region}, ${data.province}, ${data.city}`;
+                    document.getElementById('modal2-party').textContent = data.party;
+                    document.getElementById('modal2-biography').textContent = data.biography;
+
+                    // Populate portfolio
+                    const educationList = document.getElementById('modal2-education');
+                    educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
+
+                    const leadershipList = document.getElementById('modal2-leadership');
+                    leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
+
+                    const achievementsList = document.getElementById('modal2-achievements');
+                    achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
+
+                    // Populate platforms
+                    const platformsList = document.getElementById('modal2-platforms');
+                    platformsList.innerHTML = Object.entries(data.platforms)
+                        .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
+                        .join('');
+
+                    // Show modal2
+                    modal2.style.display = 'block';
+                });
+        });
+    });
+
+    // Close modal2
+    closeModal2.addEventListener('click', () => {
+        modal2.style.display = 'none';
+    });
+
+    // Close modal2 when clicking outside content
+    window.addEventListener('click', (event) => {
+        if (event.target === modal2) {
+            modal2.style.display = 'none';
+        }
+    });
+});
+</script>
