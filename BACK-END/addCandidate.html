@@ -108,7 +108,7 @@
         
         <div>
             <label for="biography">SHORT BIOGRAPHY</label>  
-            <textarea id="biography" placeholder="Write the candidate's short biogrpahy here"></textarea>
+            <textarea id="biography" name="biography" placeholder="Write the candidate's short biogrpahy here"></textarea>
         </div>
 
         <br>
@@ -121,8 +121,8 @@
         <br>
 
         <div>
-            <label for="Party">POLITICAL PARTY</label>
-            <input type="text" id="bday" name="bday">
+            <label for="party">POLITICAL PARTY</label>
+            <input type="text" id="party" name="party">
         </div>
 
         <br>
@@ -216,7 +216,7 @@
             <div>
                 <label for="achievements">ACHIEVEMENTS</label>
                 <input type="text" id="achievements" name="achievements[]" placeholder="Enter Achievements">
-                <button type="button" id="addAchievements">ADD ACHIEVEMENTS</button>
+                <button type="button" id="addAchievements" name="button">ADD ACHIEVEMENTS</button>
                 
                 <p>Listed Achievements</p>
                 <ol id="achievementList"></ol>
@@ -266,8 +266,13 @@
 
         <br>
 
+        <label for="photo">Upload Candidate's Photo:</label>
+        <input type="file" id="photo" name="photo" accept=".jpg, .jpeg" >
+
         <button type="submit" id="submit">Submit</button>
-        <button type="reset" id="reset">Reset</button>
+        <button type="reset" id="reset">Reset</button> 
+            
     </form>
+
 </body>
 </html>
