@@ -108,7 +108,7 @@ svg{
     font-size: 1rem; /* Set a readable font size */
     font-family: 'Poppins', Arial, sans-serif; /* Match the font with the rest of the design */
     font-weight: 600; /* Make the text bold */
-    color: #000000; /* Set the text color to white */
+    color: #ffffff; /* Set the text color to white */
     background-color: #FFC964; 
     border: none; /* Remove the default border */
     border-radius: 1.25rem; /* Add rounded corners */

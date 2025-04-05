@@ -98,13 +98,28 @@ html {
     text-decoration: none;
     font-size: 1rem;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .tagline .btn:hover{
-    background-color: #f3bf5e;
-}
+    opacity: 80%;
+    transform: scale(1.05);
+}   
 
+
+.citybackground {
+    background-image: url("/static/Group 95.png"); /* Corrected property */
+    background-size: contain; /* Ensure the image covers the entire container */
+    background-position: center; /* Center the image */
+    background-repeat: no-repeat; /* Prevent the image from repeating */
+    width: 120rem;
+    height: 27.75rem;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction:column;
+    justify-content: center;
+    align-items: center;
+}
 
 .features {
     border-radius: 0rem;
@@ -134,7 +149,7 @@ html {
 .feature-card-container {
     display: flex;
     justify-content: center;
-    gap: 8rem;
+    gap: 4rem;
 }
 
 .feature-card {
@@ -316,11 +331,12 @@ html {
     text-decoration: none;
     font-size: 1rem;
     font-weight: bold;
-    transition: background-color 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .PiliTugma .btn:hover{
-    background-color: #f3bf5e;
+    opacity: 80%;
+    transform: scale(1.05);
 }
 
 /*question html */
@@ -524,24 +540,24 @@ html {
 
 }
 
-.btn.previous {
+.navigation-buttons .btn.previous {
     background: #ECECEC;
     color: #AAAAAA;
     cursor: not-allowed;
 }
 
-.btn.next {
+.navigation-buttons .btn.next {
     background: #81C3D7;
     color: white;
 }
 
-.btn.finish {
+.navigation-buttons .btn.finish {
     background: #ECECEC;
     color: #AAAAAA;
     cursor: not-allowed;
 }
 
-.btn:hover:not(:disabled) {
+.navigation-buttons .btn:hover:not(:disabled) {
     background: #3E80A8;
     color: white;
     transform: scale(1.05);
