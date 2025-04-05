@@ -22,7 +22,7 @@
         </div>
 
         <br>
-
+        
         <section>
             <div id="addressSection">
                 <label for="region">REGION</label>
@@ -108,7 +108,7 @@
         
         <div>
             <label for="biography">SHORT BIOGRAPHY</label>  
-            <textarea id="biography" placeholder="Write the candidate's short biogrpahy here"></textarea>
+            <textarea id="biography" name="biography" placeholder="Write the candidate's short biogrpahy here"></textarea>
         </div>
 
         <br>
@@ -121,8 +121,8 @@
         <br>
 
         <div>
-            <label for="Party">POLITICAL PARTY</label>
-            <input type="text" id="bday" name="bday">
+            <label for="party">POLITICAL PARTY</label>
+            <input type="text" id="party" name="party">
         </div>
 
         <br>
@@ -165,6 +165,7 @@
                             education.splice(education.indexOf(edu), 1);
                             educationList.removeChild(li);
                         });
+
                         li.appendChild(del);
                         educationList.appendChild(li);
                     });
@@ -204,6 +205,16 @@
                     experience.forEach(exp => {
                         const li = document.createElement('li');
                         li.textContent = exp;
+
+                        const del = document.createElement('button');
+                        del.textContent = "Delete";
+                        del.type = "button";
+                        del.addEventListener('click', function() {
+                            experience.splice(experience.indexOf(exp), 1);
+                            experienceList.removeChild(li);
+                        });
+
+                        li.appendChild(del);
                         experienceList.appendChild(li);
                     });
                 }
@@ -216,7 +227,7 @@
             <div>
                 <label for="achievements">ACHIEVEMENTS</label>
                 <input type="text" id="achievements" name="achievements[]" placeholder="Enter Achievements">
-                <button type="button" id="addAchievements">ADD ACHIEVEMENTS</button>
+                <button type="button" id="addAchievements" name="button">ADD ACHIEVEMENTS</button>
                 
                 <p>Listed Achievements</p>
                 <ol id="achievementList"></ol>
@@ -242,32 +253,84 @@
                     achievements.forEach(ach => {
                         const li = document.createElement('li');
                         li.textContent = ach;
+
+                        const del = document.createElement('button');
+                        del.textContent = "Delete";
+                        del.type = "button";
+                        del.addEventListener('click', function() {
+                            achievements.splice(achievements.indexOf(ach), 1);
+                            achievementList.removeChild(li);
+                        });
+                        
+                        li.appendChild(del);
                         achievementList.appendChild(li);
                     });
                 }
 
-            </script>
-           
+            </script>   
         </section>
         
         <br>
-        <label for="achievements">PLATFORMS OF THE CANDIDATES</label>
-        <br>
-        <label for="pillar1">EDUCATION</label>
-        <input type="text" id="ed" name="ed">
-        <label for="pillar2">HEALTHCARE</label>
-        <input type="text" id="hc" name="hc">
-        <label for="pillar3">CLEAN GOVERNMENT</label>
-        <input type="text" id="cg" name="cg">
-        <label for="pillar4">ECONOMY</label>
-        <input type="text" id="econ" name="econ">
-        <label for="pillar5">AGRICULTURE</label>
-        <input type="text" id="agri" name="agri">
+        <section id="platformsSection">
+            <h2>PLATFORMS</h2>
+            <div id="pillarInputsContainer">
+                <!-- Dynamic inputs will appear here -->
+                <p>Loading pillars...</p>
+            </div>
+        </section>
+        
+        <script>
+            // Load pillars and create inputs
+            async function loadPillarInputs() {
+                try {
+                    const response = await fetch('/api/pillars');
+                    const data = await response.json();
+                    
+                    const container = document.getElementById('pillarInputsContainer');
+                    container.innerHTML = '';
+                    
+                    if (data.pillars && data.pillars.length > 0) {
+                        data.pillars.forEach(pillar => {
+                            const div = document.createElement('div');
+                            div.className = 'platform-input';
+                            
+                            const label = document.createElement('label');
+                            label.textContent = pillar;
+                            label.htmlFor = `platform-${pillar.toLowerCase().replace(/\s+/g, '-')}`;
+                            
+                            const input = document.createElement('input');
+                            input.type = 'text';
+                            input.id = `platform-${pillar.toLowerCase().replace(/\s+/g, '-')}`;
+                            input.name = `platforms[${pillar}]`;
+                            input.placeholder = `Candidate's platform for ${pillar}`;
+                            
+                            div.appendChild(label);
+                            div.appendChild(input);
+                            container.appendChild(div);
+                        });
+                    } else {
+                        container.innerHTML = '<p>No pillars defined yet</p>';
+                    }
+                } catch (error) {
+                    console.error("Error loading pillars:", error);
+                    document.getElementById('pillarInputsContainer').innerHTML = 
+                        '<p>Error loading platform fields</p>';
+                }
+            }
+        
+            // Call this when the page loads
+            document.addEventListener('DOMContentLoaded', loadPillarInputs);
+        </script>
 
         <br>
+
+        <label for="photo">Upload Candidate's Photo:</label>
+        <input type="file" id="photo" name="photo" accept=".jpg, .jpeg" >
 
         <button type="submit" id="submit">Submit</button>
-        <button type="reset" id="reset">Reset</button>
+        <button type="reset" id="reset">Reset</button> 
+            
     </form>
+
 </body>
 </html>
