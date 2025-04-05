@@ -96,10 +96,6 @@ def save_results():
     data = request.json
     print("User selected:", data['answers'])
     return jsonify({"status": "success"})
-        
-        
-
-
 @app.route('/adminAddCandi')
 def addCandi():
     return render_template('addCandidate.html')
