@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <title>Voting</title>
+</head>
+<body>
+    <!--Navbar Section-->
+    <header>
+        <nav class="navbar">
+            <ul>
+                <li><a id="home" class="logo" href="/dashboard">
+                    <img src="/static/politekologo1.png" alt="Logo" style="height: 2rem; margin-right: 1.5rem;">POLL-IT-TEKO</a></li>
+                <li><a class="navlinks" href="/PiliTugma">PiliTugma</a></li>
+                <li><a class="navlinks" href="/candidate">Candidates</a></li>
+                <li><a class="navlinks" href="/voting">Voting</a></li>
+                <li><a class="navlinks" href="/results">Results</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!--Voting Section-->
+    <section class="votingsec">
+        <div class="title">
+            <p> Cast your Votes</p>
+            <img src="/static/cast.png">
+        </div>
+
+        <!-- Chairperson Section -->
+        <div class="position">
+            <h2>Chairperson</h2>
+            <ul>
+                {% for candidate in chairpersons %}
+                <li>
+                    <div class="candidate-card">
+                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Vice Chairperson Section -->
+        <div class="position">
+            <h2>Vice Chairperson</h2>
+            <ul>
+                {% for candidate in vice_chairpersons %}
+                <li>
+                    <div class="candidate-card">
+                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+
+    </section>
+</html>

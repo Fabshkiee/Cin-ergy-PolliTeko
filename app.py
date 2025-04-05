@@ -18,7 +18,7 @@ educationsSheet = workbook.worksheet("education")
 leadershipsSheet = workbook.worksheet("leadership")
 achievementsSheet = workbook.worksheet("achievement")
 positionsSheet = workbook.worksheet("positions")
-votesSheet = workbook.worksheet("votes")
+resultsSheet = workbook.worksheet("results")
 questionsSheet = workbook.worksheet("questions")
 
 @app.route('/')
@@ -123,26 +123,70 @@ def voting():
         return redirect('/')
     return render_template('voting.html')
 
+@app.route('/casting')
+def casting():
+    if 'user_id' not in session:
+        return redirect('/')
+
+    try:
+        # Fetch all data from the candidates sheet
+        all_data = candidatesSheet.get_all_values()
+
+        # Extract column indices for relevant data
+        first_name_col = 0  # Column A (index 0)
+        last_name_col = 2   # Column C (index 2)
+        position_col = 3   # Column L (index 3)
+
+        # Skip the header row and filter candidates by position
+        chairpersons = []
+        vice_chairpersons = []
+
+        for row in all_data[1:]:  # Skip the header row
+            if len(row) > position_col:  # Ensure the row has enough columns
+                position = row[position_col].strip()
+                first_name = row[first_name_col].strip()
+                last_name = row[last_name_col].strip()
+
+                candidate = {
+                    "first_name": first_name,
+                    "last_name": last_name,
+                }
+
+                if position.lower() == "chair person":
+                    chairpersons.append(candidate)
+                elif position.lower() == "vice chair person":
+                    vice_chairpersons.append(candidate)
+
+        # Redirect to casting.html with the filtered data
+        return render_template(
+            'casting.html',
+            chairpersons=chairpersons,
+            vice_chairpersons=vice_chairpersons
+        )
+
+    except Exception as e:
+        return f"Error fetching candidates: {str(e)}", 500
+
 @app.route('/api/vote', methods=['POST'])
 def record_vote():
     try:
         data = request.json
-        vote_rows = data.get('votes', [])
+        vote_rows = data.get('results', [])
         
         if not vote_rows:
             return jsonify({"success": False, "message": "No votes provided"}), 400
         
         # Initialize votes sheet if needed
         max_row = max(vote_rows) if vote_rows else 0
-        if len(votesSheet.get_all_values()) < max_row:
-            for _ in range(max_row - len(votesSheet.get_all_values())):
-                votesSheet.append_row([""])
+        if len(resultsSheet.get_all_values()) < max_row:
+            for _ in range(max_row - len(resultsSheet.get_all_values())):
+                resultsSheet.append_row([""])
         
         # Update vote counts
         for row in vote_rows:
-            current_votes = votesSheet.acell(f'A{row}').value
+            current_votes = resultsSheet.acell(f'A{row}').value
             current_votes = int(current_votes) if current_votes and current_votes.isdigit() else 0
-            votesSheet.update_acell(f'A{row}', str(current_votes + 1))
+            resultsSheet.update_acell(f'A{row}', str(current_votes + 1))
         
         return jsonify({
             "success": True,
