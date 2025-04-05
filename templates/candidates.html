@@ -33,9 +33,8 @@
                 {% for candidate in chairpersons %}
                 <li>
                     <div class="candidate-card">
-                        <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="candidate-photo">
-                        <h3>{{ candidate.name }}</h3>
-                        <p>{{ candidate.description }}</p>
+                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                        <p>{{ candidate.biography }}</p>
                     </div>
                 </li>
                 {% endfor %}
@@ -49,9 +48,8 @@
                 {% for candidate in vice_chairpersons %}
                 <li>
                     <div class="candidate-card">
-                        <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="candidate-photo">
-                        <h3>{{ candidate.name }}</h3>
-                        <p>{{ candidate.description }}</p>
+                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                        <p>{{ candidate.biography }}</p>
                     </div>
                 </li>
                 {% endfor %}
