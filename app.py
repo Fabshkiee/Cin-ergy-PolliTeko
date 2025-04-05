@@ -53,7 +53,7 @@ def get_positions():
 def admin_dashboard():
     if 'user_id' not in session or not session.get('is_admin', False):
         return redirect('/')
-    return render_template('addCandidate.html')
+    return render_template('/admin/admin.html')
 
 @app.route('/dashboard')
 def dashboard():
