@@ -5,12 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/candidate.css">
     <title>ADD NEW CANDIDATE</title>
-
 </head>
 <body>
     <h1>ADD NEW CANDIDATE</h1>
     <form id="candidateForm" onsubmit="submitForm(event)" autocomplete="off">
-        
         <div>
             <label for="Fname">FIRST NAME</label>
             <input type="text" id="Fname" name="FirstName" required placeholder="Gem Adrian">
@@ -23,7 +21,7 @@
 
             <label for="position">POSITION</label>
             <select id="position" name="position" required>
-                <option value="" disabled selected>Select Position</option>
+                <option value="" disabled selected>Loading positions...</option>
             </select>
         </div>
 
@@ -134,67 +132,92 @@
     </form>
 
     <script>
-        // Replace this with your actual Google Apps Script URL
-     //   const scriptURL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
-
         // Arrays to store multiple entries
         let education = [];
         let experience = [];
         let achievements = [];
 
+        // Load positions when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            fetch('/api/positions')
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    const positionSelect = document.getElementById('position');
+                    positionSelect.innerHTML = '<option value="" disabled selected>Select Position</option>';
+                    
+                    data.positions.forEach(position => {
+                        const option = document.createElement('option');
+                        option.value = position;
+                        option.textContent = position;
+                        positionSelect.appendChild(option);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error loading positions:', error);
+                    document.getElementById('position').innerHTML = 
+                        '<option value="" disabled selected>Failed to load positions</option>';
+                });
+        });
+
         // Form submission handler
         function submitForm(e) {
-    e.preventDefault();
-    
-    const formData = {
-        FirstName: document.getElementById("Fname").value,
-        MiddleName: document.getElementById("Mname").value,
-        LastName: document.getElementById("Lname").value,
-        Position: document.getElementById("position").value,
-        region: document.getElementById("region").value,
-        province: document.getElementById("province").value,
-        city: document.getElementById("city").value,
-        biography: document.getElementById("biography").value,
-        bday: document.getElementById("bday").value,
-        Party: document.getElementById("Party").value,
-        education: education,  // Array from your education list
-        experience: experience,  // Array from experience list
-        achievements: achievements,  // Array from achievements list
-        ed: document.getElementById("ed").value,
-        hc: document.getElementById("hc").value,
-        cg: document.getElementById("cg").value,
-        econ: document.getElementById("econ").value,
-        agri: document.getElementById("agri").value
-    };
+            e.preventDefault();
+            
+            const formData = {
+                FirstName: document.getElementById("Fname").value,
+                MiddleName: document.getElementById("Mname").value,
+                LastName: document.getElementById("Lname").value,
+                Position: document.getElementById("position").value,
+                region: document.getElementById("region").value,
+                province: document.getElementById("province").value,
+                city: document.getElementById("city").value,
+                biography: document.getElementById("biography").value,
+                bday: document.getElementById("bday").value,
+                Party: document.getElementById("Party").value,
+                education: education,
+                experience: experience,
+                achievements: achievements,
+                ed: document.getElementById("ed").value,
+                hc: document.getElementById("hc").value,
+                cg: document.getElementById("cg").value,
+                econ: document.getElementById("econ").value,
+                agri: document.getElementById("agri").value
+            };
 
-    fetch("/submitAddCandidate", {
-        method: "POST",
-        body: JSON.stringify(formData),
-        headers: {
-            "Content-Type": "application/json"
+            fetch("/submitAddCandidate", {
+                method: "POST",
+                body: JSON.stringify(formData),
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
+            .then(data => {
+                if (data.result === "success") {
+                    alert(`Candidate added successfully! Row: ${data.row}`);
+                    // Reset form and clear lists
+                    document.getElementById("candidateForm").reset();
+                    education = [];
+                    experience = [];
+                    achievements = [];
+                    updateEducationList();
+                    updateExperienceList();
+                    updateAchievementList();
+                } else {
+                    throw new Error(data.message || 'Unknown error occurred');
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to submit data: " + error.message);
+            });
         }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.result === "success") {
-            alert(`Data saved to Row ${data.row}!`);
-            // Reset form and clear lists
-            document.getElementById("candidateForm").reset();
-            education = [];
-            experience = [];
-            achievements = [];
-            updateEducationList();
-            updateExperienceList();
-            updateAchievementList();
-        } else {
-            alert("Error: " + data.message);
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        alert("Failed to submit data.");
-    });
-}
 
         // Education list management
         document.getElementById("addEducation").addEventListener('click', function() {
