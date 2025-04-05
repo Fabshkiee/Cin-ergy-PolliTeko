@@ -23,8 +23,28 @@
 
     <!--Voting Section-->
     <section class="votingsec">
+        <svg id="exit-icon" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35"
+                fill="none">
+                <path
+                    d="M8.49331 5.29666L17.5 14.3033L26.46 5.34332C26.6579 5.13266 26.8963 4.96414 27.1609 4.84787C27.4256 4.73159 27.7109 4.66996 28 4.66666C28.6188 4.66666 29.2123 4.91249 29.6499 5.35007C30.0875 5.78766 30.3333 6.38115 30.3333 6.99999C30.3387 7.28606 30.2857 7.57023 30.1773 7.83505C30.069 8.09987 29.9077 8.33976 29.7033 8.53999L20.6266 17.5L29.7033 26.5767C30.0879 26.9529 30.3134 27.4624 30.3333 28C30.3333 28.6188 30.0875 29.2123 29.6499 29.6499C29.2123 30.0875 28.6188 30.3333 28 30.3333C27.7026 30.3457 27.4059 30.296 27.1287 30.1876C26.8516 30.0791 26.6 29.9142 26.39 29.7033L17.5 20.6967L8.51664 29.68C8.31949 29.8836 8.08396 30.0462 7.82364 30.1583C7.56333 30.2705 7.28339 30.3299 6.99997 30.3333C6.38113 30.3333 5.78764 30.0875 5.35006 29.6499C4.91247 29.2123 4.66664 28.6188 4.66664 28C4.6612 27.7139 4.71428 27.4298 4.82261 27.1649C4.93095 26.9001 5.09226 26.6602 5.29664 26.46L14.3733 17.5L5.29664 8.42332C4.91207 8.04709 4.68657 7.53762 4.66664 6.99999C4.66664 6.38115 4.91247 5.78766 5.35006 5.35007C5.78764 4.91249 6.38113 4.66666 6.99997 4.66666C7.55997 4.67366 8.09664 4.89999 8.49331 5.29666Z"
+                    fill="black" />
+        </svg>
+
+        <div id="exit-modal" class="modal">
+            <div class="modal-content">
+                <img src="/static/exit.png" alt="Exit Icon" style="width: 144px; height: 144px;">
+                <h2>Exit Voting?</h2>
+                <p3>Progress won't be <b>saved</b></p3>
+                <div class="modal-buttons">
+                    <button id="cancel-exit" class="btn">Return</button>
+                    <button id="confirm-exit" class="btn">Exit</button>
+                </div>
+            </div>
+        </div>
+    
+
         <div class="title">
-            <p> Cast your Votes</p>
+            <h1> Cast your Votes</h1>
             <img src="/static/cast.png">
         </div>
 
@@ -35,7 +55,8 @@
                 {% for candidate in chairpersons %}
                 <li>
                     <div class="candidate-card">
-                        <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                    <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                    <input type="radio" name="chairperson" value="{{ candidate.id }}" id="chairperson-{{ candidate.id }}">
                     </div>
                 </li>
                 {% endfor %}
@@ -55,7 +76,49 @@
                 {% endfor %}
             </ul>
         </div>
-
-
     </section>
+
+    <section class="castsection">
+        <div class="cast">
+            <button type="cast" class="btn">Cast Votes</button>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const exitIcon = document.getElementById('exit-icon');
+            const exitModal = document.getElementById('exit-modal');
+            const cancelExit = document.getElementById('cancel-exit');
+            const confirmExit = document.getElementById('confirm-exit');
+            const logo = document.querySelector('.logo');
+    
+            // Show the modal when the exit icon is clicked
+            exitIcon.addEventListener('click', () => {
+                exitModal.style.display = 'flex';
+            });
+    
+            logo.addEventListener('click', (event) => {
+                event.preventDefault(); // Prevent the default navigation
+                exitModal.style.display = 'flex';
+            });
+    
+            // Close the modal when "Cancel" is clicked
+            cancelExit.addEventListener('click', () => {
+                exitModal.style.display = 'none';
+            });
+    
+            // Redirect to the landing page when "Exit" is clicked
+            confirmExit.addEventListener('click', () => {
+                window.location.href = "/dashboard";
+            });
+    
+            // Close the modal if the user clicks outside the modal content
+            window.addEventListener('click', (event) => {
+                if (event.target === exitModal) {
+                    exitModal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+
 </html>

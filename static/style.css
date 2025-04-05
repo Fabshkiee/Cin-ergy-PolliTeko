@@ -607,6 +607,7 @@ html {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    font-family: 'Poppins';
 }
 
 .modal-content {
@@ -621,7 +622,6 @@ html {
     display: flex; /* Use Flexbox for layout */
     flex-direction: column; /* Align buttons in a row */
     align-items: center; /* Vertically align items */
-    font-family: 'Poppins';
     gap: 2rem;
 }
 
@@ -658,4 +658,120 @@ html {
     background-color: #3E80A8;
     color: white;
     transform: scale(1.05);
+}
+
+.votingsec {
+    display: block; /* Allow free positioning of elements */
+    margin: 0 auto;
+    margin-top: 1.25rem;
+    padding: 5.813rem;
+    max-width: 70rem;
+    border: #BABABA 0.15rem solid;
+    width: 36.75rem;
+    position: relative;
+    border-radius: 20px;
+    background-color: #fff;
+    border: 2px solid #bababa;
+    box-sizing: border-box;
+    height: auto; /* Adjust height dynamically */
+
+}
+
+.votingsec svg{
+    position: absolute;
+    width: 2.1875rem;
+    height: 2.1875rem;
+    flex-shrink: 0;
+    aspect-ratio: 1/1;
+    top: 1rem; /* Adjust the distance from the top */
+    right: 1rem; 
+}
+
+#exit-icon {
+    cursor: pointer; /* Change cursor to pointer on hover */
+    transition: transform 0.2s ease; /* Add a smooth hover effect */
+}
+
+#exit-icon:hover {
+    transform: scale(1.1); /* Slightly enlarge the SVG on hover */
+}
+
+.votingsec .modal h1{
+    color: #000;
+
+}
+.votingsec .title{
+    text-align: center;
+}
+
+.votingsec h1 {
+    font-size: 1.5rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+    color: var(--2, #3A7CA5);
+}
+
+.votingsec .position h2 {
+    font-size: 0.938rem;
+    font-weight: 400;
+    margin-bottom: 1rem;
+    color: var(--2, #3A7CA5);
+    margin-top: 2rem;
+    text-align: left;
+    display: inline-block;
+}
+
+.votingsec ul{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.votingsec h3 {
+    font-size: 0.938rem;
+    font-weight: 400;
+    color: black;
+    margin-left: 0.5rem;
+}
+
+.votingsec li {
+    border-radius: 0.625rem;
+    background-color: #fff;
+    border: 1px solid #bababa;
+    box-sizing: border-box;
+    width: 25.188rem;
+    height: 5.206rem;
+    margin: 0 auto; /* Center horizontally */
+    display: flex; /* Enable flexbox for centering */
+    justify-content: flex-start; /* Align content to the left */
+    align-items: center; /* Center content vertically */
+    padding-left: 1rem; /* Add padding to move text away from the edge */
+    margin-bottom: 1.25rem;
+}
+
+.cast {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto; /* Adjust height dynamically based on content */
+    margin-top: 2rem; /* Add spacing from the top */
+}
+
+.cast .btn {
+    background-color: #FFC964;
+    color: #FFFFFF;
+    padding: 1rem 2rem;
+    margin-bottom: 5.75rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border: none; /* Ensure no border */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}
+
+.cast .btn:hover {
+    opacity: 0.8; /* Slightly reduce opacity on hover */
+    transform: scale(1.05); /* Slightly enlarge on hover */
 }
