@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, Blueprint
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Blueprint
 import gspread
 import os
 from google.oauth2.service_account import Credentials
@@ -14,8 +14,10 @@ client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
 workbook = client.open_by_key(sheet_id)
-sheet = workbook.worksheet("Sheet1")
+sheet = workbook.worksheet("logIn")
 sheet2 = workbook.worksheet("pillars")
+candidatesSheet = workbook.worksheet("candidates")
+#candidatesSheet = client.open("candidates").sheet1
 
 
 
@@ -82,6 +84,55 @@ def save_results():
     data = request.json
     print("User selected:", data['answers'])
     return jsonify({"status": "success"})
+        
+        
+
+
+@app.route('/adminAddCandi')
+def addCandi():
+    return render_template('addCandidate.html')
+        
+        
+@app.route("/submitAddCandidate", methods=["POST"])
+def submit():
+    try:
+        data = request.json
+
+        # Get the next available row (starts from Row 2 if empty, otherwise appends)
+        next_row = len(candidatesSheet.get_all_values()) + 1
+
+        # Define column order (A=1, B=2, ..., Q=17)
+        columns = {
+            "A": data.get("FirstName", ""),       # Column 1
+            "B": data.get("MiddleName", ""),      # Column 2
+            "C": data.get("LastName", ""),        # Column 3
+            "D": data.get("region", ""),          # Column 4
+            "E": data.get("province", ""),        # Column 5
+            "F": data.get("city", ""),            # Column 6
+            "G": data.get("biography", ""),       # Column 7
+            "H": data.get("bday", ""),           # Column 8
+            "I": data.get("Party", ""),           # Column 9
+            "J": ", ".join(data.get("education", [])),     # Column 10
+            "K": ", ".join(data.get("experience", [])),    # Column 11
+            "L": ", ".join(data.get("achievements", [])),   # Column 12
+            "M": data.get("ed", ""),              # Column 13
+            "N": data.get("hc", ""),              # Column 14
+            "O": data.get("cg", ""),             # Column 15
+            "P": data.get("econ", ""),           # Column 16
+            "Q": data.get("agri", "")            # Column 17
+        }
+
+        # Write data to each column in the next available row
+        for col_letter, value in columns.items():
+            candidatesSheet.update_acell(f"{col_letter}{next_row}", value)
+
+        return jsonify({"result": "success", "row": next_row})
+
+    except Exception as e:
+        return jsonify({"result": "error", "message": str(e)})
+
+
+
     
 if __name__ == '__main__':
         app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
