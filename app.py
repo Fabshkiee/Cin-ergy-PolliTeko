@@ -55,6 +55,13 @@ def admin_dashboard():
         return redirect('/')
     return render_template('/admin/admin.html')
 
+@app.route('/candidate')
+def candidate():
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('candidates.html')
+
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:

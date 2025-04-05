@@ -1,32 +1,63 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css">
     <title>Candidates</title>
-    <style>
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ddd; padding: 8px; }
-    </style>
 </head>
 <body>
-    <h1>Candidate List</h1>
-    
-    <table>
-        <tr>
-            <th>Name</th>
-            <th>Votes</th>
-        </tr>
-        {% for candidate in candidates %}
-        <tr>
-            <td>{{ candidate.name }}</td>
-            <td>{{ candidate.votes }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <!--Navbar Section-->
+    <header>
+        <nav class="navbar">
+            <ul class="testt">
+                <li><a id="home" class="logo" href="/dashboard">
+                        <img src="/static/politekologo1.png" alt="Logo"
+                            style="height: 2rem; margin-right: 1.5rem;">POLL-IT-TEKO</a></li>
+                <li><a href="/PiliTugma">PiliTugma</a></li>
+                <li><a href="/candidate">Candidates</a></li>
+                <li><a>Voting</a></li>
+                <li><a>Results</a></li>
+            </ul>
+        </nav>
+    </header>
 
-    <h2>Add New Candidate</h2>
-    <form action="/add-candidate" method="POST">
-        <input type="text" name="name" placeholder="Candidate Name" required>
-        <button type="submit">Add</button>
-    </form>
+    <!-- Candidates Section -->
+    <section class="candidates">
+        <h1>Candidates</h1>
+
+        <!-- Chairperson Section -->
+        <div class="position">
+            <h2>Chairperson</h2>
+            <ul>
+                {% for candidate in chairpersons %}
+                <li>
+                    <div class="candidate-card">
+                        <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="candidate-photo">
+                        <h3>{{ candidate.name }}</h3>
+                        <p>{{ candidate.description }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Vice Chairperson Section -->
+        <div class="position">
+            <h2>Vice Chairperson</h2>
+            <ul>
+                {% for candidate in vice_chairpersons %}
+                <li>
+                    <div class="candidate-card">
+                        <img src="{{ candidate.image_url }}" alt="{{ candidate.name }}" class="candidate-photo">
+                        <h3>{{ candidate.name }}</h3>
+                        <p>{{ candidate.description }}</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </section>
 </body>
 </html>
