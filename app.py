@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, redirect, url_for, s
 import gspread
 import os
 from google.oauth2.service_account import Credentials
+import json
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -71,6 +72,7 @@ def candidate():
         last_name_col = 2   # Column C (index 2)
         bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
+        photo_col = 16      # Column Q (index 16)
 
         # Skip the header row and filter candidates by position
         chairpersons = []
@@ -82,12 +84,14 @@ def candidate():
                 first_name = row[first_name_col].strip()
                 last_name = row[last_name_col].strip()
                 biography = row[bio_col].strip()
+                photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
 
                 candidate = {
                     "row_id": index,  # Add the row ID
                     "first_name": first_name,
                     "last_name": last_name,
-                    "biography": biography
+                    "biography": biography,
+                    "photo": photo  # Include the photo path
                 }
 
                 if position.lower() == "chair person":
@@ -146,6 +150,7 @@ def get_candidate_profile(row_id):
             "birthday": candidate_row[8],
             "age": candidate_row[9],
             "party": candidate_row[10],
+            "photo": candidate_row[16] if len(candidate_row) > 16 else "/static/default-profile.png",  # Include photo
             "platforms": platform_details,  # Include only non-empty platform details
             "education": education_row if education_row else [],
             "leadership": leadership_row if leadership_row else [],
@@ -283,22 +288,29 @@ def save_results():
 def addCandi():
     return render_template('addCandidate.html')
         
+import os
+
 @app.route("/submitAddCandidate", methods=["POST"])
 def submit():
     try:
-        data = request.json
-        
+        data = request.form.to_dict()
+        photo = request.files.get("photo")
+
+        # Ensure the uploads directory exists
+        upload_dir = os.path.join("static", "uploads")
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
+
+        # Save the photo file if it exists
+        if photo:
+            photo_filename = os.path.join(upload_dir, photo.filename)
+            photo.save(photo_filename)
+            data["photo"] = photo_filename  # Save the file path in the data
+
         # Get next row for candidates sheet (this will be our master row number)
         candidate_row = len(candidatesSheet.get_all_values()) + 1
-        
-        # First ensure all sheets have at least this many rows
-        for sheet in [educationsSheet, leadershipsSheet, achievementsSheet]:
-            current_rows = len(sheet.get_all_values())
-            if current_rows < candidate_row - 1:  # -1 because append_row adds a row
-                for _ in range(candidate_row - 1 - current_rows):
-                    sheet.append_row([""])  # Add empty rows if needed
 
-        # Write candidate data
+        # Write candidate data to the candidates sheet
         candidates_data = {
             "A": data.get("FirstName", ""),
             "B": data.get("MiddleName", ""),
@@ -315,17 +327,29 @@ def submit():
             "M": data.get("hc", ""),
             "N": data.get("cg", ""),
             "O": data.get("econ", ""),
-            "P": data.get("agri", "")
+            "P": data.get("agri", ""),
+            "Q": data.get("photo", ""),  # Save the photo path in column Q
         }
-        
-        # Write to candidates sheet
+
         for col_letter, value in candidates_data.items():
             candidatesSheet.update_acell(f"{col_letter}{candidate_row}", value)
 
-        # Write to other sheets at the SAME row number
-        educationsSheet.update(f"A{candidate_row}", [[", ".join(data.get("education", []))]])
-        leadershipsSheet.update(f"A{candidate_row}", [[", ".join(data.get("experience", []))]])
-        achievementsSheet.update(f"A{candidate_row}", [[", ".join(data.get("achievements", []))]])
+        # Write achievements, leadership, and educational background to their respective sheets
+        achievements = json.loads(data.get("achievements", "[]"))
+        leadership = json.loads(data.get("experience", "[]"))
+        education = json.loads(data.get("education", "[]"))
+
+        # Write achievements to the achievements sheet
+        for col_index, achievement in enumerate(achievements, start=1):
+            achievementsSheet.update_cell(candidate_row, col_index, achievement)
+
+        # Write leadership experiences to the leadership sheet
+        for col_index, exp in enumerate(leadership, start=1):
+            leadershipsSheet.update_cell(candidate_row, col_index, exp)
+
+        # Write educational background to the education sheet
+        for col_index, edu in enumerate(education, start=1):
+            educationsSheet.update_cell(candidate_row, col_index, edu)
 
         return jsonify({
             "result": "success",

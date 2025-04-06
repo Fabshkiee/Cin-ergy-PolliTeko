@@ -157,7 +157,6 @@ h2 {
 }
 
 /* Modal2 Styles */
-/* Modal2 Styles */
 .modal2 {
     display: none; /* Hidden by default */
     position: fixed;
@@ -188,13 +187,50 @@ h2 {
     margin-bottom: 1.5rem;
 }
 
-.modal2-image img {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    margin-right: 1.5rem;
+
+.candidate-image {
+    flex-shrink: 0;
+    width: 8rem; /* Adjust the width of the circular frame */
+    height: 8rem; /* Adjust the height of the circular frame */
+    border-radius: 50%; /* Make the frame circular */
+    overflow: hidden; /* Ensure the image doesn’t overflow the frame */
     border: 2px solid #ddd; /* Add a border for better visibility */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1.5rem;
 }
+
+.modal2-image {
+    width: 100px; /* Set the width of the circular frame */
+    height: 100px; /* Set the height of the circular frame */
+    border-radius: 50%; /* Make the frame circular */
+    overflow: hidden; /* Ensure the image doesn’t overflow the frame */
+    border: 2px solid #ddd; /* Optional: Add a border for better visibility */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+
+.modal2-image img {
+    width: 100px; /* Set the width of the image */
+    height: 100px; /* Set the height of the image */
+    object-fit: cover; /* Ensure the image covers the area without distortion */
+    border-radius: 50%; /* Make the image circular */
+    border: 2px solid #ddd; /* Optional: Add a border for better visibility */
+    display: block; /* Ensure the image behaves as a block element */
+}
+
+img.candidateprof {
+    width: 100%; /* Make the image fill the container */
+    height: 100%; /* Make the image fill the container */
+    object-fit: cover; /* Ensure the image covers the entire circle */
+    border-radius: 50%; /* Make the image circular */
+    background-color: #f0f0f0; /* Add a background color for empty space */
+    overflow: hidden; /* Ensure no part of the image overflows */
+}
+
 
 .modal2-header-details h2 {
     font-size: 1.8rem;

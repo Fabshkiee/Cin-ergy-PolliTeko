@@ -32,7 +32,7 @@
                 <li>
                     <div class="candidate-card">
                         <div class="candidate-image">
-                            <img src="/static/default-profile.png" alt="Candidate Image">
+                            <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
                         </div>
                         <div class="candidate-details"><h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
                             <p>{{ candidate.biography[:120] }}{% if candidate.biography|length > 120 %}...{% endif %}</p>
@@ -52,7 +52,7 @@
                 <li>
                     <div class="candidate-card">
                         <div class="candidate-image">
-                            <img src="/static/default-profile.png" alt="Candidate Image">
+                            <img src="{{ candidate.photo }}" alt="Candidate Image">
                         </div>
                         <div class="candidate-details">
                             <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
@@ -73,8 +73,7 @@
         <span class="close-btn2" id="close-modal2">&times;</span>
         <div class="modal2-header">
             <div class="modal2-image">
-                <img id="modal2-image" src="/static/default-profile.png" alt="Candidate Image">
-            </div>
+                <img id="modal2-image" src="/static/default-profile.png" alt="Candidate Image">            </div>
             <div class="modal2-header-details">
                 <h2 id="modal2-name"></h2>
                 <p id="modal2-age-region"></p>
@@ -109,43 +108,108 @@
     document.addEventListener('DOMContentLoaded', () => {
     const modal2 = document.getElementById('modal2');
     const closeModal2 = document.getElementById('close-modal2');
-    const viewProfileButtons = document.querySelectorAll('.view-profile-btn');
+    let viewProfileButtons = []; // To be populated after data loads
 
-    viewProfileButtons.forEach((button) => {
-        button.addEventListener('click', () => {
-            const candidateId = button.getAttribute('data-id'); // Get the row ID from the data-id attribute
+    // API Base URL (without trailing slash)
+    const apiBaseUrl = "https://psgc.gitlab.io/api";
 
-            fetch(`/api/candidate/${candidateId}`) // Use the correct row ID
-                .then(response => response.json())
-                .then(data => {
-                    // Populate modal2 with candidate data
-                    document.getElementById('modal2-image').src = "/static/default-profile.png";
-                    document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
-                    document.getElementById('modal2-age-region').textContent = `${data.age} | ${data.region}, ${data.province}, ${data.city}`;
-                    document.getElementById('modal2-party').textContent = data.party;
-                    document.getElementById('modal2-biography').textContent = data.biography;
+    const regionMap = {};
+    const provinceMap = {};
+    const cityMap = {};
 
-                    // Populate portfolio
-                    const educationList = document.getElementById('modal2-education');
-                    educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
-
-                    const leadershipList = document.getElementById('modal2-leadership');
-                    leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
-
-                    const achievementsList = document.getElementById('modal2-achievements');
-                    achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
-
-                    // Populate platforms
-                    const platformsList = document.getElementById('modal2-platforms');
-                    platformsList.innerHTML = Object.entries(data.platforms)
-                        .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
-                        .join('');
-
-                    // Show modal2
-                    modal2.style.display = 'block';
-                });
+    // Fetch all location data first
+    Promise.all([
+        fetch(`${apiBaseUrl}/regions`).then(res => res.json()),
+        fetch(`${apiBaseUrl}/provinces`).then(res => res.json()),
+        fetch(`${apiBaseUrl}/cities-municipalities`).then(res => res.json())
+    ])
+    .then(([regions, provinces, cities]) => {
+        // Populate regionMap
+        regions.forEach(region => {
+            const normalizedCode = region.code.padStart(9, '0'); // Normalize region code
+            regionMap[normalizedCode] = region.name;
         });
+        console.log("Region Map:", regionMap); // Debugging: Log the populated region map
+
+        // Populate provinceMap
+        provinces.forEach(province => {
+            const normalizedCode = province.code.padStart(9, '0'); // Normalize province code
+            provinceMap[normalizedCode] = province.name;
+        });
+        console.log("Province Map:", provinceMap); // Debugging: Log the populated province map
+
+        // Populate cityMap
+        cities.forEach(city => {
+            const normalizedCode = city.code.padStart(9, '0'); // Normalize city code
+            cityMap[normalizedCode] = city.name;
+        });
+        console.log("City Map:", cityMap); // Debugging: Log the populated city map
+
+        // Now setup event listeners for view profile buttons
+        setupViewProfileButtons();
+    })
+    .catch(error => {
+        console.error("Error fetching location data:", error);
     });
+
+    function setupViewProfileButtons() {
+        viewProfileButtons = document.querySelectorAll('.view-profile-btn');
+        viewProfileButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const candidateId = button.dataset.id;
+                fetch(`/api/candidate/${candidateId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Log the region, province, and city codes for debugging
+                        console.log("Region Code from Database:", data.region);
+                        console.log("Province Code from Database:", data.province);
+                        console.log("City Code from Database:", data.city);
+
+                        // Normalize the region, province, and city codes from the database
+                        const normalizedRegionCode = data.region.padStart(9, '0'); // Ensure the code is 9 digits
+                        const normalizedProvinceCode = data.province.padStart(9, '0'); // Ensure the code is 9 digits
+                        const normalizedCityCode = data.city.padStart(9, '0'); // Ensure the code is 9 digits
+
+                        const regionName = regionMap[normalizedRegionCode] || "Unknown Region";
+                        const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
+                        const cityName = cityMap[normalizedCityCode] || "Unknown City";
+
+                        // Log the resolved names for debugging
+                        console.log("Resolved Region Name:", regionName);
+                        console.log("Resolved Province Name:", provinceName);
+                        console.log("Resolved City Name:", cityName);
+
+                        // Update modal content
+                        document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
+                        document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
+                        document.getElementById('modal2-age-region').textContent = 
+                            `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
+                        document.getElementById('modal2-party').textContent = data.party;
+                        document.getElementById('modal2-biography').textContent = data.biography;
+
+                        // Populate portfolio
+                        const educationList = document.getElementById('modal2-education');
+        educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
+
+        const leadershipList = document.getElementById('modal2-leadership');
+        leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
+
+        const achievementsList = document.getElementById('modal2-achievements');
+        achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
+
+                        // Populate platforms
+                        const platformsList = document.getElementById('modal2-platforms');
+                        platformsList.innerHTML = Object.entries(data.platforms)
+                            .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
+                            .join('');
+
+                        // Show modal2
+                        modal2.style.display = 'block';
+                    })
+                    .catch(error => console.error("Error fetching candidate:", error));
+            });
+        });
+    }
 
     // Close modal2
     closeModal2.addEventListener('click', () => {

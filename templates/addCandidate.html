@@ -22,7 +22,7 @@
             <input type="text" id="Lname" name="LastName" required placeholder="Candaganan">
 
             <label for="position">POSITION</label>
-            <select id="position" name="position" required>
+            <select id="position" name="Position" required>
                 <option value="" disabled selected>Loading positions...</option>
             </select>
         </div>
@@ -130,6 +130,13 @@
 
         <br>
 
+        <div>
+            <label for="photo">Upload Candidate's Photo:</label>
+            <input type="file" id="photo" name="photo" accept=".jpg, .jpeg">
+        </div>
+        
+        <br>
+        
         <button type="submit" id="submit">Submit</button>
         <button type="reset" id="reset">Reset</button>
     </form>
@@ -167,66 +174,46 @@
 
         // Form submission handler
         function submitForm(e) {
-            e.preventDefault();
+    e.preventDefault();
 
-            const formData = {
-                FirstName: document.getElementById("Fname").value,
-                MiddleName: document.getElementById("Mname").value,
-                LastName: document.getElementById("Lname").value,
-                Position: document.getElementById("position").value,
-                region: document.getElementById("region").value,
-                province: document.getElementById("province").value,
-                city: document.getElementById("city").value,
-                biography: document.getElementById("biography").value,
-                bday: document.getElementById("bday").value,
-                Party: document.getElementById("Party").value,
-                education: education,
-                experience: experience,
-                achievements: achievements,
-                ed: document.getElementById("ed").value,
-                hc: document.getElementById("hc").value,
-                cg: document.getElementById("cg").value,
-                econ: document.getElementById("econ").value,
-                agri: document.getElementById("agri").value
-            };
+    const form = document.getElementById("candidateForm");
+    const formData = new FormData(form);
 
-            fetch("/submitAddCandidate", {
-                method: "POST",
-                body: JSON.stringify(formData),
-                headers: {
-                    "Content-Type": "application/json"
+    // Append arrays to FormData
+    formData.append("education", JSON.stringify(education));
+    formData.append("experience", JSON.stringify(experience));
+    formData.append("achievements", JSON.stringify(achievements));
+
+    fetch("/submitAddCandidate", {
+        method: "POST",
+        body: formData,
+    })
+        .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.json();
+        })
+        .then(data => {
+            if (data.result === "success") {
+                alert(`Candidate added successfully! Row: ${data.row}`);
+                // Reset form and clear lists
+                if (form && typeof form.reset === "function") {
+                    form.reset();
                 }
-            })
-                .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.result === "success") {
-                        alert(`Candidate added successfully! Row: ${data.row}`);
-                        // Reset form and clear lists
-                        const form = document.getElementById("candidateForm");
-                        if (form && typeof form.reset === 'function') {
-                            form.reset();
-                        }
-                        education = [];
-                        experience = [];
-                        achievements = [];
-                        updateEducationList();
-                        updateExperienceList();
-                        updateAchievementList();
-                    } else {
-                        throw new Error(data.message || 'Unknown error occurred');
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    // Only show alert if it's not the reset error
-                    if (!error.message.includes('reset')) {
-                        alert("Failed to submit data: " + error.message);
-                    }
-                });
-        }
+                education = [];
+                experience = [];
+                achievements = [];
+                updateEducationList();
+                updateExperienceList();
+                updateAchievementList();
+            } else {
+                throw new Error(data.message || "Unknown error occurred");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("Failed to submit data: " + error.message);
+        });
+}
 
         // Education list management
         document.getElementById("addEducation").addEventListener('click', function () {
