@@ -5,6 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/style.css">
     <title>Results</title>
+    <style>
+        .vote-count {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .results-candidate-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .candidate-info {
+            display: flex;
+            align-items: center;
+        }
+        .results-candidate-image img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 15px;
+        }
+    </style>
 </head>
 <body>
     <!--Navbar Section-->
@@ -30,11 +59,15 @@
                 {% for candidate in chairpersons %}
                 <li>
                     <div class="results-candidate-card">
-                        <div class="results-candidate-image">
-                            <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
+                        <div class="candidate-info">
+                            <div class="results-candidate-image">
+                                <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
+                            </div>
+                            <div class="results-candidate-details">
+                                <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                            </div>
                         </div>
-                        <div class="results-candidate-details"><h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                        </div>
+                        <span class="vote-count">{{ candidate.votes }} votes</span>
                     </div>
                 </li>
                 {% endfor %}
@@ -47,12 +80,15 @@
                 {% for candidate in vice_chairpersons %}
                 <li>
                     <div class="results-candidate-card">
-                        <div class="results-candidate-image">
-                            <img src="{{ candidate.photo }}" alt="Candidate Image">
+                        <div class="candidate-info">
+                            <div class="results-candidate-image">
+                                <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
+                            </div>
+                            <div class="results-candidate-details">
+                                <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                            </div>
                         </div>
-                        <div class="results-candidate-details">
-                            <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                        </div>
+                        <span class="vote-count">{{ candidate.votes }} votes</span>
                     </div>
                 </li>
                 {% endfor %}
@@ -84,8 +120,5 @@
         </div>
         <div class="footer-divider"></div>
     </footer>
-  
-    
-
 </body>
 </html>

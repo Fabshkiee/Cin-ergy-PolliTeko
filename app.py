@@ -287,6 +287,16 @@ def results():
     try:
         # Fetch all data from the candidates sheet
         all_data = candidatesSheet.get_all_values()
+        # Fetch all data from the results sheet
+        results_data = resultsSheet.get_all_values()
+        
+        # Create a dictionary to map candidate names to their vote counts
+        vote_counts = {}
+        for row in results_data:
+            if len(row) >= 2:  # Ensure there's at least a name and vote count
+                candidate_name = row[0]
+                vote_count = row[1] if len(row) > 1 else "0"
+                vote_counts[candidate_name] = vote_count
 
         # Extract column indices for relevant data
         first_name_col = 0  # Column A (index 0)
@@ -305,18 +315,24 @@ def results():
                 first_name = row[first_name_col].strip()
                 last_name = row[last_name_col].strip()
                 photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
+                candidate_name = f"{last_name}, {first_name}"
 
                 candidate = {
                     "row_id": index,  # Add the row ID
                     "first_name": first_name,
                     "last_name": last_name,
-                    "photo": photo  # Include the photo path
+                    "photo": photo,  # Include the photo path
+                    "votes": vote_counts.get(candidate_name, "0")  # Get votes from results sheet
                 }
 
                 if position.lower() == "chair person":
                     chairpersons.append(candidate)
                 elif position.lower() == "vice chair person":
                     vice_chairpersons.append(candidate)
+
+        # Sort candidates by vote count (descending)
+        chairpersons.sort(key=lambda x: int(x["votes"]), reverse=True)
+        vice_chairpersons.sort(key=lambda x: int(x["votes"]), reverse=True)
 
         # Pass the filtered data to the template
         return render_template(
@@ -326,7 +342,7 @@ def results():
         )
 
     except Exception as e:
-        return f"Error fetching candidates: {str(e)}", 500
+        return f"Error fetching results: {str(e)}", 500
 
     
 @app.route('/quiz')
