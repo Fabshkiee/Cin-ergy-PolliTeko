@@ -21,6 +21,45 @@
         </nav>
     </header>
 
+    <!--Main Results-->
+    <div class="results-title"><h1>Results</h1></div>
+    <div class="results-container">
+        <div class="results-card">
+            <h2>Chairperson</h2>
+            <ul>
+                {% for candidate in chairpersons %}
+                <li>
+                    <div class="results-candidate-card">
+                        <div class="results-candidate-image">
+                            <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
+                        </div>
+                        <div class="results-candidate-details"><h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="results-card">
+            <h2>Vice Chairperson</h2>
+            <ul>
+                {% for candidate in vice_chairpersons %}
+                <li>
+                    <div class="results-candidate-card">
+                        <div class="results-candidate-image">
+                            <img src="{{ candidate.photo }}" alt="Candidate Image">
+                        </div>
+                        <div class="results-candidate-details">
+                            <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>  
+
     <!--Footer Section-->
     <footer class="footer">
         <div class="footer-background"></div>

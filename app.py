@@ -283,7 +283,50 @@ def record_vote():
 def results():
     if 'user_id' not in session:
         return redirect('/')
-    return render_template('results.html')
+
+    try:
+        # Fetch all data from the candidates sheet
+        all_data = candidatesSheet.get_all_values()
+
+        # Extract column indices for relevant data
+        first_name_col = 0  # Column A (index 0)
+        last_name_col = 2   # Column C (index 2)
+        bio_col = 7         # Column H (index 7)
+        position_col = 3    # Column D (index 3)
+        photo_col = 16      # Column Q (index 16)
+
+        # Skip the header row and filter candidates by position
+        chairpersons = []
+        vice_chairpersons = []
+
+        for index, row in enumerate(all_data[1:], start=2):  # Skip the header row, start row IDs at 2
+            if len(row) > position_col:  # Ensure the row has enough columns
+                position = row[position_col].strip()
+                first_name = row[first_name_col].strip()
+                last_name = row[last_name_col].strip()
+                photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
+
+                candidate = {
+                    "row_id": index,  # Add the row ID
+                    "first_name": first_name,
+                    "last_name": last_name,
+                    "photo": photo  # Include the photo path
+                }
+
+                if position.lower() == "chair person":
+                    chairpersons.append(candidate)
+                elif position.lower() == "vice chair person":
+                    vice_chairpersons.append(candidate)
+
+        # Pass the filtered data to the template
+        return render_template(
+            'results.html',
+            chairpersons=chairpersons,
+            vice_chairpersons=vice_chairpersons
+        )
+
+    except Exception as e:
+        return f"Error fetching candidates: {str(e)}", 500
 
     
 @app.route('/quiz')
