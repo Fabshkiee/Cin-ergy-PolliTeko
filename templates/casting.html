@@ -53,11 +53,9 @@
             <h2>Chairperson</h2>
             <ul>
                 {% for candidate in chairpersons %}
-                <li>
-                    <div class="candidate-card">
+                <li data-value="{{ candidate.id }}">
+                    <input type="radio" name="chairperson" value="{{ candidate.id }}" id="chairperson-{{ candidate.id }}" hidden>
                     <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                    <input type="radio" name="chairperson" value="{{ candidate.id }}" id="chairperson-{{ candidate.id }}">
-                    </div>
                 </li>
                 {% endfor %}
             </ul>
@@ -119,6 +117,27 @@
                 }
             });
         });
+
+        document.addEventListener('DOMContentLoaded', () => {
+    const votingItems = document.querySelectorAll('.votingsec li');
+
+    votingItems.forEach(item => {
+        item.addEventListener('click', () => {
+            // Remove 'selected' class from all items in the same group
+            const parentUl = item.parentElement;
+            parentUl.querySelectorAll('li').forEach(li => li.classList.remove('selected'));
+
+            // Add 'selected' class to the clicked item
+            item.classList.add('selected');
+
+            // Check the corresponding radio button
+            const radio = item.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+            }
+        });
+    });
+});
     </script>
 
 </html>
