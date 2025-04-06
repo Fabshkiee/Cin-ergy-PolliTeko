@@ -734,19 +734,28 @@ html {
     margin-left: 0.5rem;
 }
 
-.votingsec li {
+.position .candidate-card li a {
+    display: block;
+    padding: 2.5rem;
     border-radius: 0.625rem;
-    background-color: #fff;
-    border: 1px solid #bababa;
-    box-sizing: border-box;
-    width: 25.188rem;
-    height: 5.206rem;
-    margin: 0 auto; /* Center horizontally */
-    display: flex; /* Enable flexbox for centering */
-    justify-content: flex-start; /* Align content to the left */
-    align-items: center; /* Center content vertically */
-    padding-left: 1rem; /* Add padding to move text away from the edge */
-    margin-bottom: 1.25rem;
+    border: 1px solid rgba(186, 186, 186, 0.67);
+    border-radius: 0.5rem;
+    text-align: center;
+    color: #000;
+    text-align: center;
+    font-family: 'Poppins';
+    font-size: 1rem;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.position .candidate-card li a.selected {
+    border: 1px solid var(--3, #81C3D7);
+    background: #D9F6FF;
+    transform: scale(1.02);
 }
 
 .cast {
@@ -775,3 +784,5 @@ html {
     opacity: 0.8; /* Slightly reduce opacity on hover */
     transform: scale(1.05); /* Slightly enlarge on hover */
 }
+
+

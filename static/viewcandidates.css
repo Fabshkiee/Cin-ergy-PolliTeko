@@ -169,22 +169,37 @@ h2 {
     overflow-y: auto;
 }
 
+.modal2 li{
+    margin-bottom: 1rem;
+}
 .modal2-content {
     background-color: #fff; /* White background */
     color: #333; /* Dark text for readability */
     margin: 5% auto;
-    padding: 2rem;
-    border-radius: 8px;
-    width: 80%;
-    max-width: 900px;
+    padding: 6.063rem;
+    border-radius: 20px;
+    max-width: 1070px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     font-family: 'Poppins', sans-serif; /* Ensure consistent font */
+    display: grid;
+    grid-template-rows: repeat(1fr 1fr 1fr 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
 }
 
+
 .modal2-header {
-    display: flex;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 4fr; /* Adjust the size of each column: 2 parts for the image, 3 parts for the details */
+    gap: 1rem; /* Add spacing between the columns */
     margin-bottom: 1.5rem;
+}
+
+.left-header {
+    display: grid;
+    grid-template-rows: 1fr 1fr; /* Create 2 equal rows */
+    text-align: left; /* Align text to the left */
+    align-items: start; /* Align items to the top (left in this case for text) */
 }
 
 
@@ -202,8 +217,8 @@ h2 {
 }
 
 .modal2-image {
-    width: 100px; /* Set the width of the circular frame */
-    height: 100px; /* Set the height of the circular frame */
+    width: 166px; /* Set the width of the circular frame */
+    height: 166px; /* Set the height of the circular frame */
     border-radius: 50%; /* Make the frame circular */
     overflow: hidden; /* Ensure the image doesn’t overflow the frame */
     border: 2px solid #ddd; /* Optional: Add a border for better visibility */
@@ -214,8 +229,8 @@ h2 {
 }
 
 .modal2-image img {
-    width: 100px; /* Set the width of the image */
-    height: 100px; /* Set the height of the image */
+    width: 166px; /* Set the width of the image */
+    height: 166px; /* Set the height of the image */
     object-fit: cover; /* Ensure the image covers the area without distortion */
     border-radius: 50%; /* Make the image circular */
     border: 2px solid #ddd; /* Optional: Add a border for better visibility */
@@ -236,6 +251,13 @@ img.candidateprof {
     font-size: 1.8rem;
     margin: 0;
     color: #3A7CA5; /* Blue color for the candidate's name */
+    text-align: left;
+}
+
+.modal2-header-lower {
+    display: flex; /* Align items horizontally */
+    align-items: center; /* Vertically center the items */
+    gap: 1rem; /* Space between the items */
 }
 
 .modal2-header-details p {
@@ -243,9 +265,36 @@ img.candidateprof {
     color: #666; /* Gray text for additional details */
 }
 
+.modal2-body{
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Adjust the size of each column: 2 parts for the image, 3 parts for the details */
+    gap: 3.313rem; /* Add spacing between the columns */
+    margin-bottom: 1.5rem;
+}
+
+.modal2-body-right{
+    margin-top: 3.5rem;
+}
+
 .modal2-body h3 {
-    margin-top: 1.5rem;
     color: #3A7CA5; /* Blue headings for sections */
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal2-body h4 {
+    margin-bottom: 1.5rem;
+}
+
+
+.modal2-plat h3 {
+    color: #3A7CA5; /* Blue headings for sections */
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal2-plat h4 {
+    margin-bottom: 1.5rem;
 }
 
 .modal2-body p,
@@ -259,6 +308,19 @@ img.candidateprof {
     list-style: disc;
     margin-left: 1.5rem;
 }
+
+.modal2-plat p,
+.modal2-plat ul {
+    color: #333; /* Dark text for readability */
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.modal2-plat ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+}
+
 
 .close-btn2 {
     position: absolute;

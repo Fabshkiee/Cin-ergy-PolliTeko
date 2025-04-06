@@ -71,34 +71,52 @@
 <div id="modal2" class="modal2">
     <div class="modal2-content">
         <span class="close-btn2" id="close-modal2">&times;</span>
-        <div class="modal2-header">
-            <div class="modal2-image">
-                <img id="modal2-image" src="/static/default-profile.png" alt="Candidate Image">            </div>
-            <div class="modal2-header-details">
-                <h2 id="modal2-name"></h2>
-                <p id="modal2-age-region"></p>
-                <p id="modal2-party"></p>
+            <div class="modal2-header">
+                <div class="modal2-image">
+                    <img id="modal2-image" src="/static/default-profile.png" alt="Candidate Image">
+                </div>
+
+                <div class="left-header">
+                    <div class="modal2-header-details">
+                        <h2 id="modal2-name"></h2>
+                        <div class="modal2-header-lower">
+                            <p id="modal2-age-region"></p>
+                            <p id="modal2-party"></p>
+                        </div>
+                    </div>
+
+                    <div class="modal2-bio">
+                        <p id="modal2-biography"></p>
+                    </div>
+                </div>  
+            
             </div>
-        </div>
+
         <div class="modal2-body">
-            <h3>Biography</h3>
-            <p id="modal2-biography"></p>
 
-            <h3>Portfolio</h3>
-            <div class="portfolio-section">
-                <h4>Educational Background</h4>
-                <ul id="modal2-education"></ul>
-
-                <h4>Leadership Experience</h4>
-                <ul id="modal2-leadership"></ul>
-
+            <div class="modal2-body-left">
+                <div class="portfolio-section">
+                    <h3>Portfolio</h3>
+                        
+                            <h4>Educational Background</h4>
+                            <ul id="modal2-education"></ul>
+                            <br>
+                            <h4>Leadership Experience</h4>
+                            <ul id="modal2-leadership"></ul>
+                </div>
+            </div>
+            
+            <div class="modal2-body-right">
                 <h4>Achievements</h4>
                 <ul id="modal2-achievements"></ul>
             </div>
+        </div>
 
+        <div class="modal2-plat">
             <h3>Platforms</h3>
             <ul id="modal2-platforms"></ul>
         </div>
+
     </div>
 </div>
 </body>
@@ -155,58 +173,51 @@
     function setupViewProfileButtons() {
         viewProfileButtons = document.querySelectorAll('.view-profile-btn');
         viewProfileButtons.forEach(button => {
-            button.addEventListener('click', () => {
+            button.addEventListener('click', async () => {
                 const candidateId = button.dataset.id;
-                fetch(`/api/candidate/${candidateId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        // Log the region, province, and city codes for debugging
-                        console.log("Region Code from Database:", data.region);
-                        console.log("Province Code from Database:", data.province);
-                        console.log("City Code from Database:", data.city);
 
-                        // Normalize the region, province, and city codes from the database
-                        const normalizedRegionCode = data.region.padStart(9, '0'); // Ensure the code is 9 digits
-                        const normalizedProvinceCode = data.province.padStart(9, '0'); // Ensure the code is 9 digits
-                        const normalizedCityCode = data.city.padStart(9, '0'); // Ensure the code is 9 digits
+                try {
+                    const response = await fetch(`/api/candidate/${candidateId}`);
+                    const data = await response.json();
 
-                        const regionName = regionMap[normalizedRegionCode] || "Unknown Region";
-                        const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
-                        const cityName = cityMap[normalizedCityCode] || "Unknown City";
+                    // Normalize the region, province, and city codes from the database
+                    const normalizedRegionCode = data.region.padStart(9, '0');
+                    const normalizedProvinceCode = data.province.padStart(9, '0');
+                    const normalizedCityCode = data.city.padStart(9, '0');
 
-                        // Log the resolved names for debugging
-                        console.log("Resolved Region Name:", regionName);
-                        console.log("Resolved Province Name:", provinceName);
-                        console.log("Resolved City Name:", cityName);
+                    const regionName = regionMap[normalizedRegionCode] || "Unknown Region";
+                    const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
+                    const cityName = cityMap[normalizedCityCode] || "Unknown City";
 
-                        // Update modal content
-                        document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
-                        document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
-                        document.getElementById('modal2-age-region').textContent = 
-                            `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
-                        document.getElementById('modal2-party').textContent = data.party;
-                        document.getElementById('modal2-biography').textContent = data.biography;
+                    // Update modal content
+                    document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
+                    document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
+                    document.getElementById('modal2-age-region').textContent = 
+                        `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
+                    document.getElementById('modal2-party').textContent = data.party;
+                    document.getElementById('modal2-biography').textContent = data.biography;
 
-                        // Populate portfolio
-                        const educationList = document.getElementById('modal2-education');
-        educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
+                    // Populate portfolio
+                    const educationList = document.getElementById('modal2-education');
+                    educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
 
-        const leadershipList = document.getElementById('modal2-leadership');
-        leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
+                    const leadershipList = document.getElementById('modal2-leadership');
+                    leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
 
-        const achievementsList = document.getElementById('modal2-achievements');
-        achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
+                    const achievementsList = document.getElementById('modal2-achievements');
+                    achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
 
-                        // Populate platforms
-                        const platformsList = document.getElementById('modal2-platforms');
-                        platformsList.innerHTML = Object.entries(data.platforms)
-                            .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
-                            .join('');
+                    // Populate platforms
+                    const platformsList = document.getElementById('modal2-platforms');
+                    platformsList.innerHTML = Object.entries(data.platforms)
+                        .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
+                        .join('');
 
-                        // Show modal2
-                        modal2.style.display = 'block';
-                    })
-                    .catch(error => console.error("Error fetching candidate:", error));
+                    // Show modal2
+                    modal2.style.display = 'block';
+                } catch (error) {
+                    console.error("Error fetching candidate:", error);
+                }
             });
         });
     }
