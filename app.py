@@ -291,55 +291,66 @@ def results():
         return redirect('/')
 
     try:
-        # Fetch all data from the candidates sheet
-        all_data = candidatesSheet.get_all_values()
-        # Fetch all data from the results sheet
+        # Fetch all candidate data
+        candidates_data = candidatesSheet.get_all_values()
+        
+        # Fetch all results data (candidate names in column A, votes in column B)
         results_data = resultsSheet.get_all_values()
         
-        # Create a dictionary to map candidate names to their vote counts
+        # Create a dictionary mapping "Last, First" names to vote counts
         vote_counts = {}
         for row in results_data:
-            if len(row) >= 2:  # Ensure there's at least a name and vote count
-                candidate_name = row[0]
-                vote_count = row[1] if len(row) > 1 else "0"
-                vote_counts[candidate_name] = vote_count
+            if len(row) >= 2:  # Ensure we have both name and votes
+                name = row[0].strip()
+                vote_str = str(row[1]).strip() if len(row) > 1 else "0"
+                
+                # Remove commas and convert to integer
+                try:
+                    votes = int(vote_str.replace(",", "")) if vote_str else 0
+                except (ValueError, TypeError):
+                    votes = 0
+                vote_counts[name] = votes
 
-        # Extract column indices for relevant data
-        first_name_col = 0  # Column A (index 0)
-        last_name_col = 2   # Column C (index 2)
-        position_col = 3    # Column D (index 3)
-        photo_col = 16      # Column Q (index 16)
-
-        # Skip the header row and filter candidates by position
+        # Organize candidates by position
         chairpersons = []
         vice_chairpersons = []
 
-        for index, row in enumerate(all_data[1:], start=2):  # Skip the header row, start row IDs at 2
-            if len(row) > position_col:  # Ensure the row has enough columns
-                position = row[position_col].strip()
-                first_name = row[first_name_col].strip()
-                last_name = row[last_name_col].strip()
-                photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
-                candidate_name = f"{last_name}, {first_name}"
+        # Column indices
+        FIRST_NAME_COL = 0
+        LAST_NAME_COL = 2
+        POSITION_COL = 3
+        PHOTO_COL = 16
 
+        # Process each candidate (skip header row)
+        for row in candidates_data[1:]:
+            if len(row) > POSITION_COL:
+                position = row[POSITION_COL].strip().lower()
+                first_name = row[FIRST_NAME_COL].strip()
+                last_name = row[LAST_NAME_COL].strip()
+                photo = row[PHOTO_COL].strip() if len(row) > PHOTO_COL else "/static/default-profile.png"
+                
+                # Create the name key as "Last, First"
+                name_key = f"{last_name}, {first_name}"
+                
+                # Get votes or default to 0
+                votes = vote_counts.get(name_key, 0)
+                
                 candidate = {
-                    "row_id": index,  # Add the row ID
                     "first_name": first_name,
                     "last_name": last_name,
-                    "photo": photo,  # Include the photo path
-                    "votes": vote_counts.get(candidate_name, "0")  # Get votes from results sheet
+                    "photo": photo,
+                    "votes": "{:,}".format(votes)  # Format with commas for display
                 }
 
-                if position.lower() == "chair person":
+                if position == "chair person":
                     chairpersons.append(candidate)
-                elif position.lower() == "vice chair person":
+                elif position == "vice chair person":
                     vice_chairpersons.append(candidate)
 
-        # Sort candidates by vote count (descending)
-        chairpersons.sort(key=lambda x: int(x["votes"]), reverse=True)
-        vice_chairpersons.sort(key=lambda x: int(x["votes"]), reverse=True)
+        # Sort by vote count (descending)
+        chairpersons.sort(key=lambda x: x["votes"].replace(",", ""), reverse=True)
+        vice_chairpersons.sort(key=lambda x: x["votes"].replace(",", ""), reverse=True)
 
-        # Pass the filtered data to the template
         return render_template(
             'results.html',
             chairpersons=chairpersons,
@@ -347,7 +358,8 @@ def results():
         )
 
     except Exception as e:
-        return f"Error fetching results: {str(e)}", 500
+        app.logger.error(f"Error in results route: {str(e)}")
+        return f"Error loading results: {str(e)}", 500
 
     
 @app.route('/quiz')
