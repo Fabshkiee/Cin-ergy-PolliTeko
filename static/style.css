@@ -818,3 +818,74 @@ html {
     color: #333;
     margin: 0;
 }   
+
+.results-title h1{
+    color: var(--2, #3A7CA5);
+    font-size: 1.875rem;
+    text-align: center;
+    margin-top: 3.625rem;
+}
+
+.results-container {
+    display: block;
+    max-width: 59.188rem;
+    height: relative;
+    margin: 0 auto; 
+    justify-items: center; 
+    align-items: center; 
+    height: 100vh; 
+}
+
+.results-container h2{
+    font-size: 1.875rem;
+    font-weight: lighter;
+    margin-bottom: 1.875rem;
+    margin-top: 4rem;
+}
+
+.results-card li{
+    list-style: none;
+}
+
+.results-candidate-card{
+    display: grid;
+    grid-template-columns: 1fr 4fr 2fr; 
+    background: linear-gradient(-90deg, #3a7ca5, #81c3d7);
+    width: 58.875rem;
+    border-radius: 2.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2.25rem;
+}
+
+.results-candidate-image {
+    flex-shrink: 0;
+    width: 8rem; 
+    height: 8rem; 
+    border-radius: 1rem;
+    overflow: hidden; 
+    border: 1px solid #ddd; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 1.5rem;
+}
+
+.results-candidate-image img {
+    width: 8rem; 
+    height: 8rem; 
+    border-radius: 1rem; 
+}
+
+.results-candidate-details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.results-candidate-details h3 {
+    font-size: 1.875rem;
+    font-weight: lighter;
+    font-weight: normal;
+    color: white;
+    text-transform: uppercase;
+}
