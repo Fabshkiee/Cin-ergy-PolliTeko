@@ -829,6 +829,17 @@ html {
     margin-top: 3.625rem;
 }
 
+.vote-count h4{
+    color: #FFFA64;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 2.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%; 
+}
+
 .results-container {
     display: block;
     max-width: 59.188rem;
@@ -854,11 +865,12 @@ html {
     display: grid;
     grid-template-columns: 1fr 4fr 2fr; 
     background: linear-gradient(-90deg, #3a7ca5, #81c3d7);
-    width: 58.875rem;
     border-radius: 2.5rem;
-    padding: 1.5rem;
     margin-bottom: 2.25rem;
+    padding: 1.5rem;
+    width: 58.875rem;
 }
+
 
 .results-candidate-image {
     flex-shrink: 0;
