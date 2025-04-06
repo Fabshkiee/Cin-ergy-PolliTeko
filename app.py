@@ -217,29 +217,29 @@ def casting():
         # Extract column indices for relevant data
         first_name_col = 0  # Column A (index 0)
         last_name_col = 2   # Column C (index 2)
-        position_col = 3   # Column L (index 3)
+        position_col = 3    # Column D (index 3)
 
         # Skip the header row and filter candidates by position
         chairpersons = []
         vice_chairpersons = []
 
-        for row in all_data[1:]:  # Skip the header row
-            if len(row) > position_col:  # Ensure the row has enough columns
-                position = row[position_col].strip()
+        for index, row in enumerate(all_data[1:], start=2):  # Skip header, start at row 2
+            if len(row) > position_col:
+                position = row[position_col].strip().lower()
                 first_name = row[first_name_col].strip()
                 last_name = row[last_name_col].strip()
 
                 candidate = {
+                    "id": str(index),  # Convert to string to match form submission
                     "first_name": first_name,
                     "last_name": last_name,
                 }
 
-                if position.lower() == "chair person":
+                if position == "chair person":
                     chairpersons.append(candidate)
-                elif position.lower() == "vice chair person":
+                elif position == "vice chair person":
                     vice_chairpersons.append(candidate)
 
-        # Redirect to casting.html with the filtered data
         return render_template(
             'casting.html',
             chairpersons=chairpersons,
@@ -428,6 +428,73 @@ def submit():
 
     except Exception as e:
         return jsonify({"result": "error", "message": str(e)})
+
+@app.route('/submit_votes', methods=['POST'])
+def submit_votes():
+    try:
+        # Get the votes from the request
+        votes = request.json.get('votes', {})
+        
+        # Process each vote
+        for position, candidate_id in votes.items():
+            try:
+                # Convert candidate_id to integer (row number)
+                candidate_row = int(candidate_id)
+                
+                # Get candidate details from candidates sheet
+                try:
+                    candidate_data = candidatesSheet.row_values(candidate_row)
+                    if not candidate_data:
+                        return jsonify({
+                            "success": False,
+                            "message": f"Candidate in row {candidate_row} not found"
+                        }), 404
+                except Exception as e:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Error accessing candidate data: {str(e)}"
+                    }), 500
+                
+                # Format candidate name as "Last, First"
+                candidate_name = f"{candidate_data[2]}, {candidate_data[0]}"
+                
+                # Check if candidate exists in results sheet
+                try:
+                    # Get all candidate names from column A
+                    existing_names = resultsSheet.col_values(1)
+                    
+                    if candidate_name in existing_names:
+                        # Candidate exists - find their row and increment vote count
+                        row_number = existing_names.index(candidate_name) + 1
+                        current_votes = int(resultsSheet.cell(row_number, 2).value)
+                        resultsSheet.update_cell(row_number, 2, current_votes + 1)
+                    else:
+                        # Candidate doesn't exist - append new row
+                        resultsSheet.append_row([candidate_name, 1])
+                        
+                except Exception as e:
+                    return jsonify({
+                        "success": False,
+                        "message": f"Error updating results: {str(e)}"
+                    }), 500
+                
+            except ValueError:
+                return jsonify({
+                    "success": False,
+                    "message": f"Invalid candidate ID: {candidate_id}"
+                }), 400
+        
+        return jsonify({
+            "success": True,
+            "message": "Votes recorded successfully"
+        })
+    
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error recording votes: {str(e)}"
+        }), 500
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
