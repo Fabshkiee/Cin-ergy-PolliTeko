@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List Positions</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Page Title */
+        h1, h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3A7CA5;
+            padding: 2rem 0;
+        }
+
+        /* Form Container */
+        #positionsForm {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            padding: 2rem 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Form Groupings */
+        #positionsForm div,
+        #positionsForm section {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Form Labels */
+        #positionsForm label {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Form Inputs */
+        #positionsForm input[type="text"],
+        #positionsForm input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #000000;
+            border-radius: 0.5rem;
+            background-color: #FAF9F6;
+            transition: border 0.3s ease;
+        }
+
+        #positionsForm input[type="text"]:focus,
+        #positionsForm input[type="number"]:focus {
+            border-color: #81C3D7;
+            outline: none;
+        }
+
+        /* Buttons */
+        #positionsForm button {
+            margin: 1rem auto;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        #positionsForm button[type="submit"] {
+            background-color: #81C3D7;
+            color: #fff;
+        }
+
+        #positionsForm button[type="submit"]:hover {
+            transform: scale(1.05);
+        }
+
+        /* Listed Positions */
+        #positionsList {
+            width: 90%;
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 1rem 2rem;
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #positionsList li {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Success and Error Messages */
+        .message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #fff;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .message.success {
+            background-color: #4caf50;
+            /* Green for success */
+        }
+
+        .message.error {
+            background-color: #f44336;
+            /* Red for error */
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 600px) {
+            #positionsForm {
+                width: 95%;
+                padding: 1.5rem 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            #positionsForm label {
+                font-size: 1rem;
+            }
+
+            #positionsForm input[type="text"],
+            #positionsForm input[type="number"] {
+                font-size: 0.9rem;
+            }
+
+            #positionsForm button {
+                font-size: 0.9rem;
+            }
+
+            #positionsList {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>LIST ALL POSITIONS</h1>
+    <form id="positionsForm" method="POST" action="/add-position">
+        <section>
+            <div id="positionsSection">
+                <label for="positions">POSITIONS IN YOUR ORGANIZATION</label>
+                <input type="text" id="positions" name="positions" placeholder="Enter Position" autocomplete="off" required>
+
+                <label for="numbers">NUMBER OF PEOPLE TO FILL THE POSITION</label>
+                <input type="number" id="numbers" name="numbers" value="0" min="0" required>
+
+                <button type="submit">ADD POSITION</button>
+            </div>
+        </section>
+    </form>
+
+    <h2>Listed Positions and Numbers</h2>
+    <ol id="positionsList">
+        {% for position, number in positions %}
+
+        <li>
+            {{ position }} - {{ number }}
+            <button class="delete-btn" data-position="{{ position }}">Delete</button>
+        </li>
+        {% endfor %}
+    </ol>
+</body>
+
+</html>
+<script>
+    document.getElementById("positionsForm").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const positionValue = document.getElementById("positions").value.trim();
+    const numberValue = document.getElementById("numbers").value.trim();
+    const number = parseInt(numberValue);
+
+    if (positionValue && !isNaN(number) && number >= 0) {
+        fetch("/add-position", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                position: positionValue,
+                number: number,
+            }),
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            if (data.success) {
+                showMessage(data.message, "success");
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            } else {
+                showMessage(data.message, "error");
+            }
+        })
+        .catch((error) => {
+            showMessage("Error: " + error.message, "error");
+        });
+    } else {
+        showMessage("Please enter valid position and number (≥0)", "error");
+    }
+});
+
+    document.querySelectorAll(".delete-btn").forEach((button) => {
+    button.addEventListener("click", function () {
+        const position = this.getAttribute("data-position");
+
+        if (confirm(`Are you sure you want to delete the position "${position}"?`)) {
+            console.log("Sending delete request for position:", position);
+
+            fetch("/delete-position", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ position: position }),
+            })
+                .then((response) => {
+                    console.log("Response status:", response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log("Response data:", data);
+                    if (data.success) {
+                        showMessage(data.message, "success");
+                        setTimeout(() => {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        showMessage(data.message, "error");
+                    }
+                })
+                .catch((error) => {
+                    console.error("Error:", error);
+                    showMessage("Error: " + error.message, "error");
+                });
+        }
+    });
+});
+
+    function showMessage(message, type) {
+        const messageDiv = document.createElement("div");
+        messageDiv.textContent = message;
+        messageDiv.className = `message ${type}`;
+        document.body.appendChild(messageDiv);
+
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
+    }
+</script>
