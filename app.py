@@ -205,6 +205,12 @@ def voting():
         return redirect('/')
     return render_template('voting.html')
 
+@app.route('/matchResults')
+def matchResults():
+    if 'user_id' not in session:
+        return redirect('/')
+    return render_template('matchResults.html')
+
 @app.route('/casting')
 def casting():
     if 'user_id' not in session:
@@ -301,7 +307,6 @@ def results():
         # Extract column indices for relevant data
         first_name_col = 0  # Column A (index 0)
         last_name_col = 2   # Column C (index 2)
-        bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
         photo_col = 16      # Column Q (index 16)
 
