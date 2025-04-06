@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>LIST ALL STANCES</h1>
+    <form id="stancesForm" method="get">
+        <section>
+            <div id="stancesSection">
+                <label for="stances">STANCES IN YOUR ORGANIZATION</label>  
+                <input type="text" id="stances" name="stances[]" placeholder="Enter stances">
+                                
+                <button type="button" id="addstance">ADD STANCE</button>
+
+                <p>Listed stances and Numbers</p>
+                <ol id="stancesList"></ol>
+            </div>
+            <script>
+                let stances = [];
+
+                document.getElementById("addstance").addEventListener('click', function() {
+                    const stanceValue = document.getElementById('stances').value.trim();
+
+                    if (stanceValue && numberValue) {
+                        stances.push(stanceValue);
+
+                        document.getElementById('stances').value = '';
+
+                        updatestancesList();
+                    }
+                });
+
+                function updatestancesList() {
+                    const stancesList = document.getElementById('stancesList');
+
+                    // Clear existing list
+                    stancesList.innerHTML = '';
+
+                    // Update list with current data
+                    stances.forEach((pos, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = `${pos} - ${numbers[index]}`;
+
+                        const delButton = document.createElement('button');
+                        delButton.textContent = "Delete";
+                        delButton.type = "button";
+                        delButton.addEventListener('click', function() {
+                            stances.splice(index, 1);
+
+                            updatestancesList();
+                        });
+
+                        li.appendChild(delButton);
+                        stancesList.appendChild(li);
+                    });
+                }
+            </script>
+        </section>
+    </form>
+</body>
+</html>
