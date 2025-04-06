@@ -230,9 +230,6 @@ html {
     aspect-ratio: 1/1;
 }
 
-
-
-
 /* Footer Styles */
 .footer {
     position: relative;
@@ -244,6 +241,8 @@ html {
     flex-direction: column; /* Stack title and cards vertically */
     justify-content: center;
     align-items: center;
+    clear: both;
+    padding-top: 2rem;
 }
 
 .footer-background {
@@ -818,6 +817,10 @@ html {
     color: #333;
     margin: 0;
 }   
+
+.resultssec{
+    margin-bottom: 25rem;
+}
 
 .results-title h1{
     color: var(--2, #3A7CA5);
