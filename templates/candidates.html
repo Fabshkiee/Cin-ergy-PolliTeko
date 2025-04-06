@@ -93,7 +93,7 @@
             </div>
 
         <div class="modal2-body">
-
+            <div id="modal2-loading" class="loading-spinner"></div>
             <div class="modal2-body-left">
                 <div class="portfolio-section">
                     <h3>Portfolio</h3>
@@ -151,16 +151,18 @@
     document.addEventListener('DOMContentLoaded', () => {
     const modal2 = document.getElementById('modal2');
     const closeModal2 = document.getElementById('close-modal2');
-    let viewProfileButtons = []; // To be populated after data loads
+    const loadingSpinner = document.getElementById('modal2-loading');
+    const modalContent = document.querySelector('.modal2-content');
 
-    // API Base URL (without trailing slash)
-    const apiBaseUrl = "https://psgc.gitlab.io/api";
-
+    // Maps to store region, province, and city names
     const regionMap = {};
     const provinceMap = {};
     const cityMap = {};
 
-    // Fetch all location data first
+    // API Base URL
+    const apiBaseUrl = "https://psgc.gitlab.io/api";
+
+    // Fetch all location data and populate maps
     Promise.all([
         fetch(`${apiBaseUrl}/regions`).then(res => res.json()),
         fetch(`${apiBaseUrl}/provinces`).then(res => res.json()),
@@ -169,90 +171,95 @@
     .then(([regions, provinces, cities]) => {
         // Populate regionMap
         regions.forEach(region => {
-            const normalizedCode = region.code.padStart(9, '0'); // Normalize region code
+            const normalizedCode = region.code.padStart(9, '0');
             regionMap[normalizedCode] = region.name;
         });
-        console.log("Region Map:", regionMap); // Debugging: Log the populated region map
 
         // Populate provinceMap
         provinces.forEach(province => {
-            const normalizedCode = province.code.padStart(9, '0'); // Normalize province code
+            const normalizedCode = province.code.padStart(9, '0');
             provinceMap[normalizedCode] = province.name;
         });
-        console.log("Province Map:", provinceMap); // Debugging: Log the populated province map
 
         // Populate cityMap
         cities.forEach(city => {
-            const normalizedCode = city.code.padStart(9, '0'); // Normalize city code
+            const normalizedCode = city.code.padStart(9, '0');
             cityMap[normalizedCode] = city.name;
         });
-        console.log("City Map:", cityMap); // Debugging: Log the populated city map
 
-        // Now setup event listeners for view profile buttons
-        setupViewProfileButtons();
+        console.log("Region Map:", regionMap);
+        console.log("Province Map:", provinceMap);
+        console.log("City Map:", cityMap);
     })
-    .catch(error => {
-        console.error("Error fetching location data:", error);
+    .catch(error => console.error("Error fetching location data:", error));
+
+    // Set up event listeners for "View Profile" buttons
+    document.querySelectorAll('.view-profile-btn').forEach(button => {
+        button.addEventListener('click', async (e) => {
+            const candidateId = e.currentTarget.dataset.id;
+
+            // Show loading state
+            modal2.style.display = 'block';
+            modalContent.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            try {
+                const response = await fetch(`/api/candidate/${candidateId}`);
+                if (!response.ok) throw new Error('Failed to fetch candidate data');
+                const data = await response.json();
+
+                // Normalize location codes
+                const normalizedRegionCode = data.region.padStart(9, '0');
+                const normalizedProvinceCode = data.province.padStart(9, '0');
+                const normalizedCityCode = data.city.padStart(9, '0');
+
+                // Get location names from maps
+                const regionName = regionMap[normalizedRegionCode] || "Unknown Region";
+                const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
+                const cityName = cityMap[normalizedCityCode] || "Unknown City";
+
+                // Update modal content
+                document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
+                document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
+                document.getElementById('modal2-age-region').textContent = 
+                    `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
+                document.getElementById('modal2-party').textContent = data.party || "No party specified";
+                document.getElementById('modal2-biography').textContent = data.biography || "No biography available";
+
+                // Populate portfolio
+                const educationList = document.getElementById('modal2-education');
+                educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
+
+                const leadershipList = document.getElementById('modal2-leadership');
+                leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
+
+                const achievementsList = document.getElementById('modal2-achievements');
+                achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
+
+                // Populate platforms
+                const platformsList = document.getElementById('modal2-platforms');
+                platformsList.innerHTML = Object.entries(data.platforms)
+                    .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
+                    .join('');
+
+                // Hide spinner and show content
+                loadingSpinner.style.display = 'none';
+                modalContent.style.display = 'block';
+            } catch (error) {
+                console.error("Error fetching candidate:", error);
+                loadingSpinner.style.display = 'none';
+                modalContent.style.display = 'block';
+                alert('Failed to load candidate profile. Please try again.');
+            }
+        });
     });
 
-    function setupViewProfileButtons() {
-        viewProfileButtons = document.querySelectorAll('.view-profile-btn');
-        viewProfileButtons.forEach(button => {
-            button.addEventListener('click', async () => {
-                const candidateId = button.dataset.id;
-
-                try {
-                    const response = await fetch(`/api/candidate/${candidateId}`);
-                    const data = await response.json();
-
-                    // Normalize the region, province, and city codes from the database
-                    const normalizedRegionCode = data.region.padStart(9, '0');
-                    const normalizedProvinceCode = data.province.padStart(9, '0');
-                    const normalizedCityCode = data.city.padStart(9, '0');
-
-                    const regionName = regionMap[normalizedRegionCode] || "Unknown Region";
-                    const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
-                    const cityName = cityMap[normalizedCityCode] || "Unknown City";
-
-                    // Update modal content
-                    document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
-                    document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
-                    document.getElementById('modal2-age-region').textContent = 
-                        `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
-                    document.getElementById('modal2-party').textContent = data.party;
-                    document.getElementById('modal2-biography').textContent = data.biography;
-
-                    // Populate portfolio
-                    const educationList = document.getElementById('modal2-education');
-                    educationList.innerHTML = data.education.map(item => `<li>${item}</li>`).join('');
-
-                    const leadershipList = document.getElementById('modal2-leadership');
-                    leadershipList.innerHTML = data.leadership.map(item => `<li>${item}</li>`).join('');
-
-                    const achievementsList = document.getElementById('modal2-achievements');
-                    achievementsList.innerHTML = data.achievements.map(item => `<li>${item}</li>`).join('');
-
-                    // Populate platforms
-                    const platformsList = document.getElementById('modal2-platforms');
-                    platformsList.innerHTML = Object.entries(data.platforms)
-                        .map(([key, value]) => `<li><strong>${key}:</strong> ${value}</li>`)
-                        .join('');
-
-                    // Show modal2
-                    modal2.style.display = 'block';
-                } catch (error) {
-                    console.error("Error fetching candidate:", error);
-                }
-            });
-        });
-    }
-
-    // Close modal2
+    // Close modal logic
     closeModal2.addEventListener('click', () => {
         modal2.style.display = 'none';
     });
 
-    // Close modal2 when clicking outside content
+    // Close modal when clicking outside the modal content
     window.addEventListener('click', (event) => {
         if (event.target === modal2) {
             modal2.style.display = 'none';

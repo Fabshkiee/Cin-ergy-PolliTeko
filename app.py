@@ -3,6 +3,23 @@ import gspread
 import os
 from google.oauth2.service_account import Credentials
 import json
+import requests
+from functools import lru_cache
+
+
+@lru_cache(maxsize=None)
+def get_location_name(code, endpoint):
+    """
+    Fetches the location name (region, province, or city) from the API and caches the result.
+    """
+    try:
+        response = requests.get(f"https://psgc.gitlab.io/api/{endpoint}/{code}/")
+        if response.status_code == 200:
+            return response.json().get('name', 'Unknown')
+        return 'Unknown'
+    except Exception as e:
+        print(f"Error fetching location name for {code} from {endpoint}: {e}")
+        return 'Unknown'
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
@@ -121,9 +138,15 @@ def get_candidate_profile(row_id):
         while len(candidate_row) < 16:  # Assuming 16 columns are required
             candidate_row.append("")
 
-        education_row = educationsSheet.row_values(row_id)
-        leadership_row = leadershipsSheet.row_values(row_id)
-        achievement_row = achievementsSheet.row_values(row_id)
+        # Get location codes from candidate data
+        region_code = candidate_row[4]
+        province_code = candidate_row[5]
+        city_code = candidate_row[6]
+
+        # Get location names using cached function
+        region_name = get_location_name(region_code, 'regions')
+        province_name = get_location_name(province_code, 'provinces')
+        city_name = get_location_name(city_code, 'cities-municipalities')
 
         # Extract platform details
         platforms = {
@@ -143,18 +166,21 @@ def get_candidate_profile(row_id):
             "middle_name": candidate_row[1],
             "last_name": candidate_row[2],
             "position": candidate_row[3],
-            "region": candidate_row[4],
-            "province": candidate_row[5],
-            "city": candidate_row[6],
+            "region": region_code,
+            "region_name": region_name,
+            "province": province_code,
+            "province_name": province_name,
+            "city": city_code,
+            "city_name": city_name,
             "biography": candidate_row[7],
             "birthday": candidate_row[8],
             "age": candidate_row[9],
             "party": candidate_row[10],
             "photo": candidate_row[16] if len(candidate_row) > 16 else "/static/default-profile.png",  # Include photo
             "platforms": platform_details,  # Include only non-empty platform details
-            "education": education_row if education_row else [],
-            "leadership": leadership_row if leadership_row else [],
-            "achievements": achievement_row if achievement_row else [],
+            "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
+            "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
+            "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
         }
 
         return jsonify(candidate)

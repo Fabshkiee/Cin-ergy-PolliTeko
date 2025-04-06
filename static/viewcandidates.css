@@ -140,6 +140,8 @@ h2 {
 .view-profile-btn:hover {
     background-color: #e6b556;
     transform: scale(1.05);
+    cursor: pointer;
+
 }
 
 /* Candidate List */
@@ -172,7 +174,9 @@ h2 {
 .modal2 li{
     margin-bottom: 1rem;
 }
+
 .modal2-content {
+    position: relative; /* Set positioning context for the close button */
     background-color: #fff; /* White background */
     color: #333; /* Dark text for readability */
     margin: 5% auto;
@@ -324,16 +328,33 @@ img.candidateprof {
 
 .close-btn2 {
     position: absolute;
-    top: 1rem;
-    right: 1rem;
+    top: 1rem; /* Adjust the distance from the top of .modal2-content */
+    right: 1rem; /* Adjust the distance from the right of .modal2-content */
     font-size: 1.5rem;
     cursor: pointer;
     color: #666; /* Gray close button */
     transition: color 0.3s ease;
+    z-index: 10; /* Ensure it stays above other content */
 }
 
 .close-btn2:hover {
     color: #000; /* Darker color on hover */
+}
+
+.loading-spinner {
+    display: none; /* Hidden by default */
+    border: 4px solid #f3f3f3; /* Light gray */
+    border-top: 4px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 40px; /* Adjust size */
+    height: 40px; /* Adjust size */
+    animation: spin 1s linear infinite;
+    margin: 20px auto; /* Center the spinner */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 @media (max-width: 768px) {

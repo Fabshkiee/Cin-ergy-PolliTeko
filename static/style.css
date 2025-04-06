@@ -785,4 +785,36 @@ html {
     transform: scale(1.05); /* Slightly enlarge on hover */
 }
 
+.votingsec li {
+    list-style: none; /* Remove default bullet points */
+    border-radius: 0.625rem;
+    background-color: #fff;
+    border: 1px solid rgba(186, 186, 186, 0.67); /* Default border color */
+    box-sizing: border-box;
+    width: 25.188rem;
+    height: 5.206rem;
+    margin: 0 auto; /* Center horizontally */
+    display: flex; /* Enable flexbox for centering */
+    justify-content: flex-start; /* Align content to the left */
+    align-items: center; /* Center content vertically */
+    padding-left: 1rem; /* Add padding to move text away from the edge */
+    margin-bottom: 1.25rem;
+    cursor: pointer; /* Add pointer cursor for better UX */
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
 
+.votingsec li:hover {
+    background-color: #f9f9f9; /* Add hover effect */
+}
+
+.votingsec li.selected {
+    border: 2px solid #81C3D7; /* Change border color when selected */
+    background-color: #D9F6FF; /* Optional: Change background color */
+}
+
+.votingsec li h3 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+}   
