@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -449,6 +449,95 @@ def submit():
 
     except Exception as e:
         return jsonify({"result": "error", "message": str(e)})
+    
+
+
+
+@app.route('/add-position', methods=['POST'])
+def add_position():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    try:
+        # Parse form data
+        position = request.json.get('position', '').strip()
+        number = int(request.json.get('number', 1))
+
+        # Validate input
+        if number < 0:
+            return jsonify({"success": False, "message": "Number cannot be negative"}), 400
+
+        # Check if position already exists
+        all_positions = positionsSheet.col_values(1)
+        if position in all_positions:
+            return jsonify({"success": False, "message": f"Position '{position}' already exists."}), 400
+
+        # Prepare value for Google Sheets - empty string for 0
+        sheet_number = '' if number == 0 else number
+
+        # Find next empty row
+        next_row = len(all_positions) + 1
+
+        # Update the sheet
+        positionsSheet.update(
+            f"A{next_row}:B{next_row}",
+            [[position, sheet_number]],
+            value_input_option='USER_ENTERED'  # This ensures proper handling of empty strings
+        )
+
+        return jsonify({
+            "success": True,
+            "message": f"Position '{position}' added successfully.",
+            "display_number": "Infinite" if number == 0 else number
+        })
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+@app.route('/list-positions')
+def list_positions():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return redirect('/')
+
+    try:
+        # Fetch all positions and numbers from the sheet
+        all_positions = positionsSheet.get_all_values()
+        positions = []
+        for row in all_positions[1:]:  # Skip header row
+            position = row[0]
+            number = row[1] if len(row) > 1 else ''
+            # Convert empty string to "Infinite"
+            display_number = "Infinite" if number == '' else number
+            positions.append((position, display_number))
+
+        return render_template('listposition.html', positions=positions)
+    except Exception as e:
+        return f"Error fetching positions: {str(e)}", 500
+    
+@app.route('/delete-position', methods=['POST'])
+def delete_position():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    try:
+        # Parse the position to delete
+        data = request.json
+        position_to_delete = data.get('position', '').strip()
+
+        # Fetch all positions from the sheet
+        all_positions = positionsSheet.get_all_values()
+
+        # Find the row number of the position to delete
+        for index, row in enumerate(all_positions):
+            if row[0] == position_to_delete:  # Match the position in column A
+                positionsSheet.delete_rows(index + 1)  # Delete the row (1-based index)
+                return jsonify({"success": True, "message": f"Position '{position_to_delete}' deleted successfully."})
+
+        return jsonify({"success": False, "message": f"Position '{position_to_delete}' not found."}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+    
+    
 
 @app.route('/submit_votes', methods=['POST'])
 def submit_votes():

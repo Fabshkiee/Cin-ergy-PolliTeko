@@ -11,5 +11,5 @@ document.getElementById("createQuestion").onclick = function () {
 }
 
 document.getElementById("listPosition").onclick = function () {
-    window.location.href = "listposition.html";
+    window.location.href = "/list-positions";
 }
