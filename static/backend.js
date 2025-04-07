@@ -7,7 +7,7 @@ document.getElementById("addPillar").onclick = function () {
 }
 
 document.getElementById("createQuestion").onclick = function () {
-    window.location.href = "createQuestions.html";
+    window.location.href = "/createQuestion";
 }
 
 document.getElementById("listPosition").onclick = function () {
