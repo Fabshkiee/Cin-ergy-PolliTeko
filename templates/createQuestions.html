@@ -3,6 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Questions</title>
+</head>
+<body>
+    <h1>CREATE NEW QUESTIONS</h1>
+    <form id="createQuestionsForm" method="POST" action="/submit-issues">
+        <div>
+            <label for="chooseQuestion">CHOOSE QUESTION</label>
+            <select id="chooseQuestion" name="chooseQuestion" required>
+                <option value="" disabled selected>Select Question</option>
+                <option value="question1">Multiple Choice Question</option>
+                <option value="question2">Ranked Choice Question</option>
+                <option value="question3">Issues and Controversies</option>
+            </select>
+        </div>
+
+        <div id="dynamicFields"></div>
+    </form>
+
+    <script>
+        const chooseQuestion = document.getElementById("chooseQuestion");
+
+        chooseQuestion.addEventListener("change", function () {
+            const selectedQuestion = this.value;
+
+            const form = document.getElementById("createQuestionsForm");
+            form.innerHTML = ""; // Clear existing fields
+
+            if (selectedQuestion === "question3") {
+                const head = document.createElement("h2");
+                head.textContent = "ISSUES AND CONTROVERSIES";
+                form.appendChild(head);
+
+                const newInput = document.createElement("input");
+                newInput.setAttribute("type", "text");
+                newInput.setAttribute("id", "dynamicTextarea");
+                newInput.setAttribute("placeholder", "List issues here...");
+                form.append(newInput);
+
+                const addButton = document.createElement("button");
+                addButton.textContent = "Add Issue";
+                addButton.type = "button";
+                addButton.id = "buttonAdd";
+                form.appendChild(addButton);
+
+                const issueList = document.createElement("ol");
+                issueList.setAttribute("id", "issueList");
+                form.appendChild(issueList);
+
+                const submitButton = document.createElement("button");
+                submitButton.textContent = "Submit Issues";
+                submitButton.type = "button";
+                submitButton.id = "submitIssues";
+                form.appendChild(submitButton);
+
+                const issues = [];
+
+                addButton.addEventListener("click", function () {
+                    const issueValue = newInput.value.trim();
+                    if (issueValue) {
+                        issues.push(issueValue);
+                        newInput.value = "";
+                        issueList.innerHTML = "";
+
+                        issues.forEach(issue => {
+                            const li = document.createElement("li");
+                            li.textContent = issue;
+
+                            const del = document.createElement("button");
+                            del.textContent = "Delete";
+                            del.type = "button";
+
+                            del.addEventListener("click", function () {
+                                issues.splice(issues.indexOf(issue), 1);
+                                issueList.removeChild(li);
+                            });
+
+                            li.appendChild(del);
+                            issueList.appendChild(li);
+                        });
+                    }
+                });
+
+                submitButton.addEventListener("click", function () {
+                    fetch("/submit-issues", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ issues }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Issues saved successfully!");
+                            } else {
+                                alert("Error saving issues: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            alert("Failed to save issues.");
+                        });
+                });
+            }
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create New Questions</title>
 </head>
 <body>
