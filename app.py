@@ -254,8 +254,9 @@ def matchResults():
         match_summary = generate_match_summary(candidate, platform_match, stance_match)
 
         # Get photo URL from the photo_dict
-        full_name = f"{candidate['first_name']} {candidate['last_name']}"
-        photo = photo_dict.get(full_name, "/static/default-profile.png")
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+        photo = photo_paths[candidate['row_id'] - 2] if (candidate['row_id'] - 2) < len(photo_paths) else "/static/default-profile.png"
+
 
         # Ensure the photo URL is valid
         if not photo.startswith("http"):
@@ -267,7 +268,7 @@ def matchResults():
             'stance_match': stance_match,
             'overall_match': overall_match,
             'match_summary': match_summary,
-            'photo': photo,
+            'photo': photo_paths[candidate['row_id'] - 2] if (candidate['row_id'] - 2) < len(photo_paths) else "/static/default-profile.png"
         }
         processed_results.append(processed_candidate)
 
