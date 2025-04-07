@@ -238,7 +238,7 @@ def matchResults():
     photo_data = photosSheet.get_all_values()  # Fetch all data from the photosSheet
     photo_dict = {row[0].strip(): row[1].strip() for row in photo_data[1:] if len(row) >= 2}  # Map names to photo URLs
 
-    # Calculate match percentages for each candidate
+    # Process match results
     processed_results = []
     for candidate in results:
         # Calculate platform match percentage
@@ -274,6 +274,7 @@ def matchResults():
     # Sort by overall match score descending
     processed_results.sort(key=lambda x: x['overall_match'], reverse=True)
 
+    # Separate top candidate and similar candidates
     top_candidate = processed_results[0] if processed_results else None
     similar_candidates = processed_results[1:4] if len(processed_results) > 1 else []
 
