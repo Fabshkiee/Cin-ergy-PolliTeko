@@ -141,6 +141,8 @@ def get_candidate_profile(row_id):
         if not candidate_row:
             return jsonify({"error": "Candidate not found"}), 404
 
+        photo_path = photosSheet.cell(row_id, 2).value if row_id <= len(photosSheet.get_all_values()) else ""
+
         # Ensure the row has enough columns
         while len(candidate_row) < 16:  # Assuming 16 columns are required
             candidate_row.append("")
@@ -178,7 +180,7 @@ def get_candidate_profile(row_id):
             "birthday": candidate_row[8],
             "age": candidate_row[9],
             "party": candidate_row[10],
-            "photo": candidate_row[16] if len(candidate_row) > 16 else "/static/default-profile.png",  # Include photo
+            "photo": photo_path or "/static/default-profile.png",
             "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],

@@ -329,8 +329,8 @@ img.candidateprof {
 .close-btn2 {
     position: absolute;
     top: 1rem; /* Adjust the distance from the top of .modal2-content */
-    right: 1rem; /* Adjust the distance from the right of .modal2-content */
-    font-size: 1.5rem;
+    right: 1em; /* Adjust the distance from the right of .modal2-content */
+    font-size: 3rem;
     cursor: pointer;
     color: #666; /* Gray close button */
     transition: color 0.3s ease;

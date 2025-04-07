@@ -218,9 +218,8 @@
                 const provinceName = provinceMap[normalizedProvinceCode] || "Unknown Province";
                 const cityName = cityMap[normalizedCityCode] || "Unknown City";
 
-                // Update modal content
-                document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";
-                document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
+                // Update modal contentsrc =
+                document.getElementById('modal2-image').src = data.photo || "/static/default-profile.png";                document.getElementById('modal2-name').textContent = `${data.last_name}, ${data.first_name}`;
                 document.getElementById('modal2-age-region').textContent = 
                     `${data.age} | ${regionName}, ${provinceName}, ${cityName}`;
                 document.getElementById('modal2-party').textContent = data.party || "No party specified";
