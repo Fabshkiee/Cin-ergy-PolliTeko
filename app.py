@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -98,9 +98,8 @@ def candidate():
         bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
 
-        # Skip the header row and filter candidates by position
-        chairpersons = []
-        vice_chairpersons = []
+        # Group candidates by position
+        positions = {}
 
         for index, row in enumerate(all_data[1:], start=2):  # Skip the header row, start row IDs at 2
             if len(row) > position_col:  # Ensure the row has enough columns
@@ -118,16 +117,15 @@ def candidate():
                     "photo": photo  # Include the photo path
                 }
 
-                if position.lower() == "chair person":
-                    chairpersons.append(candidate)
-                elif position.lower() == "vice chair person":
-                    vice_chairpersons.append(candidate)
+                # Add candidate to the corresponding position group
+                if position not in positions:
+                    positions[position] = []
+                positions[position].append(candidate)
 
-        # Pass the filtered data to the template
+        # Pass the grouped data to the template
         return render_template(
             'candidates.html',
-            chairpersons=chairpersons,
-            vice_chairpersons=vice_chairpersons
+            positions=positions
         )
 
     except Exception as e:

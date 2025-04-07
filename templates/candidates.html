@@ -24,31 +24,11 @@
 
     <!-- Candidates Section -->
     <section class="candidates">
-        <!-- Chairperson Section -->
+        {% for position, candidates in positions.items() %}
         <div class="position">
-            <h2>Chairperson</h2>
+            <h2>{{ position }}</h2>
             <ul>
-                {% for candidate in chairpersons %}
-                <li>
-                    <div class="candidate-card">
-                        <div class="candidate-image">
-                            <img src="{{ candidate.photo }}" class="candidateprof" alt="Candidate Image">
-                        </div>
-                        <div class="candidate-details"><h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
-                            <p>{{ candidate.biography[:120] }}{% if candidate.biography|length > 120 %}...{% endif %}</p>
-                            <a class="view-profile-btn" data-id="{{ candidate.row_id }}">View Profile</a>
-                        </div>
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-        </div>
-
-        <!-- Vice Chairperson Section -->
-        <div class="position">
-            <h2>Vice Chairperson</h2>
-            <ul>
-                {% for candidate in vice_chairpersons %}
+                {% for candidate in candidates %}
                 <li>
                     <div class="candidate-card">
                         <div class="candidate-image">
@@ -57,7 +37,6 @@
                         <div class="candidate-details">
                             <h3>{{ candidate.last_name }}, {{ candidate.first_name }}</h3>
                             <p>{{ candidate.biography[:120] }}{% if candidate.biography|length > 120 %}...{% endif %}</p>
-                            <!-- Corrected data-id attribute -->
                             <a class="view-profile-btn" data-id="{{ candidate.row_id }}">View Profile</a>
                         </div>
                     </div>
@@ -65,6 +44,7 @@
                 {% endfor %}
             </ul>
         </div>
+        {% endfor %}
     </section>
 
 <!--Modal Structure-->
