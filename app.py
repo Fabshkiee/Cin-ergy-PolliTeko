@@ -329,13 +329,12 @@ def results():
                     'formatted': "{:,}".format(vote_count)  # For display with commas
                 }
 
-        # Initialize lists
-        chairpersons = []
-        vice_chairpersons = []
+        # Group candidates by position
+        positions = {}
 
         for index, row in enumerate(all_candidates[1:], start=2):  # Skip header row
             if len(row) > 3:  # Ensure row has enough columns
-                position = row[3].strip().lower()
+                position = row[3].strip()
                 first_name = row[0].strip()
                 last_name = row[2].strip()
                 full_name = f"{last_name}, {first_name}"  # Match the format in results sheet
@@ -353,19 +352,18 @@ def results():
                     "votes_formatted": votes_data['formatted']  # For display
                 }
 
-                if position == "chair person":
-                    chairpersons.append(candidate)
-                elif position == "vice chair person":
-                    vice_chairpersons.append(candidate)
+                # Add candidate to the corresponding position group
+                if position not in positions:
+                    positions[position] = []
+                positions[position].append(candidate)
 
-        # Sort candidates by raw vote count in descending order
-        chairpersons.sort(key=lambda x: x['votes'], reverse=True)
-        vice_chairpersons.sort(key=lambda x: x['votes'], reverse=True)
+        # Sort candidates within each position by raw vote count in descending order
+        for position, candidates in positions.items():
+            candidates.sort(key=lambda x: x['votes'], reverse=True)
 
         return render_template(
             'results.html',
-            chairpersons=chairpersons,
-            vice_chairpersons=vice_chairpersons
+            positions=positions
         )
 
     except Exception as e:

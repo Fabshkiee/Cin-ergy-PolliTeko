@@ -818,19 +818,21 @@ html {
     margin: 0;
 }   
 
+/* Results Section */
 .resultssec {
     flex: 1; /* Allow the results section to grow and push the footer down */
-    padding-bottom: 30rem; /* Add padding for spacing */
+    padding-bottom: 0; /* Add padding for spacing */
 }
 
-.results-title h1{
+.results-title h1 {
     color: var(--2, #3A7CA5);
     font-size: 1.875rem;
     text-align: center;
     margin-top: 3.625rem;
 }
 
-.vote-count h4{
+/* Vote Count Styling */
+.vote-count h4 {
     color: #FFFA64;
     border-radius: 20px;
     font-weight: bold;
@@ -838,45 +840,38 @@ html {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%; 
+    height: 100%;
 }
 
-.results-container {
-    display: block;
-    max-width: 59.188rem;
-    height: relative;
-    margin: 0 auto; 
-    justify-items: center; 
-    align-items: center; 
-    height: 100vh; 
-    padding-bottom: 4rem; /* Maintain bottom padding */
-    min-height: 60vh; /* Minimum height to push footer down */
-}
-
+/* Results Container */
 .results-container {
     display: block;
     max-width: 59.188rem;
     margin: 0 auto;
     padding-bottom: 4rem; /* Maintain bottom padding */
+    min-height: 60vh; /* Minimum height to push footer down */
 }
 
-.results-card{
+/* Results Card */
+.results-card {
     max-height: none; /* Remove any height restrictions */
     overflow: visible; /* Ensure content isn't clipped */
     margin-bottom: 3rem;
 }
 
-.results-card h2{
+.results-card h2 {
     color: #3B7DA6;
     border-bottom: 2px solid #3B7DA6;
     display: inline-block;
     padding-bottom: 0.5rem;
     margin-bottom: 1rem;
 }
-.results-card li{
+
+.results-card li {
     list-style: none;
 }
 
+/* Candidate Card */
 .results-candidate-card {
     display: grid;
     grid-template-columns: 1fr 4fr 2fr;
@@ -889,13 +884,14 @@ html {
     box-sizing: border-box; /* Include padding in width calculation */
 }
 
+/* Candidate Image */
 .results-candidate-image {
     flex-shrink: 0;
-    width: 8rem; 
-    height: 8rem; 
+    width: 8rem;
+    height: 8rem;
     border-radius: 1rem;
-    overflow: hidden; 
-    border: 1px solid #ddd; 
+    overflow: hidden;
+    border: 1px solid #ddd;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -903,12 +899,13 @@ html {
 }
 
 .results-candidate-image img {
-    width: 8rem; 
-    height: 8rem; 
-    border-radius: 1rem; 
+    width: 8rem;
+    height: 8rem;
+    border-radius: 1rem;
 }
 
-.results-candidate-details{
+/* Candidate Details */
+.results-candidate-details {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -916,12 +913,12 @@ html {
 
 .results-candidate-details h3 {
     font-size: 1.875rem;
-    font-weight: lighter;
     font-weight: normal;
     color: white;
     text-transform: uppercase;
 }
 
+/* Scrollable Container */
 .scrollable-container {
     max-height: calc(100vh - 20rem); /* Dynamically calculate height based on viewport */
     overflow-y: auto; /* Enable vertical scrolling */
@@ -935,6 +932,7 @@ html {
     list-style: none;
 }
 
+/* Scrollbar Styling */
 .scrollable-container::-webkit-scrollbar {
     width: 8px; /* Customize scrollbar width */
 }
