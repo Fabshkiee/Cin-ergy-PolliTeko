@@ -818,8 +818,9 @@ html {
     margin: 0;
 }   
 
-.resultssec{
-    margin-bottom: 25rem;
+.resultssec {
+    flex: 1; /* Allow the results section to grow and push the footer down */
+    padding-bottom: 30rem; /* Add padding for spacing */
 }
 
 .results-title h1{
@@ -848,29 +849,45 @@ html {
     justify-items: center; 
     align-items: center; 
     height: 100vh; 
+    padding-bottom: 4rem; /* Maintain bottom padding */
+    min-height: 60vh; /* Minimum height to push footer down */
 }
 
-.results-container h2{
-    font-size: 1.875rem;
-    font-weight: lighter;
-    margin-bottom: 1.875rem;
-    margin-top: 4rem;
+.results-container {
+    display: block;
+    max-width: 59.188rem;
+    margin: 0 auto;
+    padding-bottom: 4rem; /* Maintain bottom padding */
 }
 
+.results-card{
+    max-height: none; /* Remove any height restrictions */
+    overflow: visible; /* Ensure content isn't clipped */
+    margin-bottom: 3rem;
+}
+
+.results-card h2{
+    color: #3B7DA6;
+    border-bottom: 2px solid #3B7DA6;
+    display: inline-block;
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+}
 .results-card li{
     list-style: none;
 }
 
-.results-candidate-card{
+.results-candidate-card {
     display: grid;
-    grid-template-columns: 1fr 4fr 2fr; 
+    grid-template-columns: 1fr 4fr 2fr;
     background: linear-gradient(-90deg, #3a7ca5, #81c3d7);
     border-radius: 2.5rem;
     margin-bottom: 2.25rem;
     padding: 1.5rem;
-    width: 58.875rem;
+    width: 100%; /* Use 100% width to make it responsive */
+    max-width: 58.875rem; /* Set a maximum width */
+    box-sizing: border-box; /* Include padding in width calculation */
 }
-
 
 .results-candidate-image {
     flex-shrink: 0;
@@ -903,4 +920,30 @@ html {
     font-weight: normal;
     color: white;
     text-transform: uppercase;
+}
+
+.scrollable-container {
+    max-height: calc(100vh - 20rem); /* Dynamically calculate height based on viewport */
+    overflow-y: auto; /* Enable vertical scrolling */
+    padding-right: 1rem; /* Add padding to avoid scrollbar overlap */
+    width: 100%; /* Ensure it spans the full width */
+}
+
+.scrollable-container ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.scrollable-container::-webkit-scrollbar {
+    width: 8px; /* Customize scrollbar width */
+}
+
+.scrollable-container::-webkit-scrollbar-thumb {
+    background-color: #81C3D7; /* Customize scrollbar color */
+    border-radius: 4px;
+}
+
+.scrollable-container::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Customize scrollbar track color */
 }
