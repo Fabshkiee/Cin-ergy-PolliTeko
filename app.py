@@ -359,17 +359,35 @@ def results():
 @app.route('/quiz')
 def quiz():
     try:
-        cells = sheet2.range('A2:A')
-        options = [cell.value.strip() for cell in cells if cell.value.strip()]
+        # Fetch all questions from the first row of questions sheet
+        questions_row = questionsSheet.row_values(1)
+        questions = []
         
-        question = {
-            'id': 1,
-            'text': 'What is the capital of France?',
-            'description': 'Choose what applies best',
-            'options': options
-        }
+        # For each question (column in row 1), create a question object
+        for col_idx, question_text in enumerate(questions_row, start=1):
+            if not question_text.strip():
+                continue  # Skip empty columns
+                
+            # Get corresponding options from pillars sheet (same column)
+            # Note: We're using get_all_values() for better performance with multiple cells
+            pillar_col = sheet2.get_all_values()
+            options = []
+            if len(pillar_col) >= col_idx:  # Check if column exists in pillars sheet
+                # Skip header row and get all values in this column
+                options = [row[col_idx-1].strip() for row in pillar_col[1:] if len(row) >= col_idx and row[col_idx-1].strip()]
+            
+            questions.append({
+                'id': col_idx,
+                'text': question_text,
+                'description': 'Choose what applies best',
+                'options': options,
+                'column': chr(64 + col_idx)  # A, B, C, etc. for reference
+            })
         
-        return render_template('question.html', question=question)
+        if not questions:
+            return "No questions found in the questions sheet", 404
+            
+        return render_template('question.html', questions=questions)
     
     except Exception as e:
         return f"Error loading quiz: {str(e)}", 500
