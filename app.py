@@ -162,6 +162,13 @@ def get_candidate_profile(row_id):
         # Create a dictionary of platforms
         platforms = {title: value for title, value in zip(platform_titles, platform_values) if value.strip()}
 
+        # Fetch issues and stances from the stancesSheet
+        issues = stancesSheet.row_values(1)  # First row contains issues
+        stances = stancesSheet.row_values(row_id) if row_id <= len(stancesSheet.get_all_values()) else []
+
+        # Create a dictionary of stances
+        stance_data = {issue: stance for issue, stance in zip(issues, stances) if stance.strip()}
+
         # Extract candidate details
         candidate = {
             "first_name": candidate_row[0],
@@ -180,6 +187,7 @@ def get_candidate_profile(row_id):
             "party": candidate_row[10],
             "photo": photo_path or "/static/default-profile.png",
             "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
+            "stances": stance_data,  # Include stances dynamically fetched from stancesSheet
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
