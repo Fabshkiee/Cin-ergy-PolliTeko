@@ -670,11 +670,12 @@ def submit_votes():
 
 
 
-@app.route('/api/pillars')
+@app.route('/api/pillars', methods=['GET'])
 def get_pillars():
     try:
-        pillars = sheet2.row_values(1)  # Fetch pillar titles from the first row
-        return jsonify({"pillars": pillars})
+        # Fetch all pillars from the first row of the pillarsSheet
+        pillars = sheet2.row_values(1)  # Get all values from row 1
+        return jsonify({"success": True, "pillars": pillars})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 
@@ -695,8 +696,13 @@ def save_question():
 
         pillar_index = pillar_titles.index(pillar) + 1  # Convert to 1-based index for Google Sheets
 
+        # Check if the pillar already has a question
+        existing_questions = questionsSheet.col_values(pillar_index)
+        if len(existing_questions) > 1:  # More than just the header
+            return jsonify({"success": False, "message": f"The pillar '{pillar}' already has a question."}), 400
+
         # Append the question to the corresponding pillar column
-        questionsSheet.update_cell(len(questionsSheet.col_values(pillar_index)) + 1, pillar_index, question_text)
+        questionsSheet.update_cell(len(existing_questions) + 1, pillar_index, question_text)
 
         return jsonify({"success": True, "message": "Question saved successfully"})
     except Exception as e:
@@ -746,19 +752,151 @@ def addCandi_new():
     except Exception as e:
         return f"Error fetching issues: {str(e)}", 500
 
-@app.route('/api/issues')
+@app.route('/api/issues', methods=['GET'])
 def get_issues():
     try:
-        issues = stancesSheet.row_values(1)  # Get all issues from the first row
-        return jsonify({"issues": issues})
+        # Fetch all issues from the first row of the stancesSheet
+        issues = stancesSheet.row_values(1)  # Get all values from row 1
+        return jsonify({"success": True, "issues": issues})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/add-question')
 def add_question():
     if 'user_id' not in session or not session.get('is_admin', False):
         return redirect('/')
     return render_template('createQuestions.html')
+
+@app.route('/api/questions', methods=['GET'])
+def get_questions():
+    try:
+        # Fetch all questions from the first row of the questionsSheet
+        questions = questionsSheet.row_values(1)  # Get all values from row 1
+        return jsonify({"success": True, "questions": questions})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/delete-question', methods=['POST'])
+def delete_question():
+    try:
+        question_id = request.json.get('id')
+        # Find the row of the question to delete
+        all_questions = questionsSheet.get_all_records()
+        for index, question in enumerate(all_questions, start=2):  # Start at row 2 (after headers)
+            if question['id'] == question_id:
+                questionsSheet.delete_rows(index)
+                return jsonify({"success": True, "message": "Question deleted successfully"})
+        return jsonify({"success": False, "message": "Question not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/edit-question', methods=['POST'])
+def edit_question():
+    try:
+        question_id = request.json.get('id')
+        updated_text = request.json.get('text')
+        updated_pillar = request.json.get('pillar')
+
+        # Find the row of the question to edit
+        all_questions = questionsSheet.get_all_records()
+        for index, question in enumerate(all_questions, start=2):  # Start at row 2 (after headers)
+            if question['id'] == question_id:
+                questionsSheet.update(f"A{index}:B{index}", [[updated_text, updated_pillar]])
+                return jsonify({"success": True, "message": "Question updated successfully"})
+        return jsonify({"success": False, "message": "Question not found"}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/delete-column', methods=['POST'])
+def delete_column():
+    try:
+        column_name = request.json.get('columnName')
+        sheet_type = request.json.get('sheetType')  # Either 'questions' or 'stances'
+
+        # Select the correct sheet
+        if sheet_type == 'questions':
+            sheet = questionsSheet
+        elif sheet_type == 'stances':
+            sheet = stancesSheet
+        else:
+            return jsonify({"success": False, "message": "Invalid sheet type"}), 400
+
+        # Get the header row
+        headers = sheet.row_values(1)
+
+        if column_name not in headers:
+            return jsonify({"success": False, "message": "Column not found"}), 404
+
+        # Find the column index (0-based for Google Sheets API)
+        column_index = headers.index(column_name)
+
+        if sheet_type == 'stances':
+            # Delete the entire column for "Issues and Controversies"
+            sheet.delete_dimension('COLUMNS', column_index + 1)  # Convert to 1-based index for API
+            return jsonify({"success": True, "message": f"Column '{column_name}' deleted successfully"})
+        elif sheet_type == 'questions':
+            # Clear the entire column for "Multiple Choice Questions"
+            column_letter = chr(65 + column_index)  # Convert column index to letter (A, B, C, etc.)
+            num_rows = len(sheet.col_values(column_index + 1))  # Get the number of rows in the column
+            # Clear the header and all rows in the column
+            sheet.update(f"{column_letter}1:{column_letter}{num_rows}", [[""] for _ in range(num_rows)])
+            return jsonify({"success": True, "message": f"Contents of column '{column_name}' cleared successfully"})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/api/add-pillar', methods=['POST'])
+def add_pillar():
+    try:
+        pillar_name = request.json.get('pillarName', '').strip()
+
+        if not pillar_name:
+            return jsonify({"success": False, "message": "Pillar name cannot be empty"}), 400
+
+        # Check if the pillar already exists
+        existing_pillars = sheet2.row_values(1)
+        if pillar_name in existing_pillars:
+            return jsonify({"success": False, "message": "Pillar already exists"}), 400
+
+        # Add the pillar to the next empty column
+        next_column = len(existing_pillars) + 1
+        sheet2.update_cell(1, next_column, pillar_name)
+
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully"})
+    except Exception as e:
+        print(f"Error adding pillar: {e}")  # Log the error for debugging
+        return jsonify({"success": False, "message": "An error occurred while adding the pillar"}), 500
+
+@app.route('/api/delete-pillar', methods=['POST'])
+def delete_pillar():
+    try:
+        pillar_name = request.json.get('pillarName', '').strip()
+
+        # Get the header row from the pillarsSheet
+        pillars = sheet2.row_values(1)
+
+        if pillar_name not in pillars:
+            return jsonify({"success": False, "message": "Pillar not found"}), 404
+
+        # Find the column index of the pillar (0-based for Google Sheets API)
+        pillar_index = pillars.index(pillar_name)
+
+        # Delete the pillar column from the pillarsSheet
+        sheet2.delete_dimension('COLUMNS', pillar_index + 1)  # Convert to 1-based index
+
+        # Delete the corresponding column from the questionsSheet
+        questionsSheet.delete_dimension('COLUMNS', pillar_index + 1)  # Use the same column index
+
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' and its associated questions deleted successfully"})
+    except Exception as e:
+        print(f"Error deleting pillar: {e}")
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/add-pillar')
+def add_pillar_page():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return redirect('/')
+    return render_template('addPillar.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Pillars</title>
+</head>
+<body>
+    <h1>Manage Pillars</h1>
+
+    <!-- Form to Add a New Pillar -->
+    <form id="addPillarForm">
+        <label for="pillarName">Enter Pillar Name:</label>
+        <input type="text" id="pillarName" name="pillarName" required>
+        <button type="submit">Add Pillar</button>
+    </form>
+
+    <!-- List of Existing Pillars -->
+    <h2>Existing Pillars</h2>
+    <ul id="pillarsList"></ul>
+
+    <script>
+        const pillarsList = document.getElementById('pillarsList');
+        const addPillarForm = document.getElementById('addPillarForm');
+
+        // Fetch and display all pillars
+        async function loadPillars() {
+            try {
+                const response = await fetch('/api/pillars');
+                const data = await response.json();
+
+                if (data.success) {
+                    pillarsList.innerHTML = ''; // Clear the list
+                    data.pillars.forEach(pillar => {
+                        const li = document.createElement('li');
+                        li.textContent = pillar;
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.addEventListener('click', () => deletePillar(pillar));
+
+                        li.appendChild(deleteButton);
+                        pillarsList.appendChild(li);
+                    });
+                } else {
+                    alert('Failed to load pillars: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading pillars:', error);
+                alert('Failed to load pillars: ' + error.message);
+            }
+        }
+
+        // Add a new pillar
+        addPillarForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const pillarName = document.getElementById('pillarName').value.trim();
+
+            if (!pillarName) {
+                alert('Pillar name cannot be empty');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/add-pillar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pillarName }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    document.getElementById('pillarName').value = ''; // Clear the input field
+                    loadPillars(); // Reload the pillars list
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error adding pillar:', error);
+            }
+        });
+
+        // Delete a pillar
+        async function deletePillar(pillarName) {
+            if (!confirm(`Are you sure you want to delete the pillar '${pillarName}'?`)) return;
+
+            try {
+                const response = await fetch('/api/delete-pillar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pillarName }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadPillars(); // Reload the pillars list
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting pillar:', error);
+            }
+        }
+
+        // Load pillars when the page loads
+        document.addEventListener('DOMContentLoaded', loadPillars);
+    </script>
+</body>
+</html>

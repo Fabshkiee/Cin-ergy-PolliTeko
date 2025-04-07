@@ -11,7 +11,7 @@
         <div>
             <label for="chooseQuestion">CHOOSE QUESTION</label>
             <select id="chooseQuestion" name="chooseQuestion" required>
-                <option value="" selected>Select Question</option>
+                <option value="choose" disabled selected>Select</option>
                 <option value="multipleChoice">Multiple Choice Question</option>
                 <option value="issuesAndStances">Issues and Controversies</option>
             </select>
@@ -19,6 +19,16 @@
 
         <div id="dynamicFields"></div>
     </form>
+
+    <div id="questionList">
+        <h2>Stored Questions</h2>
+        <ul id="questionsContainer"></ul>
+    </div>
+    
+    <div id="issuesList" style="display: none;">
+        <h2>Stored Issues</h2>
+        <ul id="issuesContainer"></ul>
+    </div>
 
     <script>
         const chooseQuestion = document.getElementById("chooseQuestion");
@@ -32,8 +42,19 @@
             // Clear dynamic fields
             dynamicFields.innerHTML = "";
 
+            // Show/hide the appropriate list container
             if (selectedQuestion === "multipleChoice") {
-                // Add fields for Multiple Choice Question
+                document.getElementById("questionList").style.display = "block";
+                document.getElementById("issuesList").style.display = "none";
+                loadQuestions();
+            } else if (selectedQuestion === "issuesAndStances") {
+                document.getElementById("questionList").style.display = "none";
+                document.getElementById("issuesList").style.display = "block";
+                loadIssues();
+            }
+
+            if (selectedQuestion === "multipleChoice") {
+                // Add fields for Multiple Choice Questions
                 const questionLabel = document.createElement("label");
                 questionLabel.textContent = "Enter Question";
                 questionLabel.setAttribute("for", "questionText");
@@ -110,8 +131,9 @@
                                 alert("Question saved successfully!");
                                 questionInput.value = "";
                                 pillarSelect.selectedIndex = 0;
+                                loadQuestions(); // Reload the questions list
                             } else {
-                                alert("Error saving question: " + data.message);
+                                alert("Error: " + data.message);
                             }
                         })
                         .catch(error => {
@@ -185,25 +207,147 @@
             }
         });
 
-        // Function to render issues
+        // Function to load questions from the questionsSheet
+        async function loadQuestions() {
+            try {
+                const response = await fetch('/api/questions');
+                const data = await response.json();
+
+                if (data.success) {
+                    const questionsContainer = document.getElementById('questionsContainer');
+                    questionsContainer.innerHTML = ''; // Clear the list
+
+                    data.questions.forEach((question, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = question;
+
+                        const deleteButton = document.createElement('button');
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.addEventListener('click', () => deleteQuestion(question));
+
+                        li.appendChild(deleteButton);
+                        questionsContainer.appendChild(li);
+                    });
+                } else {
+                    alert('Failed to load questions: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading questions:', error);
+            }
+        }
+
+        // Function to load issues from the stancesSheet
+        async function loadIssues() {
+            try {
+                const response = await fetch('/api/issues');
+                const data = await response.json();
+
+                if (data.success) {
+                    const issuesContainer = document.getElementById('issuesContainer');
+                    issuesContainer.innerHTML = ''; // Clear the list
+
+                    data.issues.forEach((issue, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = issue;
+
+                        const delButton = document.createElement('button');
+                        delButton.textContent = "Delete";
+                        delButton.type = "button";
+                        delButton.addEventListener("click", () => deleteIssue(issue));
+
+                        li.appendChild(delButton);
+                        issuesContainer.appendChild(li);
+                    });
+                } else {
+                    alert('Failed to load issues: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading issues:', error);
+            }
+        }
+
+        function deleteIssue(columnName) {
+            if (!confirm(`Are you sure you want to delete the issue '${columnName}'?`)) return;
+
+            fetch('/api/delete-column', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ columnName, sheetType: 'stances' }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        loadIssues(); // Reload the issues list
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting issue:', error);
+                });
+        }
+
+        function deleteQuestion(columnName) {
+            if (!confirm(`Are you sure you want to clear the question '${columnName}'?`)) return;
+
+            fetch('/api/delete-column', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ columnName, sheetType: 'questions' }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        loadQuestions(); // Reload the questions list
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error clearing question:', error);
+                });
+        }
+
+        function editQuestion(index, question) {
+            const newQuestion = prompt('Edit Question:', question);
+            if (newQuestion) {
+                // Logic to update the question in the backend
+                alert(`Update question at index ${index} to "${newQuestion}" (implement backend logic)`);
+            }
+        }
+
         function renderIssues(issueList) {
-            issueList.innerHTML = ""; // Clear the list
+            issueList.innerHTML = "";
             issues.forEach((issue, index) => {
                 const li = document.createElement("li");
                 li.textContent = issue;
 
-                const delButton = document.createElement("button");
-                delButton.textContent = "Delete";
-                delButton.type = "button";
-                delButton.addEventListener("click", function () {
-                    issues.splice(index, 1); // Remove the issue from the array
-                    renderIssues(issueList); // Re-render the list
+                const deleteButton = document.createElement("button");
+                deleteButton.textContent = "Delete";
+                deleteButton.type = "button";
+                deleteButton.addEventListener("click", function () {
+                    issues.splice(index, 1);
+                    renderIssues(issueList);
                 });
 
-                li.appendChild(delButton);
+                li.appendChild(deleteButton);
                 issueList.appendChild(li);
             });
         }
+
+        // Load questions and issues when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Only load questions initially
+            loadQuestions();
+            // Hide issues container by default
+            document.getElementById("issuesList").style.display = "none";
+        });
     </script>
 </body>
 </html>

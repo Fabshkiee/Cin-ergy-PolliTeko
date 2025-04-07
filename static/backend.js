@@ -3,8 +3,8 @@ document.getElementById("addCandidate").onclick = function () {
 }
 
 document.getElementById("addPillar").onclick = function () {
-    window.location.href = "addPillar.html";
-}
+    window.location.href = "/add-pillar";
+};
 
 document.getElementById("createQuestion").onclick = function () {
     window.location.href = "/add-question";
