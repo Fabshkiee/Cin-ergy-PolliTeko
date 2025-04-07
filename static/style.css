@@ -818,6 +818,35 @@ html {
     margin: 0;
 }   
 
+#cast-votes-btn.cast-btn {
+    background-color: #FFC964;
+    color: #FFFFFF;
+    padding: 1rem 2rem;
+    margin-bottom: 10rem;
+    border-radius: 2rem;
+    text-decoration: none;
+    font-size: 1.5rem;
+    width: 15rem;
+    height: 4rem;
+    font-weight: bold;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    border: none; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    cursor: pointer; 
+}
+
+#cast-votes-btn.cast-btn:disabled {
+    background-color: #ECECEC; 
+    color: #AAAAAA; 
+    cursor: not-allowed; 
+    box-shadow: none; 
+}
+
+#cast-votes-btn.cast-btn:hover {
+    opacity: 0.8; 
+    transform: scale(1.05); 
+}
+
 .resultssec{
     margin-bottom: 25rem;
 }
