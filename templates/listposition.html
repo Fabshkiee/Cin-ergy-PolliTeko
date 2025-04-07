@@ -21,19 +21,92 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #FAF9F6;
-            display: flex;
-            flex-direction: column;
+            display: flex; /* Flexbox layout to align admin controls and main content side by side */
             min-height: 100vh;
             overflow: hidden;
-            overflow-y: auto;
         }
 
         body::-webkit-scrollbar {
             display: none;
         }
 
+        .title {
+            background-color: #FAF9F6;
+            margin: 1rem 2rem 1rem 1rem;
+            color: #3A7CA5;
+        }
+        
+
+        .navbar {
+            width: 100%;
+            background-color: #3A7CA5;
+            padding: 1rem;
+        }
+
+        .navbar ul {
+            display: flex;
+            list-style: none;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .navbar ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+
+        .admin_controls {
+            display: flex;
+            flex-direction: column;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            height: auto; /* Adjust height dynamically */
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+
+        .button-logout {
+            background-color: #FAF9F6;
+            color: black;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            margin-top: auto; /* Push logout button to the bottom */
+            border-radius: 1rem;
+            margin: 13rem 0rem 0.5rem 0rem;
+        }
+
+        .main-content {
+            flex-grow: 1; /* Allow the main content to take up the remaining space */
+            padding: 2rem;
+        }
+
         /* Page Title */
-        h1, h2 {
+        .main-content h1, h2 {
             text-align: center;
             font-size: 2.5rem;
             font-weight: 700;
@@ -149,6 +222,20 @@
 
         /* Responsive Adjustments */
         @media (max-width: 600px) {
+            body {
+                flex-direction: column; /* Stack admin controls and main content vertically */
+            }
+
+            .admin_controls {
+                width: 100%;
+                border-right: none;
+                border-bottom: 0.15rem solid #bababa;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+
             #positionsForm {
                 width: 95%;
                 padding: 1.5rem 1rem;
@@ -179,95 +266,68 @@
 </head>
 
 <body>
-    <h1>LIST ALL POSITIONS</h1>
-    <form id="positionsForm" method="POST" action="/add-position">
-        <section>
-            <div id="positionsSection">
-                <label for="positions">POSITIONS IN YOUR ORGANIZATION</label>
-                <input type="text" id="positions" name="positions" placeholder="Enter Position" autocomplete="off" required>
+    <!-- Admin Controls and Main Content -->
+    <section class="admin_controls" id="adminControls">
+        <h1 class="title">Admin</h1>
+        <button id="listPosition" class="button" onclick="location.href='/list-positions'">List Positions</button>
+        <button id="addCandidate" class="button" onclick="location.href='/adminAddCandi'">Add New Candidate</button>
+        <button id="createQuestion" class="button" onclick="location.href='/add-question'">Create New Questions</button>
+        <button id="addPillar" class="button" onclick="location.href='/add-pillar'">Add Pillar</button>
+        <button id="publishQuestions" class="button">Publish Questions</button>
+        <button id="openVoting" class="button">Open Voting</button>
+        <div class="logout">
+            <a class="button-logout" href="/logout">Logout</a>
+        </div>
+    </section>
 
-                <label for="numbers">NUMBER OF PEOPLE TO FILL THE POSITION</label>
-                <input type="number" id="numbers" name="numbers" value="0" min="0" required>
+    <section class="main-content">
+        <h1>LIST ALL POSITIONS</h1>
+        <form id="positionsForm" method="POST" action="/add-position">
+            <section>
+                <div id="positionsSection">
+                    <label for="positions">POSITIONS IN YOUR ORGANIZATION</label>
+                    <input type="text" id="positions" name="positions" placeholder="Enter Position" autocomplete="off" required>
 
-                <button type="submit">ADD POSITION</button>
-            </div>
-        </section>
-    </form>
+                    <label for="numbers">NUMBER OF PEOPLE TO FILL THE POSITION</label>
+                    <input type="number" id="numbers" name="numbers" value="0" min="0" required>
 
-    <h2>Listed Positions and Numbers</h2>
-    <ol id="positionsList">
-        {% for position, number in positions %}
+                    <button type="submit">ADD POSITION</button>
+                </div>
+            </section>
+        </form>
 
-        <li>
-            {{ position }} - {{ number }}
-            <button class="delete-btn" data-position="{{ position }}">Delete</button>
-        </li>
-        {% endfor %}
-    </ol>
-</body>
+        <h2>Listed Positions and Numbers</h2>
+        <ol id="positionsList">
+            {% for position, number in positions %}
+            <li>
+                {{ position }} - {{ number }}
+                <button class="delete-btn" data-position="{{ position }}">Delete</button>
+            </li>
+            {% endfor %}
+        </ol>
+    </section>
 
-</html>
-<script>
-    document.getElementById("positionsForm").addEventListener("submit", function (event) {
-    event.preventDefault();
+    <script>
+        document.getElementById("positionsForm").addEventListener("submit", function (event) {
+            event.preventDefault();
 
-    const positionValue = document.getElementById("positions").value.trim();
-    const numberValue = document.getElementById("numbers").value.trim();
-    const number = parseInt(numberValue);
+            const positionValue = document.getElementById("positions").value.trim();
+            const numberValue = document.getElementById("numbers").value.trim();
+            const number = parseInt(numberValue);
 
-    if (positionValue && !isNaN(number) && number >= 0) {
-        fetch("/add-position", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                position: positionValue,
-                number: number,
-            }),
-        })
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.success) {
-                showMessage(data.message, "success");
-                setTimeout(() => {
-                    location.reload();
-                }, 2000);
-            } else {
-                showMessage(data.message, "error");
-            }
-        })
-        .catch((error) => {
-            showMessage("Error: " + error.message, "error");
-        });
-    } else {
-        showMessage("Please enter valid position and number (≥0)", "error");
-    }
-});
-
-    document.querySelectorAll(".delete-btn").forEach((button) => {
-    button.addEventListener("click", function () {
-        const position = this.getAttribute("data-position");
-
-        if (confirm(`Are you sure you want to delete the position "${position}"?`)) {
-            console.log("Sending delete request for position:", position);
-
-            fetch("/delete-position", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ position: position }),
-            })
-                .then((response) => {
-                    console.log("Response status:", response.status);
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
+            if (positionValue && !isNaN(number) && number >= 0) {
+                fetch("/add-position", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        position: positionValue,
+                        number: number,
+                    }),
                 })
+                .then((response) => response.json())
                 .then((data) => {
-                    console.log("Response data:", data);
                     if (data.success) {
                         showMessage(data.message, "success");
                         setTimeout(() => {
@@ -278,21 +338,53 @@
                     }
                 })
                 .catch((error) => {
-                    console.error("Error:", error);
                     showMessage("Error: " + error.message, "error");
                 });
+            } else {
+                showMessage("Please enter valid position and number (≥0)", "error");
+            }
+        });
+
+        document.querySelectorAll(".delete-btn").forEach((button) => {
+            button.addEventListener("click", function () {
+                const position = this.getAttribute("data-position");
+
+                if (confirm(`Are you sure you want to delete the position "${position}"?`)) {
+                    fetch("/delete-position", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ position: position }),
+                    })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (data.success) {
+                            showMessage(data.message, "success");
+                            setTimeout(() => {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            showMessage(data.message, "error");
+                        }
+                    })
+                    .catch((error) => {
+                        showMessage("Error: " + error.message, "error");
+                    });
+                }
+            });
+        });
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement("div");
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+            document.body.appendChild(messageDiv);
+
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 3000);
         }
-    });
-});
-
-    function showMessage(message, type) {
-        const messageDiv = document.createElement("div");
-        messageDiv.textContent = message;
-        messageDiv.className = `message ${type}`;
-        document.body.appendChild(messageDiv);
-
-        setTimeout(() => {
-            messageDiv.remove();
-        }, 3000);
-    }
-</script>
+    </script>
+</body>
+</html>
