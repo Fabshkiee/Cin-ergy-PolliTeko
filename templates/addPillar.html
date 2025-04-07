@@ -4,16 +4,184 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Pillars</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+        .title {
+            background-color: #FAF9F6;
+            margin: 1rem 2rem 1rem 1rem;
+            color: #3A7CA5;
+        }
+
+        .admin_controls {
+            display: grid;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            position: sticky;
+            height: auto; /* Allow height to adjust dynamically */
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+
+        .button-logout {
+            background-color: #FAF9F6;
+            color: black;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            margin: 13rem 0rem 0.5rem 0rem;
+            border-radius: 1rem;
+        }
+
+        .main-content {
+            flex-grow: 1; /* Allow the main content to take up the remaining space */
+            padding: 2rem;
+        }
+
+        #pillarForm {
+            width: 90%;
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #FFFFFF;
+            padding: 2rem 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 2rem;
+        }
+
+        #pillarForm input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #000000;
+            border-radius: 0.5rem;
+            background-color: #FAF9F6;
+            transition: border 0.3s ease;
+        }
+
+        #pillarForm input[type="text"]:focus {
+            border-color: #81C3D7;
+            outline: none;
+        }
+
+        #pillarForm button {
+            margin: 1rem auto;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 2rem;
+            cursor: pointer;
+            background-color: #81C3D7;
+            color: #fff;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        #pillarForm button:hover {
+            transform: scale(1.05);
+        }
+
+        ul#pillarList {
+            margin-top: 1rem;
+            padding-left: 1.5rem;
+        }
+
+        ul#pillarList li {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+            color: #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        ul#pillarList li button {
+            background-color: #FFC964;
+            color: #fff;
+            border: none;
+            margin-bottom: 2rem;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+
+        ul#pillarList li button:hover {
+            transform: scale(1.05);
+        }
+    </style>
 </head>
 <body>
-    <h1>ADD NEW PILLAR</h1>
-    <form id="pillarForm">
-        <input type="text" id="pillarName" placeholder="Enter pillar name">
-        <button type="button" id="addPillar">Add Pillar</button>
-    </form>
+    <section class="admin_controls" id="adminControls">
+        <h1 class="title">Admin</h1>
+        <button id="listPosition" class="button" onclick="location.href='/list-positions'">List Positions</button>
+        <button id="addCandidate" class="button" onclick="location.href='/adminAddCandi'">Add New Candidate</button>
+        <button id="createQuestion" class="button" onclick="location.href='/add-question'">Create New Questions</button>
+        <button id="addPillar" class="button" onclick="location.href='/add-pillar'">Add Pillar</button>
+        <button id="publishQuestions" class="button">Publish Questions</button>
+        <button id="openVoting" class="button">Open Voting</button>
+        <div class="logout">
+            <a class="button-logout" href="/logout">Logout</a>
+        </div>
+    </section>
 
-    <h2>Current Pillars</h2>
-    <ul id="pillarList"></ul>
+    <section class="main-content">
+        <h1>ADD NEW PILLAR</h1>
+        <form id="pillarForm">
+            <input type="text" id="pillarName" placeholder="Enter pillar name">
+            <button type="button" id="addPillar">Add Pillar</button>
+        </form>
+
+        <h2>Current Pillars</h2>
+        <ul id="pillarList"></ul>
+    </section>
 
     <script>
         let pillars = [];
@@ -36,6 +204,7 @@
                 if (data.success) {
                     pillars = data.pillars; // Update the local pillars array
                     updatePillarList();
+                    adjustAdminControlsHeight(); // Adjust the height dynamically
                 } else {
                     alert('Failed to load pillars: ' + data.message);
                 }
@@ -61,6 +230,7 @@
                 li.appendChild(del);
                 pillarList.appendChild(li);
             });
+            adjustAdminControlsHeight(); // Adjust the height dynamically
         }
 
         async function deletePillar(pillarName) {
@@ -86,12 +256,10 @@
         }
 
         function savePillarToSheet(pillar) {
-            fetch('YOUR_WEB_APP_URL', {
+            fetch('/api/add-pillar', {
                 method: 'POST',
-                body: JSON.stringify({ pillar: pillar }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pillarName: pillar }),
             })
             .then(response => response.json())
             .then(data => {
@@ -100,6 +268,13 @@
             .catch((error) => {
                 console.error('Error:', error);
             });
+        }
+
+        function adjustAdminControlsHeight() {
+            const adminControls = document.getElementById('adminControls');
+            const pillarList = document.getElementById('pillarList');
+            const totalHeight = pillarList.offsetHeight + 200; // Add some padding
+            adminControls.style.height = `${totalHeight}px`;
         }
 
         // Load pillars when the page loads
