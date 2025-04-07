@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -38,6 +38,8 @@ achievementsSheet = workbook.worksheet("achievement")
 positionsSheet = workbook.worksheet("positions")
 resultsSheet = workbook.worksheet("results")
 questionsSheet = workbook.worksheet("questions")
+issuesSheet = workbook.worksheet("stances")
+stancesSheet = workbook.worksheet("stances")
 
 @app.route('/')
 def home():
@@ -386,84 +388,50 @@ def save_results():
     print("User selected:", data['answers'])
     return jsonify({"status": "success"})
 
-@app.route('/adminAddCandi')
-def addCandi():
-    return render_template('addCandidate.html')
+#@app.route('/adminAddCandi')
+#def addCandi():
+#    return render_template('addCandidate.html')
         
 import os
 
 @app.route("/submitAddCandidate", methods=["POST"])
-def submit():
+def submit_candidate():
     try:
+        # Fetch candidate data
         data = request.form.to_dict()
-        photo = request.files.get("photo")
+        stances = request.form.getlist('stances')
 
-        # Ensure the uploads directory exists
-        upload_dir = os.path.join("static", "uploads")
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
+        # Save candidate data to the candidatesSheet
+        candidate_row = [
+            data.get("FirstName", ""),
+            data.get("MiddleName", ""),
+            data.get("LastName", ""),
+            data.get("Position", ""),
+            data.get("region", ""),
+            data.get("province", ""),
+            data.get("city", ""),
+            data.get("biography", ""),
+            data.get("bday", ""),
+            data.get("Party", ""),
+            data.get("ed", ""),
+            data.get("hc", ""),
+            data.get("cg", ""),
+            data.get("econ", ""),
+            data.get("agri", ""),
+        ]
 
-        # Save the photo file if it exists
-        if photo:
-            photo_filename = os.path.join(upload_dir, photo.filename)
-            photo.save(photo_filename)
-            data["photo"] = photo_filename  # Save the file path in the data
+        # Append candidate data to the candidatesSheet
+        candidatesSheet.append_row(candidate_row)
 
-        # Get next row for candidates sheet (this will be our master row number)
-        candidate_row = len(candidatesSheet.get_all_values()) + 1
+        # Save stances to the stancesSheet
+        candidate_row_index = len(candidatesSheet.get_all_values())  # Get the row index of the new candidate
+        issues = stancesSheet.row_values(1)  # Get all issues from the first row
+        stances_row = [data.get(f"stances[{issue}]", "No Answer") for issue in issues]
+        stancesSheet.insert_row(stances_row, candidate_row_index)
 
-        # Write candidate data to the candidates sheet
-        candidates_data = {
-            "A": data.get("FirstName", ""),
-            "B": data.get("MiddleName", ""),
-            "C": data.get("LastName", ""),
-            "D": data.get("Position", ""),
-            "E": data.get("region", ""),
-            "F": data.get("province", ""),
-            "G": data.get("city", ""),
-            "H": data.get("biography", ""),
-            "I": data.get("bday", ""),
-            "J": f'=DATEDIF(I{candidate_row}, TODAY(), "Y")',
-            "K": data.get("Party", ""),
-            "L": data.get("ed", ""),
-            "M": data.get("hc", ""),
-            "N": data.get("cg", ""),
-            "O": data.get("econ", ""),
-            "P": data.get("agri", ""),
-            "Q": data.get("photo", ""),  # Save the photo path in column Q
-        }
-
-        for col_letter, value in candidates_data.items():
-            candidatesSheet.update_acell(f"{col_letter}{candidate_row}", value)
-
-        # Write achievements, leadership, and educational background to their respective sheets
-        achievements = json.loads(data.get("achievements", "[]"))
-        leadership = json.loads(data.get("experience", "[]"))
-        education = json.loads(data.get("education", "[]"))
-
-        # Write achievements to the achievements sheet
-        for col_index, achievement in enumerate(achievements, start=1):
-            achievementsSheet.update_cell(candidate_row, col_index, achievement)
-
-        # Write leadership experiences to the leadership sheet
-        for col_index, exp in enumerate(leadership, start=1):
-            leadershipsSheet.update_cell(candidate_row, col_index, exp)
-
-        # Write educational background to the education sheet
-        for col_index, edu in enumerate(education, start=1):
-            educationsSheet.update_cell(candidate_row, col_index, edu)
-
-        return jsonify({
-            "result": "success",
-            "row": candidate_row,
-            "message": f"Data written to row {candidate_row} across all sheets"
-        })
-
+        return redirect('/admin-dashboard')
     except Exception as e:
-        return jsonify({"result": "error", "message": str(e)})
-    
-
-
+        return f"Error submitting candidate: {str(e)}", 500
 
 @app.route('/add-position', methods=['POST'])
 def add_position():
@@ -617,6 +585,64 @@ def submit_votes():
             "message": f"Error recording votes: {str(e)}"
         }), 500
 
+
+@app.route('/submit-issues', methods=['POST'])
+def submit_issues():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    try:
+        data = request.json
+        new_issues = data.get('issues', [])
+
+        if not new_issues:
+            return jsonify({"success": False, "message": "No issues provided"}), 400
+
+        # Fetch existing issues from the first row of the stancesSheet
+        existing_issues = stancesSheet.row_values(1)
+
+        # Append new issues to the existing list, avoiding duplicates
+        updated_issues = list(dict.fromkeys(existing_issues + new_issues))  # Remove duplicates while preserving order
+
+        # Update the first row of the stancesSheet with the updated list
+        stancesSheet.update('1:1', [updated_issues])
+
+        return jsonify({"success": True, "message": "Issues updated successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+@app.route('/adminAddCandi')
+def addCandi_new():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return redirect('/')
+
+    try:
+        # Fetch all issues from the stancesSheet
+        issues = stancesSheet.row_values(1)  # Assuming issues are stored in the first row
+
+        # Remove duplicates (if any)
+        issues = list(dict.fromkeys(issues))  # Ensures order is preserved while removing duplicates
+
+        # Debugging: Print the fetched issues
+        print("Fetched issues:", issues)
+
+        return render_template('addCandidate.html', issues=issues)
+    except Exception as e:
+        return f"Error fetching issues: {str(e)}", 500
+
+@app.route('/api/issues')
+def get_issues():
+    try:
+        issues = stancesSheet.row_values(1)  # Get all issues from the first row
+        return jsonify({"issues": issues})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/add-question')
+def add_question():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return redirect('/')
+    return render_template('createQuestions.html')
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

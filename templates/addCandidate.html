@@ -129,6 +129,24 @@
         <input type="text" id="agri" name="agri">
 
         <br>
+        <br>
+
+        <label>Issues and Controversies</label>
+        <div id="issuesContainer">
+            {% for issue in issues %}
+            <div>
+                <label>{{ issue }}</label>
+                <select name="stances[{{ issue }}]" required>
+                    <option value="No Answer">No Answer</option>
+                    <option value="Agree">Agree</option>
+                    <option value="Disagree">Disagree</option>
+                    <option value="Abstain">Abstain</option>
+                </select>
+            </div>
+            {% endfor %}
+        </div>
+
+        <br>
 
         <div>
             <label for="photo">Upload Candidate's Photo:</label>
@@ -361,3 +379,4 @@
 </body>
 
 </html>
+``` 
