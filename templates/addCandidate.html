@@ -185,6 +185,16 @@
                 </div>
             </section>
 
+            <!-- Issues and Controversies Section -->
+            <section class="form-section">
+                <div class="form-group">
+                    <h2>Issues and Controversies</h2>
+                    <div id="issuesContainer">
+                        <!-- Issues will be dynamically loaded here -->
+                    </div>
+                </div>
+            </section>
+
             <!-- Photo Upload Section -->
             <section class="form-section">
                 <div class="form-group">
@@ -257,6 +267,58 @@
                 const container = document.getElementById('platformsContainer');
                 container.innerHTML = `
                     <p class="no-platforms">Error loading platform options</p>
+                    <p class="error-message">${error.message}</p>
+                `;
+            }
+        }
+
+        // Function to fetch and display issues
+        async function loadIssues() {
+            try {
+                const response = await fetch('/api/issues');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json(); // Parse the JSON response
+                const issues = data.issues; // Access the "issues" array
+
+                const container = document.getElementById('issuesContainer');
+                container.innerHTML = '';
+
+                if (!issues || issues.length === 0) {
+                    container.innerHTML = '<p class="no-issues">No issues available</p>';
+                    return;
+                }
+
+                // Create a dropdown for each issue
+                issues.forEach((issue, index) => {
+                    const issueDiv = document.createElement('div');
+                    issueDiv.className = 'issue-item';
+
+                    const label = document.createElement('label');
+                    label.textContent = issue;
+                    label.setAttribute('for', `issue-${index}`);
+
+                    const select = document.createElement('select');
+                    select.id = `issue-${index}`;
+                    select.name = `stances[${issue}]`;
+                    select.required = true;
+
+                    const options = ['Agree', 'Disagree', 'Abstain', 'No Answer'];
+                    options.forEach(option => {
+                        const opt = document.createElement('option');
+                        opt.value = option;
+                        opt.textContent = option;
+                        select.appendChild(opt);
+                    });
+
+                    issueDiv.appendChild(label);
+                    issueDiv.appendChild(select);
+                    container.appendChild(issueDiv);
+                });
+            } catch (error) {
+                console.error('Error loading issues:', error);
+                const container = document.getElementById('issuesContainer');
+                container.innerHTML = `
+                    <p class="no-issues">Error loading issues</p>
                     <p class="error-message">${error.message}</p>
                 `;
             }
@@ -370,6 +432,9 @@ function resetForm() {
 
             // Load dynamic platforms from pillars sheet
             loadPlatforms();
+
+            // Load issues
+            loadIssues();
         });
 
         // [Rest of your existing JavaScript for education/experience/achievements management]
@@ -541,4 +606,3 @@ function resetForm() {
     </script>
 </body>
 </html>
-``` 
