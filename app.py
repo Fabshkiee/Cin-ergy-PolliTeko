@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -98,9 +98,8 @@ def candidate():
         bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
 
-        # Skip the header row and filter candidates by position
-        chairpersons = []
-        vice_chairpersons = []
+        # Group candidates by position
+        positions = {}
 
         for index, row in enumerate(all_data[1:], start=2):  # Skip the header row, start row IDs at 2
             if len(row) > position_col:  # Ensure the row has enough columns
@@ -118,16 +117,15 @@ def candidate():
                     "photo": photo  # Include the photo path
                 }
 
-                if position.lower() == "chair person":
-                    chairpersons.append(candidate)
-                elif position.lower() == "vice chair person":
-                    vice_chairpersons.append(candidate)
+                # Add candidate to the corresponding position group
+                if position not in positions:
+                    positions[position] = []
+                positions[position].append(candidate)
 
-        # Pass the filtered data to the template
+        # Pass the grouped data to the template
         return render_template(
             'candidates.html',
-            chairpersons=chairpersons,
-            vice_chairpersons=vice_chairpersons
+            positions=positions
         )
 
     except Exception as e:
@@ -164,6 +162,13 @@ def get_candidate_profile(row_id):
         # Create a dictionary of platforms
         platforms = {title: value for title, value in zip(platform_titles, platform_values) if value.strip()}
 
+        # Fetch issues and stances from the stancesSheet
+        issues = stancesSheet.row_values(1)  # First row contains issues
+        stances = stancesSheet.row_values(row_id) if row_id <= len(stancesSheet.get_all_values()) else []
+
+        # Create a dictionary of stances
+        stance_data = {issue: stance for issue, stance in zip(issues, stances) if stance.strip()}
+
         # Extract candidate details
         candidate = {
             "first_name": candidate_row[0],
@@ -182,6 +187,7 @@ def get_candidate_profile(row_id):
             "party": candidate_row[10],
             "photo": photo_path or "/static/default-profile.png",
             "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
+            "stances": stance_data,  # Include stances dynamically fetched from stancesSheet
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
@@ -391,13 +397,12 @@ def results():
                     'formatted': "{:,}".format(vote_count)  # For display with commas
                 }
 
-        # Initialize lists
-        chairpersons = []
-        vice_chairpersons = []
+        # Group candidates by position
+        positions = {}
 
         for index, row in enumerate(all_candidates[1:], start=2):  # Skip header row
             if len(row) > 3:  # Ensure row has enough columns
-                position = row[3].strip().lower()
+                position = row[3].strip()
                 first_name = row[0].strip()
                 last_name = row[2].strip()
                 full_name = f"{last_name}, {first_name}"  # Match the format in results sheet
@@ -415,19 +420,18 @@ def results():
                     "votes_formatted": votes_data['formatted']  # For display
                 }
 
-                if position == "chair person":
-                    chairpersons.append(candidate)
-                elif position == "vice chair person":
-                    vice_chairpersons.append(candidate)
+                # Add candidate to the corresponding position group
+                if position not in positions:
+                    positions[position] = []
+                positions[position].append(candidate)
 
-        # Sort candidates by raw vote count in descending order
-        chairpersons.sort(key=lambda x: x['votes'], reverse=True)
-        vice_chairpersons.sort(key=lambda x: x['votes'], reverse=True)
+        # Sort candidates within each position by raw vote count in descending order
+        for position, candidates in positions.items():
+            candidates.sort(key=lambda x: x['votes'], reverse=True)
 
         return render_template(
             'results.html',
-            chairpersons=chairpersons,
-            vice_chairpersons=vice_chairpersons
+            positions=positions
         )
 
     except Exception as e:

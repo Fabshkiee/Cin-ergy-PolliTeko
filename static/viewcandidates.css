@@ -352,6 +352,48 @@ img.candidateprof {
     margin: 20px auto; /* Center the spinner */
 }
 
+.modal2-stances {
+    margin-top: 2rem;
+}
+
+.modal2-stances h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #3A7CA5;
+    margin-bottom: 1rem;
+}
+
+.stances-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping to the next row */
+    gap: 1rem; /* Add spacing between stance boxes */
+}
+
+.stance-box {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Add a gap between the strong and svg */
+    width: 26.0625rem; /* Fixed width for the box */
+    height: 2.1875rem; /* Fixed height for the box */
+    border: 1px solid #ddd; /* Border for the box */
+    border-radius: 0.5rem; /* Rounded corners */
+    padding: 0.5rem 1rem; /* Padding inside the box */
+    background-color: #fff; /* Optional: Add a background color */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add a subtle shadow */
+}
+
+.stance-box strong {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+    font-size: 1rem;
+    color: #333;
+    flex-grow: 1; /* Allow the text to take up available space */
+}
+
+.stance-box svg {
+    flex-shrink: 0; /* Prevent the SVG from shrinking */
+}
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
