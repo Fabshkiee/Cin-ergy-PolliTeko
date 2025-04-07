@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -219,15 +219,75 @@ def matchResults():
     
     results = session.get('match_results', [])
     
+    # Get all photos data (column A: names, column B: photo URLs)
+    photos_data = photosSheet.get_all_values()
+    photos_dict = {row[0]: row[1] for row in photos_data[1:] if len(row) > 1}  # Skip header row
+    
+    # Calculate match percentages for each candidate
+    processed_results = []
+    for candidate in results:
+        # Calculate platform match percentage
+        platform_match = calculate_platform_match(candidate)
+        
+        # Calculate stance match percentage
+        stance_match = calculate_stance_match(candidate)
+        
+        # Calculate overall match
+        overall_match = round((platform_match + stance_match) / 2)
+        
+        # Generate match summary
+        match_summary = generate_match_summary(candidate, platform_match, stance_match)
+        
+        # Get the photo URL from the photos sheet using candidate name
+        full_name = f"{candidate['first_name']} {candidate['last_name']}"
+        photo_url = photos_dict.get(full_name, "/static/uploads/default-profile.png")  # Default if not found
+        
+        processed_candidate = {
+            **candidate,
+            'platform_match': platform_match,
+            'stance_match': stance_match,
+            'overall_match': overall_match,
+            'match_summary': match_summary,
+            'photo': photo_url  # Add the photo URL to the candidate data
+        }
+        processed_results.append(processed_candidate)
+    
     # Get the top candidate and similar candidates
-    top_candidate = results[0] if results else None
-    similar_candidates = results[1:4] if len(results) > 1 else []  # Get next 3 candidates
+    top_candidate = processed_results[0] if processed_results else None
+    similar_candidates = processed_results[1:4] if len(processed_results) > 1 else []
     
     return render_template(
         'matchResults.html',
         top_candidate=top_candidate,
         similar_candidates=similar_candidates
     )
+
+def calculate_platform_match(candidate):
+    """Example calculation - replace with your actual logic"""
+    # This should calculate percentage of matching platforms
+    # For example: (number of matching platforms / total platforms) * 100
+    return 78  # Example value
+
+def calculate_stance_match(candidate):
+    """Example calculation - replace with your actual logic"""
+    # This should calculate percentage of matching stances
+    # For example: (number of matching stances / total stances) * 100
+    return 80  # Example value
+
+def generate_match_summary(candidate, platform_match, stance_match):
+    """Generate a summary text based on match percentages"""
+    strengths = []
+    if platform_match >= 75:
+        strengths.append("strong alignment on platforms")
+    if stance_match >= 75:
+        strengths.append("shared policy stances")
+    
+    if strengths:
+        return f"You and {candidate['first_name']} show {', '.join(strengths)}. " + \
+               "This candidate's priorities closely match your values across key issues."
+    else:
+        return f"You and {candidate['first_name']} have some common ground, " + \
+               "with potential for alignment on certain issues."
 
 @app.route('/casting')
 def casting():
