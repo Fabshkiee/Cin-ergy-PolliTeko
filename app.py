@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -294,54 +294,46 @@ def results():
 
     try:
         # Fetch all candidate data
-        candidates_data = candidatesSheet.get_all_values()
+        all_candidates = candidatesSheet.get_all_values()
         
-        # Fetch all results data (candidate names in column A, votes in column B)
+        # Fetch vote data from results sheet (Column A: names, Column B: counts)
         results_data = resultsSheet.get_all_values()
         
-        # Create a dictionary mapping "Last, First" names to vote counts
-        vote_counts = {}
-        for row in results_data:
-            if len(row) >= 2:  # Ensure we have both name and votes
-                name = row[0].strip()
-                vote_str = str(row[1]).strip() if len(row) > 1 else "0"
-                
-                # Remove commas and convert to integer
-                try:
-                    votes = int(vote_str.replace(",", "")) if vote_str else 0
-                except (ValueError, TypeError):
-                    votes = 0
-                vote_counts[name] = votes
+        # Create a dictionary mapping full names to vote counts
+        vote_dict = {}
+        for row in results_data[1:]:  # Skip header row
+            if len(row) >= 2:
+                full_name = row[0].strip()
+                # Remove commas and convert to integer for sorting
+                raw_votes = row[1].replace(',', '') if row[1] else '0'
+                vote_count = int(raw_votes) if raw_votes.isdigit() else 0
+                vote_dict[full_name] = {
+                    'raw': vote_count,  # For sorting
+                    'formatted': "{:,}".format(vote_count)  # For display with commas
+                }
 
-        # Organize candidates by position
+        # Initialize lists
         chairpersons = []
         vice_chairpersons = []
 
-        # Column indices
-        FIRST_NAME_COL = 0
-        LAST_NAME_COL = 2
-        POSITION_COL = 3
-        PHOTO_COL = 16
+        for index, row in enumerate(all_candidates[1:], start=2):  # Skip header row
+            if len(row) > 3:  # Ensure row has enough columns
+                position = row[3].strip().lower()
+                first_name = row[0].strip()
+                last_name = row[2].strip()
+                full_name = f"{last_name}, {first_name}"  # Match the format in results sheet
+                photo = row[16].strip() if len(row) > 16 else "/static/default-profile.png"
+                
+                # Get vote count from dictionary (default to 0 if not found)
+                votes_data = vote_dict.get(full_name, {'raw': 0, 'formatted': '0'})
 
-        # Process each candidate (skip header row)
-        for row in candidates_data[1:]:
-            if len(row) > POSITION_COL:
-                position = row[POSITION_COL].strip().lower()
-                first_name = row[FIRST_NAME_COL].strip()
-                last_name = row[LAST_NAME_COL].strip()
-                photo = row[PHOTO_COL].strip() if len(row) > PHOTO_COL else "/static/default-profile.png"
-                
-                # Create the name key as "Last, First"
-                name_key = f"{last_name}, {first_name}"
-                
-                # Get votes or default to 0
-                votes = vote_counts.get(name_key, 0)
-                
                 candidate = {
+                    "row_id": index,
                     "first_name": first_name,
                     "last_name": last_name,
                     "photo": photo,
-                    "votes": "{:,}".format(votes)  # Format with commas for display
+                    "votes": votes_data['raw'],  # For sorting
+                    "votes_formatted": votes_data['formatted']  # For display
                 }
 
                 if position == "chair person":
@@ -349,9 +341,9 @@ def results():
                 elif position == "vice chair person":
                     vice_chairpersons.append(candidate)
 
-        # Sort by vote count (descending)
-        chairpersons.sort(key=lambda x: x["votes"].replace(",", ""), reverse=True)
-        vice_chairpersons.sort(key=lambda x: x["votes"].replace(",", ""), reverse=True)
+        # Sort candidates by raw vote count in descending order
+        chairpersons.sort(key=lambda x: x['votes'], reverse=True)
+        vice_chairpersons.sort(key=lambda x: x['votes'], reverse=True)
 
         return render_template(
             'results.html',
@@ -360,8 +352,7 @@ def results():
         )
 
     except Exception as e:
-        app.logger.error(f"Error in results route: {str(e)}")
-        return f"Error loading results: {str(e)}", 500
+        return f"Error fetching results: {str(e)}", 500
 
     
 @app.route('/quiz')
@@ -527,6 +518,92 @@ def add_position():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/add-position', methods=['POST'])
+def add_position():
+    if 'user_id' not in session or not session.get('is_admin', False):
+         return jsonify({"success": False, "message": "Unauthorized"}), 403
+ 
+    try:
+         # Parse form data
+         position = request.json.get('position', '').strip()
+         number = int(request.json.get('number', 1))
+ 
+         # Validate input
+         if number < 0:
+             return jsonify({"success": False, "message": "Number cannot be negative"}), 400
+ 
+         # Check if position already exists
+         all_positions = positionsSheet.col_values(1)
+         if position in all_positions:
+             return jsonify({"success": False, "message": f"Position '{position}' already exists."}), 400
+ 
+         # Prepare value for Google Sheets - empty string for 0
+         sheet_number = '' if number == 0 else number
+ 
+         # Find next empty row
+         next_row = len(all_positions) + 1
+ 
+         # Update the sheet
+         positionsSheet.update(
+             f"A{next_row}:B{next_row}",
+             [[position, sheet_number]],
+             value_input_option='USER_ENTERED'  # This ensures proper handling of empty strings
+         )
+ 
+         return jsonify({
+             "success": True,
+             "message": f"Position '{position}' added successfully.",
+             "display_number": "Infinite" if number == 0 else number
+         })
+    except Exception as e:
+         return jsonify({"success": False, "message": str(e)}), 500
+ 
+ 
+@app.route('/list-positions')
+def list_positions():
+     if 'user_id' not in session or not session.get('is_admin', False):
+         return redirect('/')
+ 
+     try:
+         # Fetch all positions and numbers from the sheet
+         all_positions = positionsSheet.get_all_values()
+         positions = []
+         for row in all_positions[1:]:  # Skip header row
+             position = row[0]
+             number = row[1] if len(row) > 1 else ''
+             # Convert empty string to "Infinite"
+             display_number = "Infinite" if number == '' else number
+             positions.append((position, display_number))
+ 
+         return render_template('listposition.html', positions=positions)
+     except Exception as e:
+         return f"Error fetching positions: {str(e)}", 500
+     
+@app.route('/delete-position', methods=['POST'])
+def delete_position():
+    if 'user_id' not in session or not session.get('is_admin', False):
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+
+    try:
+        # Parse the position to delete
+        data = request.json
+        position_to_delete = data.get('position', '').strip()
+
+        # Fetch all positions from the sheet
+        all_positions = positionsSheet.get_all_values()
+
+        # Find the row number of the position to delete
+        for index, row in enumerate(all_positions):
+            if row[0] == position_to_delete:  # Match the position in column A
+                positionsSheet.delete_rows(index + 1)  # Delete the row (1-based index)
+                return jsonify({"success": True, "message": f"Position '{position_to_delete}' deleted successfully."})
+
+        return jsonify({"success": False, "message": f"Position '{position_to_delete}' not found."}), 404
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+
 @app.route('/submit_votes', methods=['POST'])
 def submit_votes():
     try:
@@ -564,11 +641,14 @@ def submit_votes():
                     if candidate_name in existing_names:
                         # Candidate exists - find their row and increment vote count
                         row_number = existing_names.index(candidate_name) + 1
-                        current_votes = int(resultsSheet.cell(row_number, 2).value)
-                        resultsSheet.update_cell(row_number, 2, current_votes + 1)
+                        current_votes_str = resultsSheet.cell(row_number, 2).value
+                        # Remove commas and convert to integer
+                        current_votes = int(current_votes_str.replace(',', '')) if current_votes_str else 0
+                        # Format back with commas for storage
+                        resultsSheet.update_cell(row_number, 2, "{:,}".format(current_votes + 1))
                     else:
                         # Candidate doesn't exist - append new row
-                        resultsSheet.append_row([candidate_name, 1])
+                        resultsSheet.append_row([candidate_name, "1"])
                         
                 except Exception as e:
                     return jsonify({
@@ -587,7 +667,7 @@ def submit_votes():
             "message": "Votes recorded successfully"
         })
     
-    except Exception as e:
+    except Exception as e:  
         return jsonify({
             "success": False,
             "message": f"Error recording votes: {str(e)}"
