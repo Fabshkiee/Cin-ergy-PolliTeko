@@ -214,7 +214,21 @@ def voting():
 def matchResults():
     if 'user_id' not in session:
         return redirect('/')
-    return render_template('matchResults.html')
+    
+    if 'match_results' not in session:
+        return redirect('/quiz')  # Redirect if no results available
+    
+    results = session.get('match_results', [])
+    
+    # Get the top candidate and similar candidates
+    top_candidate = results[0] if results else None
+    similar_candidates = results[1:4] if len(results) > 1 else []  # Get next 3 candidates
+    
+    return render_template(
+        'matchResults.html',
+        top_candidate=top_candidate,
+        similar_candidates=similar_candidates
+    )
 
 @app.route('/casting')
 def casting():
@@ -396,9 +410,83 @@ def quiz():
 
 @app.route('/save-results', methods=['POST'])
 def save_results():
-    data = request.json
-    print("User selected:", data['answers'])
-    return jsonify({"status": "success"})
+    try:
+        data = request.json
+        user_answers = data.get('answers', {})
+        
+        if not user_answers:
+            return jsonify({"success": False, "message": "No answers provided"}), 400
+
+        # Get all candidates data
+        all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header row
+        candidate_scores = {}
+
+        # Initialize scores for all candidates
+        for index, row in enumerate(all_candidates, start=2):  # Start at row 2 (1-based)
+            candidate_scores[index] = 0  # Using row number as candidate ID
+
+        # Get all questions and their corresponding pillar columns
+        questions_row = questionsSheet.row_values(1)
+        pillar_data = sheet2.get_all_values()
+        
+        # For each question the user answered
+        for question_id, answer in user_answers.items():
+            # Find which pillar this question belongs to (by column)
+            pillar_col = int(question_id) - 1  # Convert to 0-based index
+            
+            if pillar_col >= len(pillar_data[0]):  # Check if column exists
+                continue
+                
+            pillar_name = pillar_data[0][pillar_col]  # Get pillar name from first row
+            
+            # Check each candidate's platform for this pillar
+            for candidate_row in range(len(all_candidates)):
+                candidate_data = all_candidates[candidate_row]
+                candidate_row_num = candidate_row + 2  # Actual row in sheet
+                
+                # Get candidate's platform for this pillar (same column in pillars sheet)
+                if len(pillar_data) > candidate_row_num - 1:  # Check if row exists
+                    candidate_platform = pillar_data[candidate_row_num - 1][pillar_col]
+                    
+                    # If candidate's platform matches user's answer, increment score
+                    if candidate_platform and candidate_platform.strip().lower() == answer.strip().lower():
+                        candidate_scores[candidate_row_num] += 1
+
+        # Prepare results data with candidate details and scores
+        results = []
+        for row_num, score in candidate_scores.items():
+            candidate_data = candidatesSheet.row_values(row_num)
+            if len(candidate_data) >= 3:  # Ensure we have basic candidate info
+                results.append({
+                    "row_id": row_num,
+                    "first_name": candidate_data[0],
+                    "last_name": candidate_data[2],
+                    "position": candidate_data[3],
+                    "photo": candidate_data[16] if len(candidate_data) > 16 else "/static/default-profile.png",
+                    "score": score,
+                    "platforms": {
+                        "Education": candidate_data[11] if len(candidate_data) > 11 else "",
+                        "Healthcare": candidate_data[12] if len(candidate_data) > 12 else "",
+                        "Clean Government": candidate_data[13] if len(candidate_data) > 13 else "",
+                        "Economy": candidate_data[14] if len(candidate_data) > 14 else "",
+                        "Agriculture": candidate_data[15] if len(candidate_data) > 15 else ""
+                    }
+                })
+
+        # Sort candidates by score (descending)
+        results.sort(key=lambda x: x['score'], reverse=True)
+
+        # Store results in session
+        session['match_results'] = results
+
+        return jsonify({
+            "success": True,
+            "message": "Results processed successfully",
+            "results": results
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/adminAddCandi')
 def addCandi():
@@ -531,47 +619,7 @@ def add_position():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-"""@app.route('/add-position', methods=['POST'])
-def add_position():
-    if 'user_id' not in session or not session.get('is_admin', False):
-         return jsonify({"success": False, "message": "Unauthorized"}), 403
- 
-    try:
-         # Parse form data
-         position = request.json.get('position', '').strip()
-         number = int(request.json.get('number', 1))
- 
-         # Validate input
-         if number < 0:
-             return jsonify({"success": False, "message": "Number cannot be negative"}), 400
- 
-         # Check if position already exists
-         all_positions = positionsSheet.col_values(1)
-         if position in all_positions:
-             return jsonify({"success": False, "message": f"Position '{position}' already exists."}), 400
- 
-         # Prepare value for Google Sheets - empty string for 0
-         sheet_number = '' if number == 0 else number
- 
-         # Find next empty row
-         next_row = len(all_positions) + 1
- 
-         # Update the sheet
-         positionsSheet.update(
-             f"A{next_row}:B{next_row}",
-             [[position, sheet_number]],
-             value_input_option='USER_ENTERED'  # This ensures proper handling of empty strings
-         )
- 
-         return jsonify({
-             "success": True,
-             "message": f"Position '{position}' added successfully.",
-             "display_number": "Infinite" if number == 0 else number
-         })
-    except Exception as e:
-         return jsonify({"success": False, "message": str(e)}), 500
- 
- """
+
 @app.route('/list-positions')
 def list_positions():
      if 'user_id' not in session or not session.get('is_admin', False):
