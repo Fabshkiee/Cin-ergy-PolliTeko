@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -741,8 +741,6 @@ def submit_votes():
             "message": f"Error recording votes: {str(e)}"
         }), 500
 
-
-
 @app.route('/api/pillars', methods=['GET'])
 def get_pillars():
     try:
@@ -750,6 +748,7 @@ def get_pillars():
         pillars = sheet2.row_values(1)  # Get all values from row 1
         return jsonify({"success": True, "pillars": pillars})
     except Exception as e:
+        print(f"Error fetching pillars: {e}")
         return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/save-question', methods=['POST'])

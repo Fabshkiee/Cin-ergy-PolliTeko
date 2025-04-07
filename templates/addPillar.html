@@ -28,6 +28,23 @@
             }
         });
 
+        async function loadPillars() {
+            try {
+                const response = await fetch('/api/pillars');
+                const data = await response.json();
+
+                if (data.success) {
+                    pillars = data.pillars; // Update the local pillars array
+                    updatePillarList();
+                } else {
+                    alert('Failed to load pillars: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error loading pillars:', error);
+                alert('Failed to load pillars: ' + error.message);
+            }
+        }
+
         function updatePillarList() {
             const pillarList = document.getElementById('pillarList');
             pillarList.innerHTML = '';
@@ -39,12 +56,33 @@
                 del.textContent = 'Delete';
                 del.type = 'button';
                 del.addEventListener('click', function() {
-                    pillars.splice(pillars.indexOf(pillar), 1);
-                    updatePillarList();
+                    deletePillar(pillar);
                 });
                 li.appendChild(del);
                 pillarList.appendChild(li);
             });
+        }
+
+        async function deletePillar(pillarName) {
+            if (!confirm(`Are you sure you want to delete the pillar '${pillarName}'?`)) return;
+
+            try {
+                const response = await fetch('/api/delete-pillar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pillarName }),
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert(data.message);
+                    loadPillars(); // Reload the pillars list
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error deleting pillar:', error);
+            }
         }
 
         function savePillarToSheet(pillar) {
@@ -63,6 +101,9 @@
                 console.error('Error:', error);
             });
         }
+
+        // Load pillars when the page loads
+        document.addEventListener('DOMContentLoaded', loadPillars);
     </script>
 </body>
 </html>
