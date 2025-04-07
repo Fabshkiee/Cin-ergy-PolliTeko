@@ -6,106 +6,63 @@
     <title>Add Pillars</title>
 </head>
 <body>
-    <h1>Manage Pillars</h1>
-
-    <!-- Form to Add a New Pillar -->
-    <form id="addPillarForm">
-        <label for="pillarName">Enter Pillar Name:</label>
-        <input type="text" id="pillarName" name="pillarName" required>
-        <button type="submit">Add Pillar</button>
+    <h1>ADD NEW PILLAR</h1>
+    <form id="pillarForm">
+        <input type="text" id="pillarName" placeholder="Enter pillar name">
+        <button type="button" id="addPillar">Add Pillar</button>
     </form>
 
-    <!-- List of Existing Pillars -->
-    <h2>Existing Pillars</h2>
-    <ul id="pillarsList"></ul>
+    <h2>Current Pillars</h2>
+    <ul id="pillarList"></ul>
 
     <script>
-        const pillarsList = document.getElementById('pillarsList');
-        const addPillarForm = document.getElementById('addPillarForm');
+        let pillars = [];
 
-        // Fetch and display all pillars
-        async function loadPillars() {
-            try {
-                const response = await fetch('/api/pillars');
-                const data = await response.json();
-
-                if (data.success) {
-                    pillarsList.innerHTML = ''; // Clear the list
-                    data.pillars.forEach(pillar => {
-                        const li = document.createElement('li');
-                        li.textContent = pillar;
-
-                        const deleteButton = document.createElement('button');
-                        deleteButton.textContent = 'Delete';
-                        deleteButton.addEventListener('click', () => deletePillar(pillar));
-
-                        li.appendChild(deleteButton);
-                        pillarsList.appendChild(li);
-                    });
-                } else {
-                    alert('Failed to load pillars: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error loading pillars:', error);
-                alert('Failed to load pillars: ' + error.message);
-            }
-        }
-
-        // Add a new pillar
-        addPillarForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            const pillarName = document.getElementById('pillarName').value.trim();
-
-            if (!pillarName) {
-                alert('Pillar name cannot be empty');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/add-pillar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pillarName }),
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert(data.message);
-                    document.getElementById('pillarName').value = ''; // Clear the input field
-                    loadPillars(); // Reload the pillars list
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error adding pillar:', error);
+        document.getElementById('addPillar').addEventListener('click', function() {
+            const pillarName = document.getElementById('pillarName').value;
+            if (pillarName) {
+                pillars.push(pillarName);
+                document.getElementById('pillarName').value = '';
+                updatePillarList();
+                savePillarToSheet(pillarName);
             }
         });
 
-        // Delete a pillar
-        async function deletePillar(pillarName) {
-            if (!confirm(`Are you sure you want to delete the pillar '${pillarName}'?`)) return;
+        function updatePillarList() {
+            const pillarList = document.getElementById('pillarList');
+            pillarList.innerHTML = '';
+            pillars.forEach(pillar => {
+                const li = document.createElement('li');
+                li.textContent = pillar;
 
-            try {
-                const response = await fetch('/api/delete-pillar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pillarName }),
+                const del = document.createElement('button');
+                del.textContent = 'Delete';
+                del.type = 'button';
+                del.addEventListener('click', function() {
+                    pillars.splice(pillars.indexOf(pillar), 1);
+                    updatePillarList();
                 });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert(data.message);
-                    loadPillars(); // Reload the pillars list
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error deleting pillar:', error);
-            }
+                li.appendChild(del);
+                pillarList.appendChild(li);
+            });
         }
 
-        // Load pillars when the page loads
-        document.addEventListener('DOMContentLoaded', loadPillars);
+        function savePillarToSheet(pillar) {
+            fetch('YOUR_WEB_APP_URL', {
+                method: 'POST',
+                body: JSON.stringify({ pillar: pillar }),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
     </script>
 </body>
 </html>

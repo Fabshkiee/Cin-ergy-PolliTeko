@@ -6,6 +6,32 @@
     <title>Match Results</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/viewcandidates.css">
+    <style>
+        .matched-candidate-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .candidate-image img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .match-score {
+            font-size: 24px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        .platform-item, .stance-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+    </style>
 </head>
 <body>
     <!--Navbar Section-->
@@ -25,56 +51,56 @@
     <!--Main Results-->
     <section class="matchResults">
         <div class="results-title"><h1>Matched Candidate</h1></div>
-            <div class="matched-candidate-card">
-                <div class="header">
-                    <div class="candidate-image">
-                    </div>
-
-                    <div class="candidate-name">
-                    </div>
-
-                    <div class="candidate-bio">
-                    </div>
-                <div class="preference">
-                    <div class="aligned-preference">
-                    </div>
-
-                    <div class="aligned-platforms">
-                    </div>
-
-                    <div class="aligned-stances">
-                    </div>
-                </div>
-                <div class="overall">
-                    <h2>Overall: </h2>
-                </div>
-                <div class="view-profile-btn">
-                    <a>View Profile</a>
-                </div>
-            </div>
-            
-        <div class="results-title"><h1>Similar Candidates</h1></div>
+        {% if top_candidate %}
         <div class="matched-candidate-card">
             <div class="header">
                 <div class="candidate-image">
+                    <img src="{{ top_candidate.photo }}" alt="{{ top_candidate.first_name }} {{ top_candidate.last_name }}">
                 </div>
-
                 <div class="candidate-name">
+                    <h2>{{ top_candidate.first_name }} {{ top_candidate.last_name }}</h2>
+                    <p>{{ top_candidate.position }}</p>
                 </div>
-
-                <div class="candidate-bio">
-                </div>
-
-            <div class="preference">
-                <div class="aligned-preference">
+                <div class="match-score">
+                    Match Score: {{ top_candidate.score }}
                 </div>
             </div>
-
+            <div class="platforms">
+                <h3>Platforms:</h3>
+                {% for platform, text in top_candidate.platforms.items() %}
+                    {% if text %}
+                    <div class="platform-item">
+                        <strong>{{ platform }}:</strong> {{ text }}
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
             <div class="view-profile-btn">
-                <a>View Profile</a>
+                <a href="/api/candidate/{{ top_candidate.row_id }}">View Profile</a>
             </div>
         </div>
+        {% endif %}
+        
+        <div class="results-title"><h1>Similar Candidates</h1></div>
+        {% for candidate in similar_candidates %}
+        <div class="matched-candidate-card">
+            <div class="header">
+                <div class="candidate-image">
+                    <img src="{{ candidate.photo }}" alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+                </div>
+                <div class="candidate-name">
+                    <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                    <p>{{ candidate.position }}</p>
+                </div>
+                <div class="match-score">
+                    Match Score: {{ candidate.score }}
+                </div>
+            </div>
+            <div class="view-profile-btn">
+                <a href="/api/candidate/{{ candidate.row_id }}">View Profile</a>
+            </div>
+        </div>
+        {% endfor %}
     </section>
-
 </body>
 </html>

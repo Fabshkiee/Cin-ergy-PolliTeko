@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -89,12 +89,14 @@ def candidate():
         # Fetch all data from the candidates sheet
         all_data = candidatesSheet.get_all_values()
 
+        # Fetch photo paths from the photosSheet
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+
         # Extract column indices for relevant data
         first_name_col = 0  # Column A (index 0)
         last_name_col = 2   # Column C (index 2)
         bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
-        photo_col = 16      # Column Q (index 16)
 
         # Skip the header row and filter candidates by position
         chairpersons = []
@@ -106,7 +108,7 @@ def candidate():
                 first_name = row[first_name_col].strip()
                 last_name = row[last_name_col].strip()
                 biography = row[bio_col].strip()
-                photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
+                photo = photo_paths[index - 2] if index - 2 < len(photo_paths) else "/static/default-profile.png"
 
                 candidate = {
                     "row_id": index,  # Add the row ID
@@ -214,7 +216,21 @@ def voting():
 def matchResults():
     if 'user_id' not in session:
         return redirect('/')
-    return render_template('matchResults.html')
+    
+    if 'match_results' not in session:
+        return redirect('/quiz')  # Redirect if no results available
+    
+    results = session.get('match_results', [])
+    
+    # Get the top candidate and similar candidates
+    top_candidate = results[0] if results else None
+    similar_candidates = results[1:4] if len(results) > 1 else []  # Get next 3 candidates
+    
+    return render_template(
+        'matchResults.html',
+        top_candidate=top_candidate,
+        similar_candidates=similar_candidates
+    )
 
 @app.route('/casting')
 def casting():
@@ -299,6 +315,9 @@ def results():
         # Fetch all candidate data
         all_candidates = candidatesSheet.get_all_values()
         
+        # Fetch photo paths from the photosSheet
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+
         # Fetch vote data from results sheet (Column A: names, Column B: counts)
         results_data = resultsSheet.get_all_values()
         
@@ -325,7 +344,7 @@ def results():
                 first_name = row[0].strip()
                 last_name = row[2].strip()
                 full_name = f"{last_name}, {first_name}"  # Match the format in results sheet
-                photo = row[16].strip() if len(row) > 16 else "/static/default-profile.png"
+                photo = photo_paths[index - 2] if index - 2 < len(photo_paths) else "/static/default-profile.png"
                 
                 # Get vote count from dictionary (default to 0 if not found)
                 votes_data = vote_dict.get(full_name, {'raw': 0, 'formatted': '0'})
@@ -361,26 +380,117 @@ def results():
 @app.route('/quiz')
 def quiz():
     try:
-        cells = sheet2.range('A2:A')
-        options = [cell.value.strip() for cell in cells if cell.value.strip()]
+        # Fetch all questions from the first row of the questions sheet
+        questions_row = questionsSheet.row_values(1)
+        questions = []
         
-        question = {
-            'id': 1,
-            'text': 'What is the capital of France?',
-            'description': 'Choose what applies best',
-            'options': options
-        }
+        # For each question (column in row 1), create a question object
+        for col_idx, question_text in enumerate(questions_row, start=1):
+            if not question_text.strip():
+                continue  # Skip empty columns
+                
+            # Get corresponding options from pillars sheet (same column)
+            pillar_col = sheet2.get_all_values()
+            options = []
+            if len(pillar_col) >= col_idx:  # Check if column exists in pillars sheet
+                # Skip header row and get all values in this column
+                options = [row[col_idx-1].strip() for row in pillar_col[1:] if len(row) >= col_idx and row[col_idx-1].strip()]
+            
+            questions.append({
+                'id': col_idx,
+                'text': question_text,
+                'description': 'Choose what applies best',
+                'options': options,
+                'column': chr(64 + col_idx)  # A, B, C, etc. for reference
+            })
         
-        return render_template('question.html', question=question)
+        if not questions:
+            return "No questions found in the questions sheet", 404
+            
+        return render_template('question.html', questions=questions)
     
     except Exception as e:
         return f"Error loading quiz: {str(e)}", 500
 
 @app.route('/save-results', methods=['POST'])
 def save_results():
-    data = request.json
-    print("User selected:", data['answers'])
-    return jsonify({"status": "success"})
+    try:
+        data = request.json
+        user_answers = data.get('answers', {})
+        
+        if not user_answers:
+            return jsonify({"success": False, "message": "No answers provided"}), 400
+
+        # Get all candidates data
+        all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header row
+        candidate_scores = {}
+
+        # Initialize scores for all candidates
+        for index, row in enumerate(all_candidates, start=2):  # Start at row 2 (1-based)
+            candidate_scores[index] = 0  # Using row number as candidate ID
+
+        # Get all questions and their corresponding pillar columns
+        questions_row = questionsSheet.row_values(1)
+        pillar_data = sheet2.get_all_values()
+        
+        # For each question the user answered
+        for question_id, answer in user_answers.items():
+            # Find which pillar this question belongs to (by column)
+            pillar_col = int(question_id) - 1  # Convert to 0-based index
+            
+            if pillar_col >= len(pillar_data[0]):  # Check if column exists
+                continue
+                
+            pillar_name = pillar_data[0][pillar_col]  # Get pillar name from first row
+            
+            # Check each candidate's platform for this pillar
+            for candidate_row in range(len(all_candidates)):
+                candidate_data = all_candidates[candidate_row]
+                candidate_row_num = candidate_row + 2  # Actual row in sheet
+                
+                # Get candidate's platform for this pillar (same column in pillars sheet)
+                if len(pillar_data) > candidate_row_num - 1:  # Check if row exists
+                    candidate_platform = pillar_data[candidate_row_num - 1][pillar_col]
+                    
+                    # If candidate's platform matches user's answer, increment score
+                    if candidate_platform and candidate_platform.strip().lower() == answer.strip().lower():
+                        candidate_scores[candidate_row_num] += 1
+
+        # Prepare results data with candidate details and scores
+        results = []
+        for row_num, score in candidate_scores.items():
+            candidate_data = candidatesSheet.row_values(row_num)
+            if len(candidate_data) >= 3:  # Ensure we have basic candidate info
+                results.append({
+                    "row_id": row_num,
+                    "first_name": candidate_data[0],
+                    "last_name": candidate_data[2],
+                    "position": candidate_data[3],
+                    "photo": candidate_data[16] if len(candidate_data) > 16 else "/static/default-profile.png",
+                    "score": score,
+                    "platforms": {
+                        "Education": candidate_data[11] if len(candidate_data) > 11 else "",
+                        "Healthcare": candidate_data[12] if len(candidate_data) > 12 else "",
+                        "Clean Government": candidate_data[13] if len(candidate_data) > 13 else "",
+                        "Economy": candidate_data[14] if len(candidate_data) > 14 else "",
+                        "Agriculture": candidate_data[15] if len(candidate_data) > 15 else ""
+                    }
+                })
+
+        # Sort candidates by score (descending)
+        results.sort(key=lambda x: x['score'], reverse=True)
+
+        # Store results in session
+        session['match_results'] = results
+
+        return jsonify({
+            "success": True,
+            "message": "Results processed successfully",
+            "results": results
+        })
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/adminAddCandi')
 def addCandi():
@@ -416,7 +526,7 @@ def submit_candidate():
         issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
         # Ensure the uploads directory exists
-        upload_dir = os.path.join("static", "uploads")
+        upload_dir = os.path.join(app.root_path, "static", "uploads")  # Use app.root_path for absolute path
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
 
@@ -426,6 +536,9 @@ def submit_candidate():
             photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
             photo_path = os.path.join(upload_dir, photo_filename)
             photo.save(photo_path)
+
+            # Save the relative path for use in the app
+            photo_path = f"/static/uploads/{photo_filename}"
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -513,47 +626,7 @@ def add_position():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-"""@app.route('/add-position', methods=['POST'])
-def add_position():
-    if 'user_id' not in session or not session.get('is_admin', False):
-         return jsonify({"success": False, "message": "Unauthorized"}), 403
- 
-    try:
-         # Parse form data
-         position = request.json.get('position', '').strip()
-         number = int(request.json.get('number', 1))
- 
-         # Validate input
-         if number < 0:
-             return jsonify({"success": False, "message": "Number cannot be negative"}), 400
- 
-         # Check if position already exists
-         all_positions = positionsSheet.col_values(1)
-         if position in all_positions:
-             return jsonify({"success": False, "message": f"Position '{position}' already exists."}), 400
- 
-         # Prepare value for Google Sheets - empty string for 0
-         sheet_number = '' if number == 0 else number
- 
-         # Find next empty row
-         next_row = len(all_positions) + 1
- 
-         # Update the sheet
-         positionsSheet.update(
-             f"A{next_row}:B{next_row}",
-             [[position, sheet_number]],
-             value_input_option='USER_ENTERED'  # This ensures proper handling of empty strings
-         )
- 
-         return jsonify({
-             "success": True,
-             "message": f"Position '{position}' added successfully.",
-             "display_number": "Infinite" if number == 0 else number
-         })
-    except Exception as e:
-         return jsonify({"success": False, "message": str(e)}), 500
- 
- """
+
 @app.route('/list-positions')
 def list_positions():
      if 'user_id' not in session or not session.get('is_admin', False):
@@ -701,7 +774,7 @@ def save_question():
         if len(existing_questions) > 1:  # More than just the header
             return jsonify({"success": False, "message": f"The pillar '{pillar}' already has a question."}), 400
 
-        # Append the question to the corresponding pillar column
+        # Append question to the corresponding pillar column
         questionsSheet.update_cell(len(existing_questions) + 1, pillar_index, question_text)
 
         return jsonify({"success": True, "message": "Question saved successfully"})
