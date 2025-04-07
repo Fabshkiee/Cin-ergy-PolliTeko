@@ -1,181 +1,360 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/candidate.css">
     <title>ADD NEW CANDIDATE</title>
+    <style>
+        /* Platform section styling */
+        .platforms-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .platforms-header {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            padding-bottom: 5px;
+            border-bottom: 2px solid #eee;
+        }
+        .platform-item {
+            margin-bottom: 20px;
+        }
+        .platform-item label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        .platform-item input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        .platform-item input:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+        }
+        .no-platforms {
+            color: #7f8c8d;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+    </style>
 </head>
-
 <body>
-    <h1>ADD NEW CANDIDATE</h1>
-    <form id="candidateForm" onsubmit="submitForm(event)" autocomplete="off">
-        <div>
-            <label for="Fname">FIRST NAME</label>
-            <input type="text" id="Fname" name="FirstName" required placeholder="Gem Adrian">
+    <div class="form-container">
+        <h1>ADD NEW CANDIDATE</h1>
+        <form id="candidateForm" onsubmit="submitForm(event)" autocomplete="off" enctype="multipart/form-data">
+            <!-- Personal Information Section -->
+            <section class="form-section">
+                <h2>Personal Information</h2>
+                <div class="form-group">
+                    <label for="Fname">FIRST NAME</label>
+                    <input type="text" id="Fname" name="FirstName" required placeholder="Gem Adrian">
+                </div>
+                <div class="form-group">
+                    <label for="Mname">MIDDLE NAME</label>
+                    <input type="text" id="Mname" name="MiddleName" placeholder="Casimero">
+                </div>
+                <div class="form-group">
+                    <label for="Lname">LAST NAME</label>
+                    <input type="text" id="Lname" name="LastName" required placeholder="Candaganan">
+                </div>
+                <div class="form-group">
+                    <label for="position">POSITION</label>
+                    <select id="position" name="Position" required>
+                        <option value="" disabled selected>Loading positions...</option>
+                    </select>
+                </div>
+            </section>
 
-            <label for="Mname">MIDDLE NAME</label>
-            <input type="text" id="Mname" name="MiddleName" placeholder="Casimero">
+            <!-- Address Information Section -->
+            <section class="form-section">
+                <h2>Address Information</h2>
+                <div class="form-group">
+                    <label for="region">REGION</label>
+                    <select id="region" name="region" required>
+                        <option value="" disabled selected>Select Region</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="province">PROVINCE</label>
+                    <select id="province" name="province" required>
+                        <option value="" disabled selected>Select Province</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="city">CITY/MUNICIPALITY</label>
+                    <select id="city" name="city" required>
+                        <option value="" disabled selected>Select City/Municipality</option>
+                    </select>
+                </div>
+            </section>
 
-            <label for="Lname">LAST NAME</label>
-            <input type="text" id="Lname" name="LastName" required placeholder="Candaganan">
+            <!-- Biography Section -->
+            <section class="form-section">
+                <div class="form-group">
+                    <label for="biography">SHORT BIOGRAPHY</label>
+                    <textarea id="biography" name="biography" rows="4" placeholder="Write the candidate's short biography here"></textarea>
+                </div>
+            </section>
 
-            <label for="position">POSITION</label>
-            <select id="position" name="Position" required>
-                <option value="" disabled selected>Loading positions...</option>
-            </select>
-        </div>
+            <!-- Personal Details Section -->
+            <section class="form-section">
+                <h2>Personal Details</h2>
+                <div class="form-group">
+                    <label for="bday">BIRTHDAY</label>
+                    <input type="date" id="bday" name="bday" required>
+                </div>
+                <div class="form-group">
+                    <label for="Party">POLITICAL PARTY</label>
+                    <input type="text" id="Party" name="Party" placeholder="Enter political party">
+                </div>
+            </section>
 
-        <br>
+            <!-- Education Background Section -->
+            <section class="form-section">
+                <h2>Educational Background</h2>
+                <div class="form-group">
+                    <label for="education">ADD EDUCATION</label>
+                    <div class="input-group">
+                        <input type="text" id="education" placeholder="Enter Educational Background">
+                        <button type="button" id="addEducation" class="btn-add">ADD</button>
+                    </div>
+                    <div class="listed-items">
+                        <p>Listed Educational Background</p>
+                        <ol id="educationList"></ol>
+                    </div>
+                </div>
+            </section>
 
-        <section>
-            <div id="addressSection">
-                <label for="region">REGION</label>
-                <select id="region" name="region" required>
-                    <option value="" disabled selected>Select Region</option>
-                </select>
+            <!-- Leadership Experience Section -->
+            <section class="form-section">
+                <h2>Leadership Experience</h2>
+                <div class="form-group">
+                    <label for="experience">ADD EXPERIENCE</label>
+                    <div class="input-group">
+                        <input type="text" id="experience" placeholder="Enter Leadership Experience">
+                        <button type="button" id="addExperience" class="btn-add">ADD</button>
+                    </div>
+                    <div class="listed-items">
+                        <p>Listed Leadership Experience</p>
+                        <ol id="experienceList"></ol>
+                    </div>
+                </div>
+            </section>
 
-                <br><br>
+            <!-- Achievements Section -->
+            <section class="form-section">
+                <h2>Achievements</h2>
+                <div class="form-group">
+                    <label for="achievements">ADD ACHIEVEMENTS</label>
+                    <div class="input-group">
+                        <input type="text" id="achievements" placeholder="Enter Achievements">
+                        <button type="button" id="addAchievements" class="btn-add">ADD</button>
+                    </div>
+                    <div class="listed-items">
+                        <p>Listed Achievements</p>
+                        <ol id="achievementList"></ol>
+                    </div>
+                </div>
+            </section>
 
-                <label for="province">PROVINCE</label>
-                <select id="province" name="province" required>
-                    <option value="" disabled selected>Select Province</option>
-                </select>
+            <!-- Dynamic Platforms Section -->
+            <section class="platforms-section">
+                <div class="platforms-header">CANDIDATE PLATFORMS</div>
+                <div id="platformsContainer">
+                    <p class="no-platforms">Loading platform options from pillars sheet...</p>
+                </div>
+            </section>
 
-                <br><br>
+            <!-- Photo Upload Section -->
+            <section class="form-section">
+                <div class="form-group">
+                    <label for="photo">Upload Candidate's Photo:</label>
+                    <input type="file" id="photo" name="photo" accept=".jpg,.jpeg,.png">
+                </div>
+            </section>
 
-                <label for="city">CITY/MUNICIPALITY</label>
-                <select id="city" name="city" required>
-                    <option value="" disabled selected>Select City/Municipality</option>
-                </select>
+            <!-- Form Buttons -->
+            <div class="form-actions">
+                <button type="submit" id="submit" class="btn-primary">Submit Candidate</button>
+                <button type="reset" id="reset" class="btn-secondary">Reset Form</button>
             </div>
-        </section>
-
-        <br>
-
-        <div>
-            <label for="biography">SHORT BIOGRAPHY</label>
-            <textarea id="biography" name="biography"
-                placeholder="Write the candidate's short biography here"></textarea>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="bday">BIRTHDAY</label>
-            <input type="date" id="bday" name="bday" required>
-        </div>
-
-        <br>
-
-        <div>
-            <label for="Party">POLITICAL PARTY</label>
-            <input type="text" id="Party" name="Party">
-        </div>
-
-        <br>
-
-        <section>
-            <div id="educationalBackgroundSection">
-                <label for="education">EDUCATIONAL BACKGROUND</label>
-                <input type="text" id="education" placeholder="Enter Educational Background">
-                <button type="button" id="addEducation">ADD EDUCATION</button>
-
-                <p>Listed Educational Background</p>
-                <ol id="educationList"></ol>
-            </div>
-        </section>
-
-        <br>
-
-        <section>
-            <div id="leadershipExperienceSection">
-                <label for="experience">LEADERSHIP EXPERIENCE</label>
-                <input type="text" id="experience" placeholder="Enter Leadership Experience">
-                <button type="button" id="addExperience">ADD EXPERIENCES</button>
-
-                <p>Listed Leadership Experience</p>
-                <ol id="experienceList"></ol>
-            </div>
-        </section>
-
-        <br>
-
-        <section>
-            <div>
-                <label for="achievements">ACHIEVEMENTS</label>
-                <input type="text" id="achievements" placeholder="Enter Achievements">
-                <button type="button" id="addAchievements">ADD ACHIEVEMENTS</button>
-
-                <p>Listed Achievements</p>
-                <ol id="achievementList"></ol>
-            </div>
-        </section>
-
-        <br>
-
-        <label>PLATFORMS OF THE CANDIDATE</label>
-        <br>
-        <label for="ed">EDUCATION</label>
-        <input type="text" id="ed" name="ed">
-        <label for="hc">HEALTHCARE</label>
-        <input type="text" id="hc" name="hc">
-        <label for="cg">CLEAN GOVERNMENT</label>
-        <input type="text" id="cg" name="cg">
-        <label for="econ">ECONOMY</label>
-        <input type="text" id="econ" name="econ">
-        <label for="agri">AGRICULTURE</label>
-        <input type="text" id="agri" name="agri">
-
-        <br>
-        <br>
-
-        <label>Issues and Controversies</label>
-        <div id="issuesContainer">
-            {% for issue in issues %}
-            <div>
-                <label>{{ issue }}</label>
-                <select name="stances[{{ issue }}]" required>
-                    <option value="No Answer">No Answer</option>
-                    <option value="Agree">Agree</option>
-                    <option value="Disagree">Disagree</option>
-                    <option value="Abstain">Abstain</option>
-                </select>
-            </div>
-            {% endfor %}
-        </div>
-
-        <br>
-
-        <div>
-            <label for="photo">Upload Candidate's Photo:</label>
-            <input type="file" id="photo" name="photo" accept=".jpg, .jpeg">
-        </div>
-        
-        <br>
-        
-        <button type="submit" id="submit">Submit</button>
-        <button type="reset" id="reset">Reset</button>
-    </form>
+        </form>
+    </div>
 
     <script>
         // Arrays to store multiple entries
         let education = [];
         let experience = [];
         let achievements = [];
+        let platforms = {}; // Object to store platform values
 
-        // Load positions when page loads
-        document.addEventListener('DOMContentLoaded', function () {
+        // Function to fetch and display platform options from pillars sheet
+        async function loadPlatforms() {
+            try {
+                const response = await fetch('/api/platforms');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const platformTitles = await response.json();
+                
+                const container = document.getElementById('platformsContainer');
+                container.innerHTML = '';
+                
+                if (!platformTitles || platformTitles.length === 0) {
+                    container.innerHTML = '<p class="no-platforms">No platform categories defined in pillars sheet</p>';
+                    return;
+                }
+                
+                // Create a platform input for each title from pillars sheet (A1, B1, C1)
+                platformTitles.forEach((title, index) => {
+                    if (!title || !title.trim()) return; // Skip empty titles
+                    
+                    const platformDiv = document.createElement('div');
+                    platformDiv.className = 'platform-item';
+                    
+                    const label = document.createElement('label');
+                    label.textContent = title.toUpperCase();
+                    label.setAttribute('for', `platform-${index}`);
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `platform-${index}`;
+                    input.name = `platform_${index}`;
+                    input.placeholder = `Enter candidate's ${title} platform`;
+                    input.setAttribute('data-pillar-title', title);
+                    
+                    // Store platform value when changed
+                    input.addEventListener('input', function() {
+                        const pillarTitle = this.getAttribute('data-pillar-title');
+                        platforms[pillarTitle] = this.value;
+                    });
+                    
+                    platformDiv.appendChild(label);
+                    platformDiv.appendChild(input);
+                    container.appendChild(platformDiv);
+                });
+                
+            } catch (error) {
+                console.error('Error loading platforms:', error);
+                const container = document.getElementById('platformsContainer');
+                container.innerHTML = `
+                    <p class="no-platforms">Error loading platform options</p>
+                    <p class="error-message">${error.message}</p>
+                `;
+            }
+        }
+
+        // Modified form submission handler
+        function submitForm(e) {
+    e.preventDefault();
+
+    const form = document.getElementById("candidateForm");
+    const formData = new FormData(form);
+
+    // Append arrays and platforms to FormData
+    formData.append("education", JSON.stringify(education));
+    formData.append("experience", JSON.stringify(experience));
+    formData.append("achievements", JSON.stringify(achievements));
+    formData.append("platforms", JSON.stringify(platforms));
+
+    // Show loading state
+    const submitBtn = document.getElementById("submit");
+    const originalBtnText = submitBtn.textContent;
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Submitting...";
+
+    fetch("/submitAddCandidate", {
+        method: "POST",
+        body: formData,
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => { throw new Error(err.message || "Server error"); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.result === "success") {
+            alert(`Candidate added successfully!\nRow: ${data.row}\n${data.message}`);
+            
+            // Comprehensive form reset
+            resetForm();
+        } else {
+            throw new Error(data.message || "Unknown error occurred");
+        }
+    })
+    .catch(error => {
+        console.error("Submission error:", error);
+        alert("Failed to submit candidate data: " + error.message);
+    })
+    .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+    });
+}
+
+// New function to completely reset the form
+function resetForm() {
+    // Reset the HTML form
+    const form = document.getElementById("candidateForm");
+    form.reset();
+    
+    // Clear all JavaScript arrays
+    education = [];
+    experience = [];
+    achievements = [];
+    platforms = {};
+    
+    // Update all lists to show empty
+    updateEducationList();
+    updateExperienceList();
+    updateAchievementList();
+    
+    // Clear platform inputs
+    const platformInputs = document.querySelectorAll('#platformsContainer input[type="text"]');
+    platformInputs.forEach(input => {
+        input.value = '';
+    });
+    
+    // Reset file input
+    document.getElementById("photo").value = '';
+    
+    // Reset select dropdowns to their initial state
+    document.getElementById("position").selectedIndex = 0;
+    document.getElementById("region").selectedIndex = 0;
+    document.getElementById("province").selectedIndex = 0;
+    document.getElementById("city").selectedIndex = 0;
+}
+
+        // Load positions and platforms when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load positions
             fetch('/api/positions')
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error('Failed to load positions');
                     return response.json();
                 })
                 .then(data => {
                     const positionSelect = document.getElementById('position');
                     positionSelect.innerHTML = '<option value="" disabled selected>Select Position</option>';
-
                     data.positions.forEach(position => {
                         const option = document.createElement('option');
                         option.value = position;
@@ -185,60 +364,22 @@
                 })
                 .catch(error => {
                     console.error('Error loading positions:', error);
-                    document.getElementById('position').innerHTML =
+                    document.getElementById('position').innerHTML = 
                         '<option value="" disabled selected>Failed to load positions</option>';
                 });
+
+            // Load dynamic platforms from pillars sheet
+            loadPlatforms();
         });
 
-        // Form submission handler
-        function submitForm(e) {
-    e.preventDefault();
-
-    const form = document.getElementById("candidateForm");
-    const formData = new FormData(form);
-
-    // Append arrays to FormData
-    formData.append("education", JSON.stringify(education));
-    formData.append("experience", JSON.stringify(experience));
-    formData.append("achievements", JSON.stringify(achievements));
-
-    fetch("/submitAddCandidate", {
-        method: "POST",
-        body: formData,
-    })
-        .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-        })
-        .then(data => {
-            if (data.result === "success") {
-                alert(`Candidate added successfully! Row: ${data.row}`);
-                // Reset form and clear lists
-                if (form && typeof form.reset === "function") {
-                    form.reset();
-                }
-                education = [];
-                experience = [];
-                achievements = [];
-                updateEducationList();
-                updateExperienceList();
-                updateAchievementList();
-            } else {
-                throw new Error(data.message || "Unknown error occurred");
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            alert("Failed to submit data: " + error.message);
-        });
-}
-
+        // [Rest of your existing JavaScript for education/experience/achievements management]
         // Education list management
-        document.getElementById("addEducation").addEventListener('click', function () {
-            const educationName = document.getElementById('education').value.trim();
+        document.getElementById("addEducation").addEventListener('click', function() {
+            const educationInput = document.getElementById('education');
+            const educationName = educationInput.value.trim();
             if (educationName && !education.includes(educationName)) {
                 education.push(educationName);
-                document.getElementById('education').value = '';
+                educationInput.value = '';
                 updateEducationList();
             }
         });
@@ -246,28 +387,31 @@
         function updateEducationList() {
             const educationList = document.getElementById('educationList');
             educationList.innerHTML = '';
-            education.forEach(edu => {
+            education.forEach((edu, index) => {
                 const li = document.createElement('li');
                 li.textContent = edu;
-
+                
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
                 delBtn.type = "button";
-                delBtn.addEventListener('click', function () {
-                    education = education.filter(item => item !== edu);
+                delBtn.className = "btn-delete";
+                delBtn.addEventListener('click', function() {
+                    education.splice(index, 1);
                     updateEducationList();
                 });
+                
                 li.appendChild(delBtn);
                 educationList.appendChild(li);
             });
         }
 
         // Experience list management
-        document.getElementById("addExperience").addEventListener('click', function () {
-            const experienceName = document.getElementById('experience').value.trim();
+        document.getElementById("addExperience").addEventListener('click', function() {
+            const experienceInput = document.getElementById('experience');
+            const experienceName = experienceInput.value.trim();
             if (experienceName && !experience.includes(experienceName)) {
                 experience.push(experienceName);
-                document.getElementById('experience').value = '';
+                experienceInput.value = '';
                 updateExperienceList();
             }
         });
@@ -275,28 +419,31 @@
         function updateExperienceList() {
             const experienceList = document.getElementById('experienceList');
             experienceList.innerHTML = '';
-            experience.forEach(exp => {
+            experience.forEach((exp, index) => {
                 const li = document.createElement('li');
                 li.textContent = exp;
-
+                
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
                 delBtn.type = "button";
-                delBtn.addEventListener('click', function () {
-                    experience = experience.filter(item => item !== exp);
+                delBtn.className = "btn-delete";
+                delBtn.addEventListener('click', function() {
+                    experience.splice(index, 1);
                     updateExperienceList();
                 });
+                
                 li.appendChild(delBtn);
                 experienceList.appendChild(li);
             });
         }
 
         // Achievements list management
-        document.getElementById("addAchievements").addEventListener('click', function () {
-            const achievementName = document.getElementById('achievements').value.trim();
+        document.getElementById("addAchievements").addEventListener('click', function() {
+            const achievementsInput = document.getElementById('achievements');
+            const achievementName = achievementsInput.value.trim();
             if (achievementName && !achievements.includes(achievementName)) {
                 achievements.push(achievementName);
-                document.getElementById('achievements').value = '';
+                achievementsInput.value = '';
                 updateAchievementList();
             }
         });
@@ -304,17 +451,19 @@
         function updateAchievementList() {
             const achievementList = document.getElementById('achievementList');
             achievementList.innerHTML = '';
-            achievements.forEach(ach => {
+            achievements.forEach((ach, index) => {
                 const li = document.createElement('li');
                 li.textContent = ach;
-
+                
                 const delBtn = document.createElement('button');
                 delBtn.textContent = "Delete";
                 delBtn.type = "button";
-                delBtn.addEventListener('click', function () {
-                    achievements = achievements.filter(item => item !== ach);
+                delBtn.className = "btn-delete";
+                delBtn.addEventListener('click', function() {
+                    achievements.splice(index, 1);
                     updateAchievementList();
                 });
+                
                 li.appendChild(delBtn);
                 achievementList.appendChild(li);
             });
@@ -330,6 +479,7 @@
         fetch(`${apiBaseUrl}/regions`)
             .then(response => response.json())
             .then(data => {
+                regionSelect.innerHTML = '<option value="" disabled selected>Select Region</option>';
                 data.forEach(region => {
                     const option = document.createElement("option");
                     option.value = region.code;
@@ -337,13 +487,18 @@
                     regionSelect.appendChild(option);
                 });
             })
-            .catch(error => console.error("Error fetching regions:", error));
+            .catch(error => {
+                console.error("Error fetching regions:", error);
+                regionSelect.innerHTML = '<option value="" disabled selected>Error loading regions</option>';
+            });
 
         // Fetch provinces based on selected region
-        regionSelect.addEventListener("change", function () {
+        regionSelect.addEventListener("change", function() {
             const regionCode = this.value;
             provinceSelect.innerHTML = '<option value="" disabled selected>Select Province</option>';
             citySelect.innerHTML = '<option value="" disabled selected>Select City/Municipality</option>';
+
+            if (!regionCode) return;
 
             fetch(`${apiBaseUrl}/regions/${regionCode}/provinces`)
                 .then(response => response.json())
@@ -355,13 +510,18 @@
                         provinceSelect.appendChild(option);
                     });
                 })
-                .catch(error => console.error("Error fetching provinces:", error));
+                .catch(error => {
+                    console.error("Error fetching provinces:", error);
+                    provinceSelect.innerHTML = '<option value="" disabled selected>Error loading provinces</option>';
+                });
         });
 
         // Fetch cities based on selected province
-        provinceSelect.addEventListener("change", function () {
+        provinceSelect.addEventListener("change", function() {
             const provinceCode = this.value;
             citySelect.innerHTML = '<option value="" disabled selected>Select City/Municipality</option>';
+
+            if (!provinceCode) return;
 
             fetch(`${apiBaseUrl}/provinces/${provinceCode}/cities-municipalities/`)
                 .then(response => response.json())
@@ -373,10 +533,12 @@
                         citySelect.appendChild(option);
                     });
                 })
-                .catch(error => console.error("Error fetching cities:", error));
+                .catch(error => {
+                    console.error("Error fetching cities:", error);
+                    citySelect.innerHTML = '<option value="" disabled selected>Error loading cities</option>';
+                });
         });
     </script>
 </body>
-
 </html>
 ``` 

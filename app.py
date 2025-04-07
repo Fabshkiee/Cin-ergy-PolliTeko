@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -388,50 +388,104 @@ def save_results():
     print("User selected:", data['answers'])
     return jsonify({"status": "success"})
 
-#@app.route('/adminAddCandi')
-#def addCandi():
-#    return render_template('addCandidate.html')
+@app.route('/adminAddCandi')
+def addCandi():
+    return render_template('addCandidate.html')
         
 import os
+
+@app.route('/api/platforms')
+def get_platforms():
+    try:
+        # Fetch platform titles from first row of pillars sheet (A1, B1, C1)
+        platforms = sheet2.row_values(1)  # Get first 3 columns of row 1
+        platforms = [p for p in platforms if p and str(p).strip()]  # Remove empty/None values
+        return jsonify(platforms)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+# Add this after your other sheet definitions
+photosSheet = workbook.worksheet("photos")  # Make sure this sheet exists
+
+# Modify the /submitAddCandidate route
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, Blueprint
+import gspread
+import os
+from google.oauth2.service_account import Credentials
+import json
+import requests
+from functools import lru_cache
+
+# [Previous configuration code remains the same until the /submitAddCandidate route]
 
 @app.route("/submitAddCandidate", methods=["POST"])
 def submit_candidate():
     try:
         # Fetch candidate data
         data = request.form.to_dict()
-        stances = request.form.getlist('stances')
+        photo = request.files.get("photo")
 
-        # Save candidate data to the candidatesSheet
-        candidate_row = [
-            data.get("FirstName", ""),
-            data.get("MiddleName", ""),
-            data.get("LastName", ""),
-            data.get("Position", ""),
-            data.get("region", ""),
-            data.get("province", ""),
-            data.get("city", ""),
-            data.get("biography", ""),
-            data.get("bday", ""),
-            data.get("Party", ""),
-            data.get("ed", ""),
-            data.get("hc", ""),
-            data.get("cg", ""),
-            data.get("econ", ""),
-            data.get("agri", ""),
-        ]
+        # Ensure the uploads directory exists
+        upload_dir = os.path.join("static", "uploads")
+        if not os.path.exists(upload_dir):
+            os.makedirs(upload_dir)
 
-        # Append candidate data to the candidatesSheet
-        candidatesSheet.append_row(candidate_row)
+        # Save the photo file if it exists
+        if photo:
+            photo_filename = os.path.join(upload_dir, photo.filename)
+            photo.save(photo_filename)
+            data["photo"] = photo_filename  # Save the file path in the data
 
-        # Save stances to the stancesSheet
-        candidate_row_index = len(candidatesSheet.get_all_values())  # Get the row index of the new candidate
-        issues = stancesSheet.row_values(1)  # Get all issues from the first row
-        stances_row = [data.get(f"stances[{issue}]", "No Answer") for issue in issues]
-        stancesSheet.insert_row(stances_row, candidate_row_index)
+        # Get next row for candidates sheet (this will be our master row number)
+        candidate_row = len(candidatesSheet.get_all_values()) + 1
+
+        # Write candidate data to the candidates sheet
+        candidates_data = {
+            "A": data.get("FirstName", ""),
+            "B": data.get("MiddleName", ""),
+            "C": data.get("LastName", ""),
+            "D": data.get("Position", ""),
+            "E": data.get("region", ""),
+            "F": data.get("province", ""),
+            "G": data.get("city", ""),
+            "H": data.get("biography", ""),
+            "I": data.get("bday", ""),
+            "J": f'=DATEDIF(I{candidate_row}, TODAY(), "Y")',
+            "K": data.get("Party", ""),
+            "L": data.get("ed", ""),
+            "M": data.get("hc", ""),
+            "N": data.get("cg", ""),
+            "O": data.get("econ", ""),
+            "P": data.get("agri", ""),
+            "Q": data.get("photo", ""),  # Save the photo path in column Q
+        }
+
+        for col_letter, value in candidates_data.items():
+            candidatesSheet.update_acell(f"{col_letter}{candidate_row}", value)
+
+        # Write achievements, leadership, and educational background to their respective sheets
+        achievements = json.loads(data.get("achievements", "[]"))
+        leadership = json.loads(data.get("experience", "[]"))
+        education = json.loads(data.get("education", "[]"))
+
+        # Write achievements to the achievements sheet
+        for col_index, achievement in enumerate(achievements, start=1):
+            achievementsSheet.update_cell(candidate_row, col_index, achievement)
+
+        # Write leadership experiences to the leadership sheet
+        for col_index, exp in enumerate(leadership, start=1):
+            leadershipsSheet.update_cell(candidate_row, col_index, exp)
+
+        # Write educational background to the education sheet
+        for col_index, edu in enumerate(education, start=1):
+            educationsSheet.update_cell(candidate_row, col_index, edu)
 
         return redirect('/admin-dashboard')
     except Exception as e:
-        return f"Error submitting candidate: {str(e)}", 500
+        return jsonify({"result": "error", "message": str(e)})
+    
+
+
 
 @app.route('/add-position', methods=['POST'])
 def add_position():
@@ -471,53 +525,7 @@ def add_position():
             "display_number": "Infinite" if number == 0 else number
         })
     except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-
-
-@app.route('/list-positions')
-def list_positions():
-    if 'user_id' not in session or not session.get('is_admin', False):
-        return redirect('/')
-
-    try:
-        # Fetch all positions and numbers from the sheet
-        all_positions = positionsSheet.get_all_values()
-        positions = []
-        for row in all_positions[1:]:  # Skip header row
-            position = row[0]
-            number = row[1] if len(row) > 1 else ''
-            # Convert empty string to "Infinite"
-            display_number = "Infinite" if number == '' else number
-            positions.append((position, display_number))
-
-        return render_template('listposition.html', positions=positions)
-    except Exception as e:
-        return f"Error fetching positions: {str(e)}", 500
-    
-@app.route('/delete-position', methods=['POST'])
-def delete_position():
-    if 'user_id' not in session or not session.get('is_admin', False):
-        return jsonify({"success": False, "message": "Unauthorized"}), 403
-
-    try:
-        # Parse the position to delete
-        data = request.json
-        position_to_delete = data.get('position', '').strip()
-
-        # Fetch all positions from the sheet
-        all_positions = positionsSheet.get_all_values()
-
-        # Find the row number of the position to delete
-        for index, row in enumerate(all_positions):
-            if row[0] == position_to_delete:  # Match the position in column A
-                positionsSheet.delete_rows(index + 1)  # Delete the row (1-based index)
-                return jsonify({"success": True, "message": f"Position '{position_to_delete}' deleted successfully."})
-
-        return jsonify({"success": False, "message": f"Position '{position_to_delete}' not found."}), 404
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
-    
-    
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/submit_votes', methods=['POST'])
 def submit_votes():
@@ -584,6 +592,45 @@ def submit_votes():
             "success": False,
             "message": f"Error recording votes: {str(e)}"
         }), 500
+
+
+
+@app.route('/api/pillars')
+def get_pillars():
+    try:
+        # Fetch pillars from the pillars sheet (assuming they're in row 1, columns A-C)
+        pillars = sheet2.row_values(1)[:3]  # Gets first 3 columns of row 1
+        pillars = [p for p in pillars if p]  # Remove empty values
+        return jsonify(pillars)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/save-question', methods=['POST'])
+def save_question():
+    try:
+        question_type = request.form.get('chooseQuestion')
+        pillar = request.form.get('pillars')
+        question_text = request.form.get('questionText', '')
+        
+        if question_type in ['question1', 'question2']:
+            options = request.form.getlist('options')
+            # Save to your Google Sheet
+            # Example: questionsSheet.append_row([question_type, pillar, question_text, ', '.join(options)])
+        elif question_type == 'question3':
+            issues = request.form.getlist('issues[]')
+            # Save to your Google Sheet
+            # Example: questionsSheet.append_row([question_type, pillar, '', ', '.join(issues)])
+        
+        return jsonify({"success": True, "message": "Question saved successfully"})
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
+
+
+
+
+
+
 
 
 @app.route('/submit-issues', methods=['POST'])
