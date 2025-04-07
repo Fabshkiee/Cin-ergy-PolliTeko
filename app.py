@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -518,7 +518,7 @@ def add_position():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.route('/add-position', methods=['POST'])
+"""@app.route('/add-position', methods=['POST'])
 def add_position():
     if 'user_id' not in session or not session.get('is_admin', False):
          return jsonify({"success": False, "message": "Unauthorized"}), 403
@@ -558,7 +558,7 @@ def add_position():
     except Exception as e:
          return jsonify({"success": False, "message": str(e)}), 500
  
- 
+ """
 @app.route('/list-positions')
 def list_positions():
      if 'user_id' not in session or not session.get('is_admin', False):
