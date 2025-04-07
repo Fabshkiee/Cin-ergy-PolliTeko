@@ -1,151 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/static/style.css" />
     <title>PolliTeko</title>
     <style>
-      .progress-container {
-        width: 100%;
-        margin: 20px 0;
-        position: relative;
-      }
-      .progress {
-        height: 10px;
-        background-color: #4caf50;
-        transition: width 0.3s ease;
-        width: 0%;
-      }
-      .percentage {
-        position: absolute;
-        right: 0;
-        top: -20px;
-        font-size: 14px;
-      }
-      .selected {
-        background-color: #4caf50;
-        color: white;
-      }
-      .quescard {
-        display: none;
-      }
-      .quescard.active {
-        display: block;
-      }
+        .progress-container {
+            width: 100%;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .progress {
+            height: 10px;
+            background-color: #4caf50;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .percentage {
+            position: absolute;
+            right: 0;
+            top: -20px;
+            font-size: 14px;
+        }
+
+        .selected {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .quescard {
+            display: none;
+        }
+
+        .quescard.active {
+            display: block;
+        }
     </style>
   </head>
 
-  <body>
-    <!--Navbar Section-->
+<body>
+    <!-- Navbar Section -->
     <header>
-      <nav class="navbar">
-        <ul>
-          <li>
-            <a id="home" class="logo" href="/dashboard">
-              <img
-                src="/static/politekologo1.png"
-                alt="Logo"
-                style="height: 2rem; margin-right: 1.5rem"
-              />POLL-IT-TEKO</a
-            >
-          </li>
-          <li><a class="navlinks" href="/PiliTugma">PiliTugma</a></li>
-          <li><a class="navlinks" href="/candidate">Candidates</a></li>
-          <li><a class="navlinks" href="/voting">Voting</a></li>
-          <li><a class="navlinks" href="/results">Results</a></li>
-        </ul>
-      </nav>
+        <nav class="navbar">
+            <ul>
+                <li>
+                    <a id="home" class="logo" href="/dashboard">
+                        <img src="/static/politekologo1.png" alt="Logo"
+                            style="height: 2rem; margin-right: 1.5rem" />POLL-IT-TEKO</a>
+                </li>
+                <li><a class="navlinks" href="/PiliTugma">PiliTugma</a></li>
+                <li><a class="navlinks" href="/candidate">Candidates</a></li>
+                <li><a class="navlinks" href="/voting">Voting</a></li>
+                <li><a class="navlinks" href="/results">Results</a></li>
+            </ul>
+        </nav>
     </header>
 
     <section class="questionsec">
-      <div class="progress-container">
-        <p class="percentage">0%</p>
-        <div class="progress"></div>
-      </div>
-
-      {% for question in questions %}
-      <div
-        class="quescard"
-        id="question-{{ question.id }}"
-        data-question-id="{{ question.id }}"
-        {%
-        if
-        loop.first
-        %}class="active"
-        {%
-        endif
-        %}
-      >
-        <svg
-          class="exit-icon"
-          xmlns="http://www.w3.org/2000/svg"
-          width="35"
-          height="35"
-          viewBox="0 0 35 35"
-          fill="none"
-        >
-          <path
-            d="M8.49331 5.29666L17.5 14.3033L26.46 5.34332C26.6579 5.13266 26.8963 4.96414 27.1609 4.84787C27.4256 4.73159 27.7109 4.66996 28 4.66666C28.6188 4.66666 29.2123 4.91249 29.6499 5.35007C30.0875 5.78766 30.3333 6.38115 30.3333 6.99999C30.3387 7.28606 30.2857 7.57023 30.1773 7.83505C30.069 8.09987 29.9077 8.33976 29.7033 8.53999L20.6266 17.5L29.7033 26.5767C30.0879 26.9529 30.3134 27.4624 30.3333 28C30.3333 28.6188 30.0875 29.2123 29.6499 29.6499C29.2123 30.0875 28.6188 30.3333 28 30.3333C27.7026 30.3457 27.4059 30.296 27.1287 30.1876C26.8516 30.0791 26.6 29.9142 26.39 29.7033L17.5 20.6967L8.51664 29.68C8.31949 29.8836 8.08396 30.0462 7.82364 30.1583C7.56333 30.2705 7.28339 30.3299 6.99997 30.3333C6.38113 30.3333 5.78764 30.0875 5.35006 29.6499C4.91247 29.2123 4.66664 28.6188 4.66664 28C4.6612 27.7139 4.71428 27.4298 4.82261 27.1649C4.93095 26.9001 5.09226 26.6602 5.29664 26.46L14.3733 17.5L5.29664 8.42332C4.91207 8.04709 4.68657 7.53762 4.66664 6.99999C4.66664 6.38115 4.91247 5.78766 5.35006 5.35007C5.78764 4.91249 6.38113 4.66666 6.99997 4.66666C7.55997 4.67366 8.09664 4.89999 8.49331 5.29666Z"
-            fill="black"
-          />
-        </svg>
-        <h2>Question {{ question.id }}</h2>
-        <p>{{ question.text }}</p>
-        <p class="p1">{{ question.description }}</p>
-        <div class="question">
-          {% for option in question.options %}
-          <li>
-            <a
-              href="#"
-              data-value="{{ option }}"
-              data-question-id="{{ question.id }}"
-              >{{ option }}</a
-            >
-          </li>
-          {% endfor %}
+        <div class="progress-container">
+            <p class="percentage">0%</p>
+            <div class="progress"></div>
         </div>
-      </div>
-      {% endfor %}
 
-      <div class="navigation-buttons">
-        <button class="btn previous" disabled>Previous</button>
-        <button class="btn next">Next</button>
-        <button class="btn finish" style="display: none">
-          <a href="/matchResults">Finish</a>
-        </button>
-      </div>
+        {% for question in questions %}
+        <div class="quescard {% if loop.first %}active{% endif %}" id="question-{{ question.id }}"
+            data-question-id="{{ question.id }}">
+            <svg class="exit-icon" xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35" fill="none"><path d="M8.49331 5.29666L17.5 14.3033L26.46 5.34332C26.6579 5.13266 26.8963 4.96414 27.1609 4.84787C27.4256 4.73159 27.7109 4.66996 28 4.66666C28.6188 4.66666 29.2123 4.91249 29.6499 5.35007C30.0875 5.78766 30.3333 6.38115 30.3333 6.99999C30.3387 7.28606 30.2857 7.57023 30.1773 7.83505C30.069 8.09987 29.9077 8.33976 29.7033 8.53999L20.6266 17.5L29.7033 26.5767C30.0879 26.9529 30.3134 27.4624 30.3333 28C30.3333 28.6188 30.0875 29.2123 29.6499 29.6499C29.2123 30.0875 28.6188 30.3333 28 30.3333C27.7026 30.3457 27.4059 30.296 27.1287 30.1876C26.8516 30.0791 26.6 29.9142 26.39 29.7033L17.5 20.6967L8.51664 29.68C8.31949 29.8836 8.08396 30.0462 7.82364 30.1583C7.56333 30.2705 7.28339 30.3299 6.99997 30.3333C6.38113 30.3333 5.78764 30.0875 5.35006 29.6499C4.91247 29.2123 4.66664 28.6188 4.66664 28C4.6612 27.7139 4.71428 27.4298 4.82261 27.1649C4.93095 26.9001 5.09226 26.6602 5.29664 26.46L14.3733 17.5L5.29664 8.42332C4.91207 8.04709 4.68657 7.53762 4.66664 6.99999C4.66664 6.38115 4.91247 5.78766 5.35006 5.35007C5.78764 4.91249 6.38113 4.66666 6.99997 4.66666C7.55997 4.67366 8.09664 4.89999 8.49331 5.29666Z" fill="black"/></svg>
+            <h2>Question {{ question.id }}</h2>
+            <p>{{ question.text }}</p>
+            <p class="p1">{{ question.description }}</p>
+            <div class="question">
+                {% for option in question.options %}
+                <li>
+                    <a href="#" data-value="{{ option }}" data-question-id="{{ question.id }}">{{ option }}</a>
+                </li>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="navigation-buttons">
+            <button class="btn previous" disabled>Previous</button>
+            <button class="btn next">Next</button>
+            <button class="btn finish" style="display: none">
+                <a href="/matchResults">Finish</a>
+            </button>
+        </div>
     </section>
 
     <div id="exit-modal" class="modal">
-      <div class="modal-content">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="144"
-          height="144"
-          viewBox="0 0 144 144"
-          fill="none"
-        >
-          <path
-            d="M72 126C101.823 126 126 101.823 126 72C126 42.1766 101.823 18 72 18C42.1766 18 18 42.1766 18 72C18 101.823 42.1766 126 72 126Z"
-            stroke="#FF0000"
-          />
-          <path
-            d="M72 111C73.6569 111 75 109.657 75 108C75 106.343 73.6569 105 72 105C70.3431 105 69 106.343 69 108C69 109.657 70.3431 111 72 111Z"
-            fill="#FF0000"
-          />
-          <path
-            d="M72 96V90.858C72 86.574 74.142 82.572 77.706 80.196L81.3 77.796C83.9753 76.01 86.1689 73.5919 87.6865 70.7556C89.204 67.9194 89.9987 64.7527 90 61.536V60C90 55.2261 88.1036 50.6477 84.7279 47.2721C81.3523 43.8964 76.7739 42 72 42C67.2261 42 62.6477 43.8964 59.2721 47.2721C55.8964 50.6477 54 55.2261 54 60"
-            stroke="#FF0000"
-          />
-        </svg>
-        <h2>Exit Voting?</h2>
-        <p3>Progress won't be <b>saved</b></p3>
-        <div class="modal-buttons">
-          <button id="cancel-exit" class="btn">Return</button>
-          <button id="confirm-exit" class="btn">Exit</button>
+        <div class="modal-content">
+            <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144" fill="none">
+                <path d="M72 126C101.823 126 126 101.823 126 72C126 42.1766 101.823 18 72 18C42.1766 18 18 42.1766 18 72C18 101.823 42.1766 126 72 126Z" stroke="#FF0000"/>
+                <path d="M72 111C73.6569 111 75 109.657 75 108C75 106.343 73.6569 105 72 105C70.3431 105 69 106.343 69 108C69 109.657 70.3431 111 72 111Z" fill="#FF0000"/>
+                <path d="M72 96V90.858C72 86.574 74.142 82.572 77.706 80.196L81.3 77.796C83.9753 76.01 86.1689 73.5919 87.6865 70.7556C89.204 67.9194 89.9987 64.7527 90 61.536V60C90 55.2261 88.1036 50.6477 84.7279 47.2721C81.3523 43.8964 76.7739 42 72 42C67.2261 42 62.6477 43.8964 59.2721 47.2721C55.8964 50.6477 54 55.2261 54 60" stroke="#FF0000"/>
+            </svg>
+            <h2>Exit Voting?</h2>
+            <p>Progress won't be <b>saved</b></p>
+            <div class="modal-buttons">
+                <button id="cancel-exit" class="btn">Return</button>
+                <button id="confirm-exit" class="btn">Exit</button>
+            </div>
         </div>
-      </div>
     </div>
 
     <script>
@@ -162,64 +122,62 @@
         // Initialize progress
         updateProgress();
 
-        // Option selection
-        document.querySelectorAll(".question li a").forEach((option) => {
-          option.addEventListener("click", function (e) {
-            e.preventDefault();
-            const questionId = this.dataset.questionId;
+            // Option selection
+            document.querySelectorAll('.question li a').forEach(option => {
+                option.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const questionId = this.dataset.questionId;
 
-            // Remove selected class from all options in this question
-            document
-              .querySelectorAll(`#question-${questionId} .question li a`)
-              .forEach((opt) => {
-                opt.classList.remove("selected");
-              });
+                    // Remove selected class from all options in this question
+                    document.querySelectorAll(`#question-${questionId} .question li a`).forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
 
-            // Add selected class to clicked option
-            this.classList.add("selected");
+                    // Add selected class to clicked option
+                    this.classList.add('selected');
 
-            // Store selection
-            userSelections[questionId] = this.dataset.value;
-          });
-        });
+                    // Store selection
+                    userSelections[questionId] = this.dataset.value;
+                });
+            });
 
-        // Next button
-        nextBtn.addEventListener("click", () => {
-          if (currentQuestionIndex < questions.length - 1) {
-            questions[currentQuestionIndex].classList.remove("active");
-            currentQuestionIndex++;
-            questions[currentQuestionIndex].classList.add("active");
-            updateProgress();
-          }
+            // Next button
+            nextBtn.addEventListener('click', () => {
+                if (currentQuestionIndex < questions.length - 1) {
+                    questions[currentQuestionIndex].classList.remove('active');
+                    currentQuestionIndex++;
+                    questions[currentQuestionIndex].classList.add('active');
+                    updateProgress();
+                }
 
-          // Show finish button on last question
-          if (currentQuestionIndex === questions.length - 1) {
-            nextBtn.style.display = "none";
-            finishBtn.style.display = "block";
-          }
+                // Show finish button on last question
+                if (currentQuestionIndex === questions.length - 1) {
+                    nextBtn.style.display = 'none';
+                    finishBtn.style.display = 'block';
+                }
 
-          // Enable previous button
-          prevBtn.disabled = false;
-        });
+                // Enable previous button
+                prevBtn.disabled = false;
+            });
 
-        // Previous button
-        prevBtn.addEventListener("click", () => {
-          if (currentQuestionIndex > 0) {
-            questions[currentQuestionIndex].classList.remove("active");
-            currentQuestionIndex--;
-            questions[currentQuestionIndex].classList.add("active");
-            updateProgress();
+            // Previous button
+            prevBtn.addEventListener('click', () => {
+                if (currentQuestionIndex > 0) {
+                    questions[currentQuestionIndex].classList.remove('active');
+                    currentQuestionIndex--;
+                    questions[currentQuestionIndex].classList.add('active');
+                    updateProgress();
 
-            // Show next button if it was hidden
-            nextBtn.style.display = "block";
-            finishBtn.style.display = "none";
-          }
+                    // Show next button if it was hidden
+                    nextBtn.style.display = 'block';
+                    finishBtn.style.display = 'none';
+                }
 
-          // Disable previous button on first question
-          if (currentQuestionIndex === 0) {
-            prevBtn.disabled = true;
-          }
-        });
+                // Disable previous button on first question
+                if (currentQuestionIndex === 0) {
+                    prevBtn.disabled = true;
+                }
+            });
 
         // Finish button
         // In question.html, update the finish button click handler:
@@ -260,45 +218,44 @@
             });
         });
 
-        function updateProgress() {
-          const progress =
-            ((currentQuestionIndex + 1) / questions.length) * 100;
-          percentageText.textContent = `${Math.round(progress)}%`;
-          progressBar.style.width = `${progress}%`;
-        }
-
-        // Exit modal functionality
-        const exitIcons = document.querySelectorAll(".exit-icon");
-        const exitModal = document.getElementById("exit-modal");
-        const cancelExit = document.getElementById("cancel-exit");
-        const confirmExit = document.getElementById("confirm-exit");
-        const logo = document.querySelector(".logo");
-
-        exitIcons.forEach((icon) => {
-          icon.addEventListener("click", () => {
-            exitModal.style.display = "flex";
-          });
+            function updateProgress() {
+                const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+                percentageText.textContent = `${Math.round(progress)}%`;
+                progressBar.style.width = `${progress}%`;
+            }
         });
 
-        logo.addEventListener("click", (e) => {
-          e.preventDefault();
-          exitModal.style.display = "flex";
+        const exitIcons = document.querySelectorAll('.exit-icon');
+        const exitModal = document.getElementById('exit-modal');
+        const cancelExit = document.getElementById('cancel-exit');
+        const confirmExit = document.getElementById('confirm-exit');
+        const logo = document.querySelector('.logo');
+
+        exitIcons.forEach(icon => {
+            icon.addEventListener('click', () => {
+                exitModal.style.display = 'flex';
+            });
         });
 
-        cancelExit.addEventListener("click", () => {
-          exitModal.style.display = "none";
+        logo.addEventListener('click', (e) => {
+            e.preventDefault();
+            exitModal.style.display = 'flex';
         });
 
-        confirmExit.addEventListener("click", () => {
-          window.location.href = "/dashboard";
+        cancelExit.addEventListener('click', () => {
+            exitModal.style.display = 'none';
         });
 
-        window.addEventListener("click", (e) => {
-          if (e.target === exitModal) {
-            exitModal.style.display = "none";
-          }
+        confirmExit.addEventListener('click', () => {
+            window.location.href = "/dashboard";
         });
-      });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === exitModal) {
+                exitModal.style.display = 'none';
+            }
+        });
     </script>
-  </body>
+</body>
+
 </html>

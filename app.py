@@ -24,7 +24,7 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("upvhackathonCreds.json", scopes=scopes)
+creds = Credentials.from_service_account_file("Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -89,12 +89,14 @@ def candidate():
         # Fetch all data from the candidates sheet
         all_data = candidatesSheet.get_all_values()
 
+        # Fetch photo paths from the photosSheet
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+
         # Extract column indices for relevant data
         first_name_col = 0  # Column A (index 0)
         last_name_col = 2   # Column C (index 2)
         bio_col = 7         # Column H (index 7)
         position_col = 3    # Column D (index 3)
-        photo_col = 16      # Column Q (index 16)
 
         # Skip the header row and filter candidates by position
         chairpersons = []
@@ -106,7 +108,7 @@ def candidate():
                 first_name = row[first_name_col].strip()
                 last_name = row[last_name_col].strip()
                 biography = row[bio_col].strip()
-                photo = row[photo_col].strip() if len(row) > photo_col else "/static/default-profile.png"
+                photo = photo_paths[index - 2] if index - 2 < len(photo_paths) else "/static/default-profile.png"
 
                 candidate = {
                     "row_id": index,  # Add the row ID
@@ -313,6 +315,9 @@ def results():
         # Fetch all candidate data
         all_candidates = candidatesSheet.get_all_values()
         
+        # Fetch photo paths from the photosSheet
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+
         # Fetch vote data from results sheet (Column A: names, Column B: counts)
         results_data = resultsSheet.get_all_values()
         
@@ -339,7 +344,7 @@ def results():
                 first_name = row[0].strip()
                 last_name = row[2].strip()
                 full_name = f"{last_name}, {first_name}"  # Match the format in results sheet
-                photo = row[16].strip() if len(row) > 16 else "/static/default-profile.png"
+                photo = photo_paths[index - 2] if index - 2 < len(photo_paths) else "/static/default-profile.png"
                 
                 # Get vote count from dictionary (default to 0 if not found)
                 votes_data = vote_dict.get(full_name, {'raw': 0, 'formatted': '0'})
@@ -375,7 +380,7 @@ def results():
 @app.route('/quiz')
 def quiz():
     try:
-        # Fetch all questions from the first row of questions sheet
+        # Fetch all questions from the first row of the questions sheet
         questions_row = questionsSheet.row_values(1)
         questions = []
         
@@ -385,7 +390,6 @@ def quiz():
                 continue  # Skip empty columns
                 
             # Get corresponding options from pillars sheet (same column)
-            # Note: We're using get_all_values() for better performance with multiple cells
             pillar_col = sheet2.get_all_values()
             options = []
             if len(pillar_col) >= col_idx:  # Check if column exists in pillars sheet
@@ -522,7 +526,7 @@ def submit_candidate():
         issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
         # Ensure the uploads directory exists
-        upload_dir = os.path.join("static", "uploads")
+        upload_dir = os.path.join(app.root_path, "static", "uploads")  # Use app.root_path for absolute path
         if not os.path.exists(upload_dir):
             os.makedirs(upload_dir)
 
@@ -532,6 +536,9 @@ def submit_candidate():
             photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
             photo_path = os.path.join(upload_dir, photo_filename)
             photo.save(photo_path)
+
+            # Save the relative path for use in the app
+            photo_path = f"/static/uploads/{photo_filename}"
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -761,7 +768,7 @@ def save_question():
 
         pillar_index = pillar_titles.index(pillar) + 1  # Convert to 1-based index for Google Sheets
 
-        # Append the question to the corresponding pillar column
+        # Append question to the corresponding pillar column
         questionsSheet.update_cell(len(questionsSheet.col_values(pillar_index)) + 1, pillar_index, question_text)
 
         return jsonify({"success": True, "message": "Question saved successfully"})
