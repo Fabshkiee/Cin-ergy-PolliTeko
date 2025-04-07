@@ -512,7 +512,48 @@ def add_position():
         })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+"""@app.route('/add-position', methods=['POST'])
+def add_position():
+    if 'user_id' not in session or not session.get('is_admin', False):
+         return jsonify({"success": False, "message": "Unauthorized"}), 403
  
+    try:
+         # Parse form data
+         position = request.json.get('position', '').strip()
+         number = int(request.json.get('number', 1))
+ 
+         # Validate input
+         if number < 0:
+             return jsonify({"success": False, "message": "Number cannot be negative"}), 400
+ 
+         # Check if position already exists
+         all_positions = positionsSheet.col_values(1)
+         if position in all_positions:
+             return jsonify({"success": False, "message": f"Position '{position}' already exists."}), 400
+ 
+         # Prepare value for Google Sheets - empty string for 0
+         sheet_number = '' if number == 0 else number
+ 
+         # Find next empty row
+         next_row = len(all_positions) + 1
+ 
+         # Update the sheet
+         positionsSheet.update(
+             f"A{next_row}:B{next_row}",
+             [[position, sheet_number]],
+             value_input_option='USER_ENTERED'  # This ensures proper handling of empty strings
+         )
+ 
+         return jsonify({
+             "success": True,
+             "message": f"Position '{position}' added successfully.",
+             "display_number": "Infinite" if number == 0 else number
+         })
+    except Exception as e:
+         return jsonify({"success": False, "message": str(e)}), 500
+ 
+ """
 @app.route('/list-positions')
 def list_positions():
      if 'user_id' not in session or not session.get('is_admin', False):
