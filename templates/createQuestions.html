@@ -7,14 +7,13 @@
 </head>
 <body>
     <h1>CREATE NEW QUESTIONS</h1>
-    <form id="createQuestionsForm" method="POST" action="/submit-issues">
+    <form id="createQuestionsForm" method="POST" action="/save-question">
         <div>
             <label for="chooseQuestion">CHOOSE QUESTION</label>
             <select id="chooseQuestion" name="chooseQuestion" required>
-                <option value="" disabled selected>Select Question</option>
-                <option value="question1">Multiple Choice Question</option>
-                <option value="question2">Ranked Choice Question</option>
-                <option value="question3">Issues and Controversies</option>
+                <option value="" selected>Select Question</option>
+                <option value="multipleChoice">Multiple Choice Question</option>
+                <option value="issuesAndStances">Issues and Controversies</option>
             </select>
         </div>
 
@@ -23,65 +22,140 @@
 
     <script>
         const chooseQuestion = document.getElementById("chooseQuestion");
+        const dynamicFields = document.getElementById("dynamicFields");
+
+        let issues = []; // Array to store issues
 
         chooseQuestion.addEventListener("change", function () {
             const selectedQuestion = this.value;
 
-            const form = document.getElementById("createQuestionsForm");
-            form.innerHTML = ""; // Clear existing fields
+            // Clear dynamic fields
+            dynamicFields.innerHTML = "";
 
-            if (selectedQuestion === "question3") {
+            if (selectedQuestion === "multipleChoice") {
+                // Add fields for Multiple Choice Question
+                const questionLabel = document.createElement("label");
+                questionLabel.textContent = "Enter Question";
+                questionLabel.setAttribute("for", "questionText");
+
+                const questionInput = document.createElement("input");
+                questionInput.setAttribute("type", "text");
+                questionInput.setAttribute("id", "questionText");
+                questionInput.setAttribute("name", "questionText");
+                questionInput.setAttribute("placeholder", "Enter your question");
+                questionInput.required = true;
+
+                const pillarLabel = document.createElement("label");
+                pillarLabel.textContent = "Select Pillar";
+                pillarLabel.setAttribute("for", "pillarSelect");
+
+                const pillarSelect = document.createElement("select");
+                pillarSelect.setAttribute("id", "pillarSelect");
+                pillarSelect.setAttribute("name", "pillarSelect");
+                pillarSelect.required = true;
+
+                // Load pillars dynamically
+                fetch('/api/pillars')
+                    .then(response => response.json())
+                    .then(data => {
+                        const defaultOption = document.createElement("option");
+                        defaultOption.value = "";
+                        defaultOption.textContent = "Select Pillar";
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        pillarSelect.appendChild(defaultOption);
+
+                        data.pillars.forEach(pillar => {
+                            const option = document.createElement("option");
+                            option.value = pillar;
+                            option.textContent = pillar;
+                            pillarSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error("Error loading pillars:", error);
+                        alert("Failed to load pillars. Please try again.");
+                    });
+
+                const saveButton = document.createElement("button");
+                saveButton.textContent = "Save Question";
+                saveButton.type = "button";
+                saveButton.id = "saveQuestion";
+
+                dynamicFields.appendChild(questionLabel);
+                dynamicFields.appendChild(questionInput);
+                dynamicFields.appendChild(pillarLabel);
+                dynamicFields.appendChild(pillarSelect);
+                dynamicFields.appendChild(saveButton);
+
+                saveButton.addEventListener("click", () => {
+                    const questionText = questionInput.value.trim();
+                    const pillar = pillarSelect.value;
+
+                    if (!questionText || !pillar) {
+                        alert("Please enter a question and select a pillar.");
+                        return;
+                    }
+
+                    fetch("/save-question", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ questionText, pillar }),
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert("Question saved successfully!");
+                                questionInput.value = "";
+                                pillarSelect.selectedIndex = 0;
+                            } else {
+                                alert("Error saving question: " + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error saving question:", error);
+                            alert("Failed to save question.");
+                        });
+                });
+            } else if (selectedQuestion === "issuesAndStances") {
+                // Add dynamic fields for "Issues and Controversies"
                 const head = document.createElement("h2");
                 head.textContent = "ISSUES AND CONTROVERSIES";
-                form.appendChild(head);
+                dynamicFields.appendChild(head);
 
                 const newInput = document.createElement("input");
                 newInput.setAttribute("type", "text");
                 newInput.setAttribute("id", "dynamicTextarea");
                 newInput.setAttribute("placeholder", "List issues here...");
-                form.append(newInput);
+                dynamicFields.append(newInput);
 
                 const addButton = document.createElement("button");
                 addButton.textContent = "Add Issue";
                 addButton.type = "button";
                 addButton.id = "buttonAdd";
-                form.appendChild(addButton);
+                dynamicFields.appendChild(addButton);
 
                 const issueList = document.createElement("ol");
                 issueList.setAttribute("id", "issueList");
-                form.appendChild(issueList);
+                dynamicFields.appendChild(issueList);
 
                 const submitButton = document.createElement("button");
                 submitButton.textContent = "Submit Issues";
                 submitButton.type = "button";
                 submitButton.id = "submitIssues";
-                form.appendChild(submitButton);
+                dynamicFields.appendChild(submitButton);
 
-                const issues = [];
+                // Re-render existing issues
+                renderIssues(issueList);
 
                 addButton.addEventListener("click", function () {
                     const issueValue = newInput.value.trim();
                     if (issueValue) {
                         issues.push(issueValue);
                         newInput.value = "";
-                        issueList.innerHTML = "";
-
-                        issues.forEach(issue => {
-                            const li = document.createElement("li");
-                            li.textContent = issue;
-
-                            const del = document.createElement("button");
-                            del.textContent = "Delete";
-                            del.type = "button";
-
-                            del.addEventListener("click", function () {
-                                issues.splice(issues.indexOf(issue), 1);
-                                issueList.removeChild(li);
-                            });
-
-                            li.appendChild(del);
-                            issueList.appendChild(li);
-                        });
+                        renderIssues(issueList);
                     }
                 });
 
@@ -97,200 +171,39 @@
                         .then(data => {
                             if (data.success) {
                                 alert("Issues saved successfully!");
+                                issues = []; // Clear issues after saving
+                                renderIssues(issueList);
                             } else {
                                 alert("Error saving issues: " + data.message);
                             }
                         })
                         .catch(error => {
-                            console.error("Error:", error);
+                            console.error("Error saving issues:", error);
                             alert("Failed to save issues.");
                         });
                 });
             }
         });
-    </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create New Questions</title>
-</head>
-<body>
-    <h1>CREATE NEW QUESTIONS</h1>
-    <form id="createQuestions" method="post" action="/save-question">
-        <div>
-            <label for="chooseQuestion">CHOOSE QUESTION</label>
-            <select id="chooseQuestion" name="chooseQuestion" required>
-                <option value="" disabled selected>Select Question</option>
-                <option value="question1">Multiple Choice Question</option>
-                <option value="question2">Ranked Choice Question</option>
-                <option value="question3">Issues and Controversies</option>
-            </select>
-        </div>
 
-        <div id="pillarsContainer" style="display: none;">
-            <label for="pillarSelect">Select Pillar:</label>
-            <select id="pillarSelect" name="pillar"></select>
-        </div>
+        // Function to render issues
+        function renderIssues(issueList) {
+            issueList.innerHTML = ""; // Clear the list
+            issues.forEach((issue, index) => {
+                const li = document.createElement("li");
+                li.textContent = issue;
 
-        <script>
-            const chooseQuestion = document.getElementById("chooseQuestion");
-            const pillarsContainer = document.getElementById("pillarsContainer");
-            const pillarSelect = document.getElementById("pillarSelect");
-            
-            // Fetch pillars from Flask backend
-            async function fetchPillars() {
-                try {
-                    const response = await fetch('/api/pillars');
-                    if (!response.ok) throw new Error('Failed to fetch pillars');
-                    const pillars = await response.json();
-                    
-                    // Clear existing options
-                    pillarSelect.innerHTML = '';
-                    
-                    // Add new options
-                    pillars.forEach(pillar => {
-                        const option = document.createElement("option");
-                        option.value = pillar;
-                        option.textContent = pillar;
-                        pillarSelect.appendChild(option);
-                    });
-                    
-                    return true;
-                } catch (error) {
-                    console.error('Error fetching pillars:', error);
-                    return false;
-                }
-            }
-        
-            chooseQuestion.addEventListener("change", async function () {
-                const selectedQuestion = this.value;
+                const delButton = document.createElement("button");
+                delButton.textContent = "Delete";
+                delButton.type = "button";
+                delButton.addEventListener("click", function () {
+                    issues.splice(index, 1); // Remove the issue from the array
+                    renderIssues(issueList); // Re-render the list
+                });
 
-                const existingTextarea = document.getElementById("dynamicTextarea");
-                const existingSelect = document.getElementById("dynamicSelect");
-                const existingHeading = document.querySelector("h2");
-                const existingButton = document.getElementById("buttonAdd");
-                const existingList = document.getElementById("issueList");
-                const existingInput = document.querySelector("input[type='text']");
-                const existingListItems = document.querySelectorAll("ol li");
-                const existingSubmitButton = document.querySelector("button[type='submit']");
-
-                if(existingTextarea) existingTextarea.remove();
-                if(existingSelect) existingSelect.remove(); 
-                if(existingButton) existingButton.remove();
-                if(existingList) existingList.remove();
-                if(existingHeading) existingHeading.remove();
-                if(existingInput) existingInput.remove();
-                if(existingSubmitButton) existingSubmitButton.remove();    
-                
-                // Show pillars dropdown
-                const fetched = await fetchPillars();
-                if (fetched) {
-                    pillarsContainer.style.display = 'block';
-                }
-
-                const submit = document.createElement("button");
-                submit.textContent = "Submit";
-                submit.type = "submit";
-
-                if (selectedQuestion === "question1" || selectedQuestion === "question2") {
-                    const form = document.getElementById("createQuestions");
-                    
-                    const head = document.createElement("h2");
-                    head.textContent = selectedQuestion === "question1" ? "MULTIPLE CHOICE QUESTION" : "RANKED CHOICE QUESTION";
-                    form.appendChild(head);
-
-                    const newInput = document.createElement("textarea");
-                    newInput.setAttribute("id", "dynamicTextarea");
-                    newInput.setAttribute("name", "questionText");
-                    newInput.setAttribute("placeholder", "Enter your question here...");
-                    newInput.setAttribute("rows", "4");
-                    newInput.setAttribute("cols", "50");
-                
-                    const newInput2 = document.createElement("select");
-                    newInput2.setAttribute("id", "dynamicSelect");
-                    newInput2.setAttribute("name", "options");
-                    newInput2.multiple = selectedQuestion === "question2";
-                    
-                    const options = [
-                        {value: "option1", text: "Option 1"},
-                        {value: "option2", text: "Option 2"},
-                        {value: "option3", text: "Option 3"},
-                    ];
-                    
-                    options.forEach(optionData => {
-                        const option = document.createElement("option");
-                        option.value = optionData.value;
-                        option.textContent = optionData.text;
-                        newInput2.appendChild(option);
-                    });
-                    
-                    form.appendChild(newInput);
-                    form.appendChild(newInput2);
-                    form.appendChild(submit);
-                
-                } else if (selectedQuestion === "question3") {
-                    const form = document.getElementById("createQuestions");
-
-                    const head = document.createElement("h2");
-                    head.textContent = "ISSUES AND CONTROVERSIES";
-                    form.appendChild(head);
-
-                    const newInput = document.createElement("input");
-                    newInput.setAttribute("type", "text");
-                    newInput.setAttribute("id", "dynamicTextarea");
-                    newInput.setAttribute("placeholder", "List issues here...");
-                    form.append(newInput);
-
-                    const addButton = document.createElement("button");
-                    addButton.textContent = "Add Issue";
-                    addButton.type = "button"; 
-                    addButton.id = "buttonAdd";
-                    form.appendChild(addButton);
-                        
-                    const issueList = document.createElement("ol");
-                    issueList.setAttribute("id", "issueList");
-                    form.appendChild(issueList);
-
-                    const issues = [];
-                    
-                    addButton.addEventListener("click", function () {
-                        const issueValue = newInput.value.trim();
-                        if (issueValue) {
-                            issues.push(issueValue);
-                            newInput.value = '';
-                            issueList.innerHTML = ''; 
-                            
-                            issues.forEach(issue => {
-                                const li = document.createElement("li");
-                                li.textContent = issue;
-
-                                const hiddenInput = document.createElement("input");
-                                hiddenInput.type = "hidden";
-                                hiddenInput.name = "issues[]";
-                                hiddenInput.value = issue;
-                                li.appendChild(hiddenInput);
-
-                                const del = document.createElement("button");
-                                del.textContent = "Delete";
-                                del.type = "button";
-
-                                del.addEventListener("click", function () {
-                                    issues.splice(issues.indexOf(issue), 1);
-                                    issueList.removeChild(li);
-                                });
-
-                                li.appendChild(del);
-                                issueList.appendChild(li); 
-                            });
-                            form.appendChild(submit);
-                        }
-                    });
-                }
+                li.appendChild(delButton);
+                issueList.appendChild(li);
             });
-        </script>
-    </form>
+        }
+    </script>
 </body>
 </html>

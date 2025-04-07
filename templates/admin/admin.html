@@ -3,15 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Admin Page</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .title{
+            background-color: #FAF9F6;
+            margin: 1rem 2rem 1rem 1rem;
+            color: #3A7CA5;
+        }
+
+        .admin_controls {
+            display: grid;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            position: sticky;
+            height: 100vh;
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+
+        .button-logout{
+            background-color: #FAF9F6;
+            color: black;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            margin: 13rem 0rem 0.5rem 0rem;
+            border-radius: 1rem;
+        }
+
+        .main-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .title1 {
+            font-size: 3.5rem;
+            color: #3A7CA5;
+            margin-top: -10rem;
+        }   
+        
+        .title2 {
+            font-size: 2rem;
+            color: black;
+            margin-bottom: 1rem;
+        }
+        .description {
+            font-size: 1rem;
+            font-style: italic;
+            color: black;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+    </style>
 </head>
 <body>
-    <button id="listPosition">List Positions</button>
-    <button id="addCandidate">Add New Candidate</button>
-    <button id="createQuestion">Create New Questions</button>
-    <button id="addPillar">Add Pillar</button>
-    <button id="Publish Questions">Publish Questions</button>
-    <button id="Open Voting">Open Voting</button>
+
+    <section class="admin_controls">    
+        <h1 class="title"> Admin </h1>
+        <button id="listPosition" class="button">List Positions</button>
+        <button id="addCandidate" class="button">Add New Candidate</button>
+        <button id="createQuestion" class="button">Create New Questions</button>
+        <button id="addPillar" class="button">Add Pillar</button>
+        <button id="Publish Questions" class="button">Publish Questions</button>
+        <button id="Open Voting" class="button">Open Voting</button>
+
+        <div class="logout">
+            <a class="button-logout">Logout</a>
+        </div>
+    </section>
+
+    <section class="main-text">
+        <h1 class="title1">Welcome to the Admin Page!</h1>
+        <p class="title2">Manage Candidates, Questions, and Voting</h2>
+        <p class="description">Use the buttons on the left to navigate through the admin functionalities.</p>
+    </section>
     
     <script src="/static/backend.js"></script>
 </body>

@@ -42,6 +42,8 @@ issuesSheet = workbook.worksheet("stances")
 stancesSheet = workbook.worksheet("stances")
 photosSheet = workbook.worksheet("photos")  # Make sure this sheet exists
 
+issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]  # Fetch issue titles from the first row
+
 @app.route('/')
 def home():
     return render_template("index.html")
@@ -417,13 +419,19 @@ def get_platforms():
 @app.route("/submitAddCandidate", methods=["POST"])
 def submit_candidate():
     try:
-        # Fetch candidate data from the form
+        # Fetch candidate data
         data = request.form.to_dict()
         photo = request.files.get("photo")
 
-        # Process platforms and stances from JSON strings
+        # Process platforms, stances, education, leadership, and achievements
         platforms = json.loads(data.get("platforms", "{}"))
         stances = json.loads(data.get("stances", "{}"))
+        education = json.loads(data.get("education", "[]"))
+        leadership = json.loads(data.get("experience", "[]"))
+        achievements = json.loads(data.get("achievements", "[]"))
+
+        # Fetch issue titles from the stancesSheet
+        issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
         # Ensure the uploads directory exists
         upload_dir = os.path.join("static", "uploads")
@@ -436,9 +444,6 @@ def submit_candidate():
             photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
             photo_path = os.path.join(upload_dir, photo_filename)
             photo.save(photo_path)
-
-        # Get the next row for the candidates sheet
-        candidate_row = len(candidatesSheet.get_all_values()) + 1
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -456,23 +461,31 @@ def submit_candidate():
         candidatesSheet.append_row(candidate_data)
 
         # Save platforms to the pillarsSheet
-        pillar_titles = sheet2.row_values(1)  # Fetch pillar titles from the first row
+        pillar_titles = [pillar.strip() for pillar in sheet2.row_values(1)]
         platform_row = [platforms.get(pillar, "") for pillar in pillar_titles]
-        sheet2.insert_row(platform_row, candidate_row)
+        sheet2.insert_row(platform_row, len(candidatesSheet.get_all_values()))
 
         # Save stances to the stancesSheet
-        issue_titles = stancesSheet.row_values(1)  # Fetch issue titles from the first row
         stances_row = [stances.get(issue, "No Answer") for issue in issue_titles]
-        stancesSheet.insert_row(stances_row, candidate_row)
+        stancesSheet.insert_row(stances_row, len(candidatesSheet.get_all_values()))
+
+        # Save education to the educationsSheet
+        for edu in education:
+            educationsSheet.append_row([edu])
+
+        # Save leadership to the leadershipsSheet
+        for lead in leadership:
+            leadershipsSheet.append_row([lead])
+
+        # Save achievements to the achievementsSheet
+        for achieve in achievements:
+            achievementsSheet.append_row([achieve])
 
         # Save photo information to the photosSheet
-        while len(photosSheet.get_all_values()) < candidate_row:
-            photosSheet.append_row(["", "", ""])  # Ensure the row exists
-        photosSheet.update(f"A{candidate_row}:C{candidate_row}", [[
+        photosSheet.append_row([
             f"{data.get('FirstName', '')} {data.get('LastName', '')}",
-            photo_path,
-            candidate_row
-        ]])
+            photo_path
+        ])
 
         return jsonify({"success": True, "message": "Candidate added successfully"})
     except Exception as e:
@@ -678,40 +691,34 @@ def submit_votes():
 @app.route('/api/pillars')
 def get_pillars():
     try:
-        # Fetch pillars from the pillars sheet (assuming they're in row 1, columns A-C)
-        pillars = sheet2.row_values(1)[:3]  # Gets first 3 columns of row 1
-        pillars = [p for p in pillars if p]  # Remove empty values
-        return jsonify(pillars)
+        pillars = sheet2.row_values(1)  # Fetch pillar titles from the first row
+        return jsonify({"pillars": pillars})
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/save-question', methods=['POST'])
 def save_question():
     try:
-        question_type = request.form.get('chooseQuestion')
-        pillar = request.form.get('pillars')
-        question_text = request.form.get('questionText', '')
-        
-        if question_type in ['question1', 'question2']:
-            options = request.form.getlist('options')
-            # Save to your Google Sheet
-            # Example: questionsSheet.append_row([question_type, pillar, question_text, ', '.join(options)])
-        elif question_type == 'question3':
-            issues = request.form.getlist('issues[]')
-            # Save to your Google Sheet
-            # Example: questionsSheet.append_row([question_type, pillar, '', ', '.join(issues)])
-        
+        data = request.json
+        question_text = data.get('questionText')
+        pillar = data.get('pillar')
+
+        if not question_text or not pillar:
+            return jsonify({"success": False, "message": "Question and pillar are required"}), 400
+
+        # Fetch pillar titles and find the column index for the selected pillar
+        pillar_titles = sheet2.row_values(1)
+        if pillar not in pillar_titles:
+            return jsonify({"success": False, "message": "Invalid pillar selected"}), 400
+
+        pillar_index = pillar_titles.index(pillar) + 1  # Convert to 1-based index for Google Sheets
+
+        # Append the question to the corresponding pillar column
+        questionsSheet.update_cell(len(questionsSheet.col_values(pillar_index)) + 1, pillar_index, question_text)
+
         return jsonify({"success": True, "message": "Question saved successfully"})
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
-
-
-
-
-
-
 
 @app.route('/submit-issues', methods=['POST'])
 def submit_issues():
