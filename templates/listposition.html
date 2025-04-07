@@ -30,6 +30,49 @@
             display: none;
         }
 
+        .admin_controls {
+            display: grid;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            position: sticky;
+            height: 100vh;
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+
+        .button-logout{
+            background-color: #FAF9F6;
+            color: black;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            margin: 13rem 0rem 0.5rem 0rem;
+            border-radius: 1rem;
+        }
+
         .title {
             background-color: #FAF9F6;
             margin: 1rem 2rem 1rem 1rem;
@@ -218,49 +261,6 @@
         .message.error {
             background-color: #f44336;
             /* Red for error */
-        }
-
-        /* Responsive Adjustments */
-        @media (max-width: 600px) {
-            body {
-                flex-direction: column; /* Stack admin controls and main content vertically */
-            }
-
-            .admin_controls {
-                width: 100%;
-                border-right: none;
-                border-bottom: 0.15rem solid #bababa;
-            }
-
-            .main-content {
-                padding: 1rem;
-            }
-
-            #positionsForm {
-                width: 95%;
-                padding: 1.5rem 1rem;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            #positionsForm label {
-                font-size: 1rem;
-            }
-
-            #positionsForm input[type="text"],
-            #positionsForm input[type="number"] {
-                font-size: 0.9rem;
-            }
-
-            #positionsForm button {
-                font-size: 0.9rem;
-            }
-
-            #positionsList {
-                padding: 1rem;
-            }
         }
     </style>
 </head>
