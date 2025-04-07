@@ -17,9 +17,9 @@ The Results Page presents the total number of votes for each candidate and posit
 Poll-It-Teko was developed to simulate a digital election process while also helping users make informed decisions by aligning their beliefs with potential candidates. It encourages political engagement and introduces a tech-based approach to voter education.
 
 ## Technologies Used
-Frontend: HTML, CSS, JavaScript
-Backend: Python
-Framework: Flask
+- Frontend: HTML, CSS, JavaScript
+- Backend: Python
+- Framework: Flask
 
 ## Authors
 **Cin>>ergy Team**
