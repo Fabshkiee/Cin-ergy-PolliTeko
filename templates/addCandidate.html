@@ -326,85 +326,80 @@
 
         // Modified form submission handler
         function submitForm(e) {
-    e.preventDefault();
+            e.preventDefault();
 
-    const form = document.getElementById("candidateForm");
-    const formData = new FormData(form);
+            const form = document.getElementById("candidateForm");
+            const formData = new FormData(form);
 
-    // Append arrays and platforms to FormData
-    formData.append("education", JSON.stringify(education));
-    formData.append("experience", JSON.stringify(experience));
-    formData.append("achievements", JSON.stringify(achievements));
-    formData.append("platforms", JSON.stringify(platforms));
+            // Append arrays and platforms to FormData
+            formData.append("education", JSON.stringify(education));
+            formData.append("experience", JSON.stringify(experience));
+            formData.append("achievements", JSON.stringify(achievements));
+            formData.append("platforms", JSON.stringify(platforms));
 
-    // Show loading state
-    const submitBtn = document.getElementById("submit");
-    const originalBtnText = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = "Submitting...";
+            const stances = {};
+            document.querySelectorAll("#issuesContainer select").forEach(select => {
+                const issue = select.name.replace("stances[", "").replace("]", "").trim().toLowerCase();
+                stances[issue] = select.value;
+            });
 
-    fetch("/submitAddCandidate", {
-        method: "POST",
-        body: formData,
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(err => { throw new Error(err.message || "Server error"); });
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.result === "success") {
-            alert(`Candidate added successfully!\nRow: ${data.row}\n${data.message}`);
+            formData.append("stances", JSON.stringify(stances));
+
+            const submitButton = document.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.textContent = "Submitting...";
             
-            // Comprehensive form reset
-            resetForm();
-        } else {
-            throw new Error(data.message || "Unknown error occurred");
+            fetch("/submitAddCandidate", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Candidate added successfully!");
+                    resetForm();
+                } else {
+                    alert("Error: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error("Submission error:", error);
+                alert("Failed to submit candidate data.");
+            });
         }
-    })
-    .catch(error => {
-        console.error("Submission error:", error);
-        alert("Failed to submit candidate data: " + error.message);
-    })
-    .finally(() => {
-        submitBtn.disabled = false;
-        submitBtn.textContent = originalBtnText;
-    });
-}
 
-// New function to completely reset the form
-function resetForm() {
-    // Reset the HTML form
-    const form = document.getElementById("candidateForm");
-    form.reset();
-    
-    // Clear all JavaScript arrays
-    education = [];
-    experience = [];
-    achievements = [];
-    platforms = {};
-    
-    // Update all lists to show empty
-    updateEducationList();
-    updateExperienceList();
-    updateAchievementList();
-    
-    // Clear platform inputs
-    const platformInputs = document.querySelectorAll('#platformsContainer input[type="text"]');
-    platformInputs.forEach(input => {
-        input.value = '';
-    });
-    
-    // Reset file input
-    document.getElementById("photo").value = '';
-    
-    // Reset select dropdowns to their initial state
-    document.getElementById("position").selectedIndex = 0;
-    document.getElementById("region").selectedIndex = 0;
-    document.getElementById("province").selectedIndex = 0;
-    document.getElementById("city").selectedIndex = 0;
-}
+        // New function to completely reset the form
+        function resetForm() {
+            // Reset the HTML form
+            const form = document.getElementById("candidateForm");
+            form.reset();
+            
+            // Clear all JavaScript arrays
+            education = [];
+            experience = [];
+            achievements = [];
+            platforms = {};
+            
+            // Update all lists to show empty
+            updateEducationList();
+            updateExperienceList();
+            updateAchievementList();
+            
+            // Clear platform inputs
+            const platformInputs = document.querySelectorAll('#platformsContainer input[type="text"]');
+            platformInputs.forEach(input => {
+                input.value = '';
+            });
+            
+            // Reset file input
+            document.getElementById("photo").value = '';
+            
+            // Reset select dropdowns to their initial state
+            document.getElementById("position").selectedIndex = 0;
+            document.getElementById("region").selectedIndex = 0;
+            document.getElementById("province").selectedIndex = 0;
+            document.getElementById("city").selectedIndex = 0;
+        }
 
         // Load positions and platforms when page loads
         document.addEventListener('DOMContentLoaded', function() {
