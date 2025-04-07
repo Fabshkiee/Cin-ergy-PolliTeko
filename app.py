@@ -5,7 +5,15 @@ from google.oauth2.service_account import Credentials
 import json
 import requests
 from functools import lru_cache
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 @lru_cache(maxsize=None)
 def get_location_name(code, endpoint):
@@ -187,8 +195,8 @@ def get_candidate_profile(row_id):
             "age": candidate_row[9],
             "party": candidate_row[10],
             "photo": photo_path or "/static/default-profile.png",
-            "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
-            "stances": stance_data,  # Include stances dynamically fetched from stancesSheet
+            "platforms": platforms,
+            "stances": stance_data,
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
@@ -220,42 +228,35 @@ def voting():
 def matchResults():
     if 'user_id' not in session:
         return redirect('/')
-    
+
     if 'match_results' not in session:
         return redirect('/quiz')  # Redirect if no results available
-    
+
     results = session.get('match_results', [])
-    
-    # Fetch photo paths from the photosSheet (Column B, skip header row)
-    photo_paths = photosSheet.col_values(2)[1:] if len(photosSheet.get_all_values()) > 1 else []
-    
+
+    # Fetch photo paths from the photosSheet
+    photo_data = photosSheet.get_all_values()  # Fetch all data from the photosSheet
+    photo_dict = {row[0].strip(): row[1].strip() for row in photo_data[1:] if len(row) >= 2}  # Map names to photo URLs
+
     # Calculate match percentages for each candidate
     processed_results = []
-    for index, candidate in enumerate(results, start=2):  # Start at row 2 to match photo paths
+    for candidate in results:
         # Calculate platform match percentage
         platform_match = calculate_platform_match(candidate)
-        
+
         # Calculate stance match percentage
         stance_match = calculate_stance_match(candidate)
-        
+
         # Calculate overall match
         overall_match = round((platform_match + stance_match) / 2)
-        
+
         # Generate match summary
         match_summary = generate_match_summary(candidate, platform_match, stance_match)
-        
-        # Get photo URL - use index-2 to match photo_paths array
-        photo = photo_paths[index-2] if (index-2) < len(photo_paths) else "/static/default-profile.png"
-        
-        # Clean up photo path if needed
-        if photo and '\\' in photo:
-            photo = photo.replace('\\', '/')
-        if photo and not photo.startswith('/static'):
-            if photo.startswith('static'):
-                photo = '/' + photo
-            else:
-                photo = '/static/' + photo
-        
+
+        # Get photo URL from the photo_dict
+        full_name = f"{candidate['first_name']} {candidate['last_name']}"
+        photo = photo_dict.get(full_name, "/static/default-profile.png")
+
         processed_candidate = {
             **candidate,
             'platform_match': platform_match,
@@ -263,16 +264,15 @@ def matchResults():
             'overall_match': overall_match,
             'match_summary': match_summary,
             'photo': photo,
-            'row_id': candidate.get('row_id', index)  # Ensure row_id exists
         }
         processed_results.append(processed_candidate)
-    
+
     # Sort by overall match score descending
     processed_results.sort(key=lambda x: x['overall_match'], reverse=True)
-    
+
     top_candidate = processed_results[0] if processed_results else None
     similar_candidates = processed_results[1:4] if len(processed_results) > 1 else []
-    
+
     return render_template(
         'matchResults.html',
         top_candidate=top_candidate,
@@ -495,6 +495,7 @@ def save_results():
 
         # Get all candidates data
         all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header row
+        photo_paths = photosSheet.col_values(2)[1:]  # Fetch photo URLs from photosSheet
         candidate_scores = {}
 
         # Initialize scores for all candidates
@@ -532,13 +533,14 @@ def save_results():
         results = []
         for row_num, score in candidate_scores.items():
             candidate_data = candidatesSheet.row_values(row_num)
+            photo = photo_paths[row_num - 2] if row_num - 2 < len(photo_paths) else "/static/default-profile.png"
             if len(candidate_data) >= 3:  # Ensure we have basic candidate info
                 results.append({
                     "row_id": row_num,
                     "first_name": candidate_data[0],
                     "last_name": candidate_data[2],
                     "position": candidate_data[3],
-                    "photo": candidate_data[16] if len(candidate_data) > 16 else "/static/default-profile.png",
+                    "photo": photo,
                     "score": score,
                     "platforms": {
                         "Education": candidate_data[11] if len(candidate_data) > 11 else "",
@@ -597,20 +599,11 @@ def submit_candidate():
         # Fetch issue titles from the stancesSheet
         issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
-        # Ensure the uploads directory exists
-        upload_dir = os.path.join(app.root_path, "static", "uploads")  # Use app.root_path for absolute path
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
-
-        # Save the photo file if it exists
-        photo_path = ""
+        # Upload the photo to Cloudinary if it exists
+        photo_url = ""
         if photo:
-            photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
-            photo_path = os.path.join(upload_dir, photo_filename)
-            photo.save(photo_path)
-
-            # Save the relative path for use in the app
-            photo_path = f"/static/uploads/{photo_filename}"
+            upload_result = cloudinary.uploader.upload(photo, folder="candidates")
+            photo_url = upload_result.get("secure_url", "")
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -651,7 +644,7 @@ def submit_candidate():
         # Save photo information to the photosSheet
         photosSheet.append_row([
             f"{data.get('FirstName', '')} {data.get('LastName', '')}",
-            photo_path
+            photo_url
         ])
 
         return jsonify({"success": True, "message": "Candidate added successfully"})
