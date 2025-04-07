@@ -141,6 +141,8 @@ def get_candidate_profile(row_id):
         if not candidate_row:
             return jsonify({"error": "Candidate not found"}), 404
 
+        photo_path = photosSheet.cell(row_id, 2).value if row_id <= len(photosSheet.get_all_values()) else ""
+
         # Ensure the row has enough columns
         while len(candidate_row) < 16:  # Assuming 16 columns are required
             candidate_row.append("")
@@ -155,17 +157,12 @@ def get_candidate_profile(row_id):
         province_name = get_location_name(province_code, 'provinces')
         city_name = get_location_name(city_code, 'cities-municipalities')
 
-        # Extract platform details
-        platforms = {
-            "Education": candidate_row[11],  # Column L
-            "Healthcare": candidate_row[12],  # Column M
-            "Clean Government": candidate_row[13],  # Column N
-            "Economy": candidate_row[14],  # Column O
-            "Agriculture": candidate_row[15],  # Column P
-        }
+        # Fetch platform titles and candidate's platform values from the pillarsSheet
+        platform_titles = sheet2.row_values(1)  # First row contains platform titles
+        platform_values = sheet2.row_values(row_id) if row_id <= len(sheet2.get_all_values()) else []
 
-        # Filter out empty platform details
-        platform_details = {key: value for key, value in platforms.items() if value.strip()}
+        # Create a dictionary of platforms
+        platforms = {title: value for title, value in zip(platform_titles, platform_values) if value.strip()}
 
         # Extract candidate details
         candidate = {
@@ -183,8 +180,8 @@ def get_candidate_profile(row_id):
             "birthday": candidate_row[8],
             "age": candidate_row[9],
             "party": candidate_row[10],
-            "photo": candidate_row[16] if len(candidate_row) > 16 else "/static/default-profile.png",  # Include photo
-            "platforms": platform_details,  # Include only non-empty platform details
+            "photo": photo_path or "/static/default-profile.png",
+            "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
