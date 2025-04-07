@@ -257,6 +257,10 @@ def matchResults():
         full_name = f"{candidate['first_name']} {candidate['last_name']}"
         photo = photo_dict.get(full_name, "/static/default-profile.png")
 
+        # Ensure the photo URL is valid
+        if not photo.startswith("http"):
+            photo = "/static/default-profile.png"
+
         processed_candidate = {
             **candidate,
             'platform_match': platform_match,
