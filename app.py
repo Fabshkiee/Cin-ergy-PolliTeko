@@ -5,7 +5,15 @@ from google.oauth2.service_account import Credentials
 import json
 import requests
 from functools import lru_cache
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 @lru_cache(maxsize=None)
 def get_location_name(code, endpoint):
@@ -187,8 +195,8 @@ def get_candidate_profile(row_id):
             "age": candidate_row[9],
             "party": candidate_row[10],
             "photo": photo_path or "/static/default-profile.png",
-            "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
-            "stances": stance_data,  # Include stances dynamically fetched from stancesSheet
+            "platforms": platforms,
+            "stances": stance_data,
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
@@ -372,7 +380,7 @@ def save_results():
 def matchResults():
     if 'user_id' not in session:
         return redirect('/')
-    
+
     if 'match_results' not in session:
         return redirect('/quiz')
     
@@ -647,20 +655,11 @@ def submit_candidate():
         # Fetch issue titles from the stancesSheet
         issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
-        # Ensure the uploads directory exists
-        upload_dir = os.path.join(app.root_path, "static", "uploads")  # Use app.root_path for absolute path
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
-
-        # Save the photo file if it exists
-        photo_path = ""
+        # Upload the photo to Cloudinary if it exists
+        photo_url = ""
         if photo:
-            photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
-            photo_path = os.path.join(upload_dir, photo_filename)
-            photo.save(photo_path)
-
-            # Save the relative path for use in the app
-            photo_path = f"/static/uploads/{photo_filename}"
+            upload_result = cloudinary.uploader.upload(photo, folder="candidates")
+            photo_url = upload_result.get("secure_url", "")
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -701,7 +700,7 @@ def submit_candidate():
         # Save photo information to the photosSheet
         photosSheet.append_row([
             f"{data.get('FirstName', '')} {data.get('LastName', '')}",
-            photo_path
+            photo_url
         ])
 
         return jsonify({"success": True, "message": "Candidate added successfully"})
@@ -1042,24 +1041,27 @@ def delete_column():
 @app.route('/api/add-pillar', methods=['POST'])
 def add_pillar():
     try:
+        # Get the pillar name from the request
         pillar_name = request.json.get('pillarName', '').strip()
 
         if not pillar_name:
             return jsonify({"success": False, "message": "Pillar name cannot be empty"}), 400
 
-        # Check if the pillar already exists
+        # Fetch existing pillars from the first row of the pillarsSheet
         existing_pillars = sheet2.row_values(1)
-        if pillar_name in existing_pillars:
-            return jsonify({"success": False, "message": "Pillar already exists"}), 400
 
-        # Add the pillar to the next empty column
+        # Check if the pillar already exists
+        if pillar_name in existing_pillars:
+            return jsonify({"success": False, "message": f"Pillar '{pillar_name}' already exists."}), 400
+
+        # Add the new pillar to the next empty column
         next_column = len(existing_pillars) + 1
         sheet2.update_cell(1, next_column, pillar_name)
 
-        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully"})
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully."})
     except Exception as e:
-        print(f"Error adding pillar: {e}")  # Log the error for debugging
-        return jsonify({"success": False, "message": "An error occurred while adding the pillar"}), 500
+        print(f"Error adding pillar: {e}")
+        return jsonify({"success": False, "message": "An error occurred while adding the pillar."}), 500
 
 @app.route('/api/delete-pillar', methods=['POST'])
 def delete_pillar():
