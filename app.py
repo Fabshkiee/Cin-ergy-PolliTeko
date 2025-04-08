@@ -33,7 +33,8 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
 google_creds_json = os.environ.get('GOOGLE_CREDENTIALS')
-creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/creds.json", scopes=scopes)
+#creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
+creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
