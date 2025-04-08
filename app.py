@@ -991,24 +991,27 @@ def delete_column():
 @app.route('/api/add-pillar', methods=['POST'])
 def add_pillar():
     try:
+        # Get the pillar name from the request
         pillar_name = request.json.get('pillarName', '').strip()
 
         if not pillar_name:
             return jsonify({"success": False, "message": "Pillar name cannot be empty"}), 400
 
-        # Check if the pillar already exists
+        # Fetch existing pillars from the first row of the pillarsSheet
         existing_pillars = sheet2.row_values(1)
-        if pillar_name in existing_pillars:
-            return jsonify({"success": False, "message": "Pillar already exists"}), 400
 
-        # Add the pillar to the next empty column
+        # Check if the pillar already exists
+        if pillar_name in existing_pillars:
+            return jsonify({"success": False, "message": f"Pillar '{pillar_name}' already exists."}), 400
+
+        # Add the new pillar to the next empty column
         next_column = len(existing_pillars) + 1
         sheet2.update_cell(1, next_column, pillar_name)
 
-        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully"})
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully."})
     except Exception as e:
-        print(f"Error adding pillar: {e}")  # Log the error for debugging
-        return jsonify({"success": False, "message": "An error occurred while adding the pillar"}), 500
+        print(f"Error adding pillar: {e}")
+        return jsonify({"success": False, "message": "An error occurred while adding the pillar."}), 500
 
 @app.route('/api/delete-pillar', methods=['POST'])
 def delete_pillar():

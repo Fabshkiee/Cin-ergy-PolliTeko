@@ -256,19 +256,24 @@
         }
 
         function savePillarToSheet(pillar) {
-            fetch('/api/add-pillar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pillarName: pillar }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
-        }
+        fetch('/api/add-pillar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pillarName: pillar }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                loadPillars(); // Reload the pillars list
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
 
         function adjustAdminControlsHeight() {
             const adminControls = document.getElementById('adminControls');
