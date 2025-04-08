@@ -5,7 +5,15 @@ from google.oauth2.service_account import Credentials
 import json
 import requests
 from functools import lru_cache
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+cloudinary.config(
+    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
+    api_key=os.getenv("CLOUDINARY_API_KEY"),
+    api_secret=os.getenv("CLOUDINARY_API_SECRET")
+)
 
 @lru_cache(maxsize=None)
 def get_location_name(code, endpoint):
@@ -24,7 +32,9 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-creds = Credentials.from_service_account_file("/storage/emulated/0/MGIT/Cin-ergy-PolliTeko/upvhackathonCreds.json", scopes=scopes)
+google_creds_json = os.environ.get('GOOGLE_CREDENTIALS')
+#creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
+creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
 client = gspread.authorize(creds)
 
 sheet_id = "15P43fHag6Va8upWyhvUJwV0ECbtU4zeMsFp5DiPUXzM"
@@ -186,8 +196,8 @@ def get_candidate_profile(row_id):
             "age": candidate_row[9],
             "party": candidate_row[10],
             "photo": photo_path or "/static/default-profile.png",
-            "platforms": platforms,  # Include platforms dynamically fetched from pillarsSheet
-            "stances": stance_data,  # Include stances dynamically fetched from stancesSheet
+            "platforms": platforms,
+            "stances": stance_data,
             "education": educationsSheet.row_values(row_id) if educationsSheet.row_values(row_id) else [],
             "leadership": leadershipsSheet.row_values(row_id) if leadershipsSheet.row_values(row_id) else [],
             "achievements": achievementsSheet.row_values(row_id) if achievementsSheet.row_values(row_id) else [],
@@ -215,95 +225,223 @@ def voting():
         return redirect('/')
     return render_template('voting.html')
 
+# ====== ADD THESE HELPER FUNCTIONS ======
+def calculate_platform_match(candidate):
+    """Calculate actual platform match percentage"""
+    try:
+        user_answers = session.get('quiz_answers', {})
+        if not user_answers:
+            return 0
+            
+        candidate_row = sheet2.row_values(candidate['row_id'])
+        platform_titles = sheet2.row_values(1)
+        candidate_platforms = dict(zip(platform_titles, candidate_row))
+        
+        matches = 0
+        total = 0
+        for pillar, user_answer in user_answers.items():
+            if pillar in candidate_platforms and candidate_platforms[pillar]:
+                total += 1
+                if candidate_platforms[pillar].strip().lower() == user_answer.strip().lower():
+                    matches += 1
+                    
+        return round((matches / total) * 100) if total > 0 else 0
+    except Exception as e:
+        print(f"Error calculating platform match: {e}")
+        return 0
+
+def calculate_stance_match(candidate):
+    """Calculate actual stance match percentage"""
+    try:
+        user_stances = session.get('quiz_stances', {})
+        if not user_stances:
+            return 0
+            
+        candidate_row = stancesSheet.row_values(candidate['row_id'])
+        issue_titles = stancesSheet.row_values(1)
+        candidate_stances = dict(zip(issue_titles, candidate_row))
+        
+        matches = 0
+        total = 0
+        for issue, user_stance in user_stances.items():
+            if issue in candidate_stances and candidate_stances[issue]:
+                total += 1
+                if candidate_stances[issue].strip().lower() == user_stance.strip().lower():
+                    matches += 1
+                    
+        return round((matches / total) * 100) if total > 0 else 0
+    except Exception as e:
+        print(f"Error calculating stance match: {e}")
+        return 0
+
+def generate_match_summary(candidate, platform_match, stance_match):
+    """Generate a dynamic summary based on match percentages"""
+    strengths = []
+    if platform_match >= 80:
+        strengths.append("excellent platform alignment")
+    elif platform_match >= 60:
+        strengths.append("strong platform alignment")
+    
+    if stance_match >= 80:
+        strengths.append("excellent stance agreement")
+    elif stance_match >= 60:
+        strengths.append("strong stance agreement")
+    
+    if strengths:
+        return f"You and {candidate['first_name']} show {', '.join(strengths)}."
+    elif platform_match >= 40 or stance_match >= 40:
+        return f"You and {candidate['first_name']} have some common ground."
+    else:
+        return f"You and {candidate['first_name']} have limited alignment."
+
+# ====== REPLACE YOUR matchResults ROUTE WITH THIS ======
+@app.route('/save-results', methods=['POST'])
+def save_results():
+    try:
+        data = request.json
+        user_answers = data.get('answers', {})
+        
+        if not user_answers:
+            return jsonify({"success": False, "message": "No answers provided"}), 400
+
+        # Get all candidates data
+        all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header
+        candidate_scores = {}
+
+        # Get photos mapping first - ensure this matches your photos sheet structure
+        # Replace the photo handling section with:
+# Replace the photo handling section with:
+        photo_map = {}
+        photos_data = photosSheet.get_all_values()
+        for row in photos_data[1:]:  # Skip header row
+          if len(row) >= 2:  # Ensure there's at least 2 columns (name and photo URL)
+            candidate_name = f"{row[0].strip().lower()}"  # Standardize name format
+            photo_url = row[1].strip()  # Get the photo URL from column B
+            photo_map[candidate_name] = photo_url if photo_url else "/static/default-profile.png"
+
+        # Rest of your code...
+
+        # Initialize scores
+        for index in range(len(all_candidates)):
+            candidate_row = all_candidates[index]
+            # Create matching key - adjust this to match your photos sheet format
+            first_name = candidate_row[0].strip().lower()
+            last_name = candidate_row[2].strip().lower()
+            full_name = f"{first_name} {last_name}"
+            
+            candidate_scores[index + 2] = {  # +2 for sheet row (1 header + 1 base)
+                'score': 0,
+                'photo': photo_map.get(full_name, '/static/default-profile.png'),
+                'first_name': candidate_row[0].strip(),
+                'last_name': candidate_row[2].strip()
+            }
+
+        # Rest of your matching logic remains the same...
+        for question_id, user_answer in user_answers.items():
+            user_keywords = user_answer.strip().lower().split()
+            
+            for candidate_row in range(len(all_candidates)):
+                candidate_data = all_candidates[candidate_row]
+                candidate_row_num = candidate_row + 2
+                
+                candidate_details = " ".join([
+                    str(value).lower() for value in candidate_data 
+                    if value and str(value).strip()
+                ])
+                
+                for keyword in user_keywords:
+                    if keyword in candidate_details:
+                        candidate_scores[candidate_row_num]['score'] += 1
+
+        # Prepare results
+        results = []
+        for row_num, data in candidate_scores.items():
+            candidate_data = candidatesSheet.row_values(row_num)
+            if len(candidate_data) >= 4:
+                results.append({
+                    "row_id": row_num,
+                    "first_name": data['first_name'],
+                    "last_name": data['last_name'],
+                    "position": candidate_data[3],
+                    "photo": data['photo'],
+                    "score": data['score'],
+                    "total_keywords": sum(len(ans.split()) for ans in user_answers.values())
+                })
+
+        # Sort and store results
+        results.sort(key=lambda x: x['score'], reverse=True)
+        session['match_results'] = results
+
+        return jsonify({"success": True, "results": results})
+
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
+
 @app.route('/matchResults')
 def matchResults():
     if 'user_id' not in session:
         return redirect('/')
-    
+
     if 'match_results' not in session:
-        return redirect('/quiz')  # Redirect if no results available
+        return redirect('/quiz')
     
-    results = session.get('match_results', [])
-    
-    # Fetch photo paths from the photosSheet (Column B, skip header row)
-    photo_paths = photosSheet.col_values(2)[1:] if len(photosSheet.get_all_values()) > 1 else []
-    
-    # Calculate match percentages for each candidate
-    processed_results = []
-    for index, candidate in enumerate(results, start=2):  # Start at row 2 to match photo paths
-        # Calculate platform match percentage
-        platform_match = calculate_platform_match(candidate)
-        
-        # Calculate stance match percentage
-        stance_match = calculate_stance_match(candidate)
-        
-        # Calculate overall match
-        overall_match = round((platform_match + stance_match) / 2)
-        
-        # Generate match summary
-        match_summary = generate_match_summary(candidate, platform_match, stance_match)
-        
-        # Get photo URL - use index-2 to match photo_paths array
-        photo = photo_paths[index-2] if (index-2) < len(photo_paths) else "/static/default-profile.png"
-        
-        # Clean up photo path if needed
-        if photo and '\\' in photo:
-            photo = photo.replace('\\', '/')
-        if photo and not photo.startswith('/static'):
-            if photo.startswith('static'):
-                photo = '/' + photo
+    results = session['match_results']
+    if not results:
+        return render_template('matchResults.html', 
+                           top_candidate=None,
+                           similar_candidates=[])
+
+    try:
+        # Get all candidates data for reference
+        all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header
+        photo_paths = photosSheet.col_values(2)[1:]  # Skip header row
+
+        # Process results with match percentages and photos
+        processed_results = []
+        for candidate in results:
+            # Get candidate data from candidates sheet
+            candidate_row = candidatesSheet.row_values(candidate['row_id'])
+            if not candidate_row or len(candidate_row) < 4:
+                continue  # Skip invalid candidates
+
+            # Get photo path
+            photo_index = candidate['row_id'] - 2  # Convert to 0-based index
+            photo_path = photo_paths[photo_index] if photo_index < len(photo_paths) else "/static/default-profile.png"
+
+            # Calculate match percentage
+            if candidate['total_keywords'] > 0:
+                match_percentage = round((candidate['score'] / candidate['total_keywords']) * 100)
+                summary = f"Found {candidate['score']} matching keywords out of {candidate['total_keywords']} total"
             else:
-                photo = '/static/' + photo
-        
-        processed_candidate = {
-            **candidate,
-            'platform_match': platform_match,
-            'stance_match': stance_match,
-            'overall_match': overall_match,
-            'match_summary': match_summary,
-            'photo': photo,
-            'row_id': candidate.get('row_id', index)  # Ensure row_id exists
-        }
-        processed_results.append(processed_candidate)
-    
-    # Sort by overall match score descending
-    processed_results.sort(key=lambda x: x['overall_match'], reverse=True)
-    
-    top_candidate = processed_results[0] if processed_results else None
-    similar_candidates = processed_results[1:4] if len(processed_results) > 1 else []
-    
-    return render_template(
-        'matchResults.html',
-        top_candidate=top_candidate,
-        similar_candidates=similar_candidates
-    )
+                match_percentage = 0
+                summary = "No keywords to match"
 
-def calculate_platform_match(candidate):
-    """Example calculation - replace with your actual logic"""
-    # This should calculate percentage of matching platforms
-    # For example: (number of matching platforms / total platforms) * 100
-    return 78  # Example value
+            processed_results.append({
+                "row_id": candidate['row_id'],
+                "first_name": candidate_row[0],
+                "last_name": candidate_row[2],
+                "position": candidate_row[3],
+                "photo": photo_path,
+                "score": candidate['score'],
+                "total_keywords": candidate['total_keywords'],
+                "match_percentage": match_percentage,
+                "match_summary": summary
+            })
 
-def calculate_stance_match(candidate):
-    """Example calculation - replace with your actual logic"""
-    # This should calculate percentage of matching stances
-    # For example: (number of matching stances / total stances) * 100
-    return 80  # Example value
+        # Sort by score descending
+        processed_results.sort(key=lambda x: x['score'], reverse=True)
 
-def generate_match_summary(candidate, platform_match, stance_match):
-    """Generate a summary text based on match percentages"""
-    strengths = []
-    if platform_match >= 75:
-        strengths.append("strong alignment on platforms")
-    if stance_match >= 75:
-        strengths.append("shared policy stances")
-    
-    if strengths:
-        return f"You and {candidate['first_name']} show {', '.join(strengths)}. " + \
-               "This candidate's priorities closely match your values across key issues."
-    else:
-        return f"You and {candidate['first_name']} have some common ground, " + \
-               "with potential for alignment on certain issues."
+        return render_template(
+            'matchResults.html',
+            top_candidate=processed_results[0] if processed_results else None,
+            similar_candidates=processed_results[1:]  # Show all remaining candidates
+        )
+
+    except Exception as e:
+        print(f"Error processing match results: {str(e)}")
+        return render_template('matchResults.html', 
+                           top_candidate=None,
+                           similar_candidates=[])
 
 @app.route('/casting')
 def casting():
@@ -483,85 +621,7 @@ def quiz():
     except Exception as e:
         return f"Error loading quiz: {str(e)}", 500
 
-@app.route('/save-results', methods=['POST'])
-def save_results():
-    try:
-        data = request.json
-        user_answers = data.get('answers', {})
-        
-        if not user_answers:
-            return jsonify({"success": False, "message": "No answers provided"}), 400
 
-        # Get all candidates data
-        all_candidates = candidatesSheet.get_all_values()[1:]  # Skip header row
-        candidate_scores = {}
-
-        # Initialize scores for all candidates
-        for index, row in enumerate(all_candidates, start=2):  # Start at row 2 (1-based)
-            candidate_scores[index] = 0  # Using row number as candidate ID
-
-        # Get all questions and their corresponding pillar columns
-        questions_row = questionsSheet.row_values(1)
-        pillar_data = sheet2.get_all_values()
-        
-        # For each question the user answered
-        for question_id, answer in user_answers.items():
-            # Find which pillar this question belongs to (by column)
-            pillar_col = int(question_id) - 1  # Convert to 0-based index
-            
-            if pillar_col >= len(pillar_data[0]):  # Check if column exists
-                continue
-                
-            pillar_name = pillar_data[0][pillar_col]  # Get pillar name from first row
-            
-            # Check each candidate's platform for this pillar
-            for candidate_row in range(len(all_candidates)):
-                candidate_data = all_candidates[candidate_row]
-                candidate_row_num = candidate_row + 2  # Actual row in sheet
-                
-                # Get candidate's platform for this pillar (same column in pillars sheet)
-                if len(pillar_data) > candidate_row_num - 1:  # Check if row exists
-                    candidate_platform = pillar_data[candidate_row_num - 1][pillar_col]
-                    
-                    # If candidate's platform matches user's answer, increment score
-                    if candidate_platform and candidate_platform.strip().lower() == answer.strip().lower():
-                        candidate_scores[candidate_row_num] += 1
-
-        # Prepare results data with candidate details and scores
-        results = []
-        for row_num, score in candidate_scores.items():
-            candidate_data = candidatesSheet.row_values(row_num)
-            if len(candidate_data) >= 3:  # Ensure we have basic candidate info
-                results.append({
-                    "row_id": row_num,
-                    "first_name": candidate_data[0],
-                    "last_name": candidate_data[2],
-                    "position": candidate_data[3],
-                    "photo": candidate_data[16] if len(candidate_data) > 16 else "/static/default-profile.png",
-                    "score": score,
-                    "platforms": {
-                        "Education": candidate_data[11] if len(candidate_data) > 11 else "",
-                        "Healthcare": candidate_data[12] if len(candidate_data) > 12 else "",
-                        "Clean Government": candidate_data[13] if len(candidate_data) > 13 else "",
-                        "Economy": candidate_data[14] if len(candidate_data) > 14 else "",
-                        "Agriculture": candidate_data[15] if len(candidate_data) > 15 else ""
-                    }
-                })
-
-        # Sort candidates by score (descending)
-        results.sort(key=lambda x: x['score'], reverse=True)
-
-        # Store results in session
-        session['match_results'] = results
-
-        return jsonify({
-            "success": True,
-            "message": "Results processed successfully",
-            "results": results
-        })
-
-    except Exception as e:
-        return jsonify({"success": False, "message": str(e)}), 500
 
 @app.route('/adminAddCandi')
 def addCandi():
@@ -596,20 +656,11 @@ def submit_candidate():
         # Fetch issue titles from the stancesSheet
         issue_titles = [issue.strip().lower() for issue in stancesSheet.row_values(1)]
 
-        # Ensure the uploads directory exists
-        upload_dir = os.path.join(app.root_path, "static", "uploads")  # Use app.root_path for absolute path
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
-
-        # Save the photo file if it exists
-        photo_path = ""
+        # Upload the photo to Cloudinary if it exists
+        photo_url = ""
         if photo:
-            photo_filename = f"candidate_{len(candidatesSheet.get_all_values()) + 1}.jpg"
-            photo_path = os.path.join(upload_dir, photo_filename)
-            photo.save(photo_path)
-
-            # Save the relative path for use in the app
-            photo_path = f"/static/uploads/{photo_filename}"
+            upload_result = cloudinary.uploader.upload(photo, folder="candidates")
+            photo_url = upload_result.get("secure_url", "")
 
         # Write candidate data to the candidates sheet
         candidate_data = [
@@ -650,7 +701,7 @@ def submit_candidate():
         # Save photo information to the photosSheet
         photosSheet.append_row([
             f"{data.get('FirstName', '')} {data.get('LastName', '')}",
-            photo_path
+            photo_url
         ])
 
         return jsonify({"success": True, "message": "Candidate added successfully"})
@@ -991,24 +1042,27 @@ def delete_column():
 @app.route('/api/add-pillar', methods=['POST'])
 def add_pillar():
     try:
+        # Get the pillar name from the request
         pillar_name = request.json.get('pillarName', '').strip()
 
         if not pillar_name:
             return jsonify({"success": False, "message": "Pillar name cannot be empty"}), 400
 
-        # Check if the pillar already exists
+        # Fetch existing pillars from the first row of the pillarsSheet
         existing_pillars = sheet2.row_values(1)
-        if pillar_name in existing_pillars:
-            return jsonify({"success": False, "message": "Pillar already exists"}), 400
 
-        # Add the pillar to the next empty column
+        # Check if the pillar already exists
+        if pillar_name in existing_pillars:
+            return jsonify({"success": False, "message": f"Pillar '{pillar_name}' already exists."}), 400
+
+        # Add the new pillar to the next empty column
         next_column = len(existing_pillars) + 1
         sheet2.update_cell(1, next_column, pillar_name)
 
-        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully"})
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully."})
     except Exception as e:
-        print(f"Error adding pillar: {e}")  # Log the error for debugging
-        return jsonify({"success": False, "message": "An error occurred while adding the pillar"}), 500
+        print(f"Error adding pillar: {e}")
+        return jsonify({"success": False, "message": "An error occurred while adding the pillar."}), 500
 
 @app.route('/api/delete-pillar', methods=['POST'])
 def delete_pillar():
@@ -1042,4 +1096,4 @@ def add_pillar_page():
     return render_template('addPillar.html')
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
