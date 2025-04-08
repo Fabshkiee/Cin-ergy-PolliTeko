@@ -3,178 +3,224 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Match Results</title>
+    <title>Your Match Results</title>
     <link rel="stylesheet" href="/static/style.css">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
-            margin: 0;
-            padding: 0;
-        }
-        .navbar {
-            background-color: white;
-            padding: 1rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .navbar ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-        .navbar li {
-            margin-right: 1.5rem;
-        }
-        .navbar a {
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-        }
-        .logo {
-            display: flex;
-            align-items: center;
-            font-weight: bold;
-        }
-        .logo img {
-            margin-right: 0.5rem;
+        :root {
+            --primary-color: #4CAF50;
+            --secondary-color: #3e8e41;
+            --light-gray: #f8f9fa;
+            --dark-gray: #333;
+            --medium-gray: #666;
         }
         
-        .matchResults {
-            max-width: 800px;
+        .results-container {
+            max-width: 900px;
             margin: 2rem auto;
-            padding: 0 1rem;
-        }
-        .results-title {
-            margin-bottom: 1.5rem;
-        }
-        .results-title h1 {
-            color: #333;
-            border-bottom: 2px solid #4CAF50;
-            padding-bottom: 0.5rem;
+            padding: 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
-        .matched-candidate-card {
+        .candidate-card {
             background: white;
-            border-radius: 10px;
+            border-radius: 15px;
             padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
         }
         
         .candidate-header {
             display: flex;
             align-items: center;
+            gap: 2rem;
             margin-bottom: 1.5rem;
         }
+        
+        .candidate-image {
+            flex-shrink: 0;
+            position: relative;
+            width: 140px;
+            height: 140px;
+        }
+        
         .candidate-image img {
-            width: 100px;
-            height: 100px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            margin-right: 1.5rem;
+            border: 4px solid var(--primary-color);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
+        
         .candidate-info h2 {
             margin: 0;
-            color: #333;
+            color: var(--dark-gray);
+            font-size: 1.8rem;
         }
-        .candidate-info p {
+        
+        .candidate-info p.position {
             margin: 0.5rem 0 0;
-            color: #666;
+            color: var(--medium-gray);
+            font-size: 1.1rem;
+            font-weight: 500;
         }
         
-        .match-section {
-            margin: 1.5rem 0;
-        }
-        .match-section h3 {
-            color: #333;
-            margin-bottom: 0.5rem;
+        .match-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin: 2rem 0;
         }
         
-        .percentage-container {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        .percentage-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .percentage-label {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 0.3rem;
-        }
-        .percentage-box {
-            background-color: #4CAF50;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            font-weight: bold;
-            min-width: 60px;
+        .stat-box {
+            flex: 1;
+            background: var(--light-gray);
+            padding: 1.2rem;
+            border-radius: 10px;
             text-align: center;
+            transition: transform 0.3s ease;
         }
         
-        .platforms-list {
-            margin-top: 1rem;
+        .stat-box:hover {
+            transform: scale(1.05);
         }
-        .platform-item {
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
             margin-bottom: 0.5rem;
         }
-        .platform-item strong {
-            color: #333;
+        
+        .stat-label {
+            font-size: 1rem;
+            color: var(--medium-gray);
+            font-weight: 500;
         }
         
-        .overall-section {
+        .match-progress-container {
             margin: 1.5rem 0;
-            padding: 1rem;
-            background-color: #f9f9f9;
-            border-radius: 5px;
         }
-        .overall-section h2 {
-            margin-top: 0;
-            color: #333;
+        
+        .match-progress-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--medium-gray);
+        }
+        
+        .match-progress {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 6px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .match-summary {
+            background: #e8f5e9;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            border-left: 4px solid var(--primary-color);
         }
         
         .view-profile-btn {
-            display: inline-block;
-            margin-top: 1rem;
-        }
-        .view-profile-btn a {
-            background-color: #4CAF50;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        .view-profile-btn a:hover {
-            background-color: #45a049;
+            margin-top: 2rem;
+            text-align: center;
         }
         
-        .similar-candidates {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
+        .view-profile-btn a {
+            display: inline-block;
+            padding: 0.9rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
         }
-        .similar-candidate {
-            background: white;
-            border-radius: 10px;
-            padding: 1.5rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        
+        .view-profile-btn a:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(76, 175, 80, 0.4);
+        }
+        
+        .section-title {
+            margin-top: 3rem;
+            color: var(--dark-gray);
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        /* Animation for percentage counters */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animated-stat {
+            animation: fadeIn 0.6s ease-out forwards;
+        }
+        
+        .candidates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+    .candidates-grid {
+        grid-template-columns: 1fr;
+    }
+}
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .candidate-header {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .match-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .candidate-image {
+                width: 120px;
+                height: 120px;
+            }
         }
     </style>
 </head>
 <body>
-    <!--Navbar Section-->
+    <!-- Navbar Section -->
     <header>
         <nav class="navbar">
             <ul>
                 <li><a id="home" class="logo" href="/dashboard">
-                    <img src="/static/politekologo1.png" alt="Logo" style="height: 2rem;">POLL-IT-TEKO</a></li>
+                    <img src="/static/politekologo1.png" alt="Logo" style="height: 2rem; margin-right: 1.5rem;">POLL-IT-TEKO</a></li>
                 <li><a class="navlinks" href="/PiliTugma">PiliTugma</a></li>
                 <li><a class="navlinks" href="/candidate">Candidates</a></li>
                 <li><a class="navlinks" href="/voting">Voting</a></li>
@@ -183,115 +229,136 @@
         </nav>
     </header>
 
-    <!--Main Results-->
-    <section class="matchResults">
-        <div class="results-title"><h1>Matched Candidate</h1></div>
+    <main class="results-container">
+        <h1 style="font-size: 2.2rem; color: var(--dark-gray); text-align: center; margin-bottom: 2rem;">Your Best Match</h1>
+        
         {% if top_candidate %}
-        <div class="matched-candidate-card">
+        <div class="candidate-card">
             <div class="candidate-header">
                 <div class="candidate-image">
-                    <img src="{{ top_candidate.photo }}" onerror="this.src='/static/default-profile.png'" alt="{{ top_candidate.first_name }} {{ top_candidate.last_name }}">
+                    <img src="{{ top_candidate.photo if top_candidate.photo else '/static/default-profile.png' }}" 
+                         onerror="this.onerror=null;this.src='/static/default-profile.png'" 
+                         alt="{{ top_candidate.first_name }} {{ top_candidate.last_name }}"
+                         loading="lazy">
                 </div>
                 <div class="candidate-info">
                     <h2>{{ top_candidate.first_name }} {{ top_candidate.last_name }}</h2>
-                    <p>{{ top_candidate.biography }}</p>
-                </div>
-            </div>
-
-            <div class="match-section">
-                <h3>Aligned Preference:</h3>
-                <div class="percentage-container">
-                    <div class="percentage-item">
-                        <div class="percentage-label">Platforms</div>
-                        <div class="percentage-box">{{ top_candidate.platform_match }}</div>
-                    </div>
-                    <div class="percentage-item">
-                        <div class="percentage-label">Stances</div>
-                        <div class="percentage-box">{{ top_candidate.stance_match }}</div>
-                    </div>
-                    <div class="percentage-item">
-                        <div class="percentage-label">Overall</div>
-                        <div class="percentage-box">{{ top_candidate.overall_match }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="match-section">
-                <h3>Platforms:</h3>
-                <div class="platforms-list">
-                    {% for platform, text in top_candidate.platforms.items() %}
-                        {% if text %}
-                        <div class="platform-item">
-                            <strong>{{ platform }}:</strong> {{ text }}
+                    <p class="position">{{ top_candidate.position }}</p>
+                    
+                    <div class="match-stats">
+                        <div class="stat-box">
+                            <div class="stat-value animated-stat" id="match-percentage">{{ top_candidate.match_percentage }}%</div>
+                            <div class="stat-label">Match Score</div>
                         </div>
-                        {% endif %}
-                    {% endfor %}
+                        <div class="stat-box">
+                            <div class="stat-value animated-stat" id="keywords-matched">{{ top_candidate.score }}</div>
+                            <div class="stat-label">Keywords Matched</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-value animated-stat">{{ top_candidate.total_keywords }}</div>
+                            <div class="stat-label">Total Keywords</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="overall-section">
-                <h2>Overall:</h2>
-                <p>{{ top_candidate.match_summary }}</p>
+            
+            <div class="match-summary">
+                {{ top_candidate.match_summary }}
             </div>
-
+            
+            <div class="match-progress-container">
+                <div class="match-progress-label">
+                    <span>Match Percentage</span>
+                    <span>{{ top_candidate.match_percentage }}%</span>
+                </div>
+                <div class="match-progress">
+                    <div class="progress-bar" style="width: {{ top_candidate.match_percentage }}%"></div>
+                </div>
+            </div>
+            
             <div class="view-profile-btn">
-                <a href="/api/candidate/{{ top_candidate.row_id }}">View Profile</a>
+                <a href="/api/candidate/{{ top_candidate.row_id }}">View Full Profile →</a>
             </div>
         </div>
         {% endif %}
-        
-        <div class="results-title"><h1>Similar Candidates</h1></div>
-        <div class="similar-candidates">
-            {% for candidate in similar_candidates %}
-            <div class="similar-candidate">
-                <div class="candidate-header">
-                    <div class="candidate-image">
-                        <img src="{{ candidate.photo }}" onerror="this.src='/static/default-profile.png'" alt="{{ candidate.first_name }} {{ candidate.last_name }}">
+
+        <!-- In the similar candidates section -->
+{% if similar_candidates %}
+<h1 class="section-title">Other Matches</h1>
+<div class="candidates-grid">
+    {% for candidate in similar_candidates %}
+    <div class="candidate-card">
+        <div class="candidate-header">
+            <div class="candidate-image">
+                <img src="{{ candidate.photo if candidate.photo else '/static/default-profile.png' }}" 
+                     onerror="this.onerror=null;this.src='/static/default-profile.png'" 
+                     alt="{{ candidate.first_name }} {{ candidate.last_name }}"
+                     loading="lazy">
+            </div>
+            <div class="candidate-info">
+                <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
+                <p class="position">{{ candidate.position }}</p>
+                
+                <div class="match-progress-container">
+                    <div class="match-progress-label">
+                        <span>Match Score</span>
+                        <span>{{ candidate.match_percentage }}%</span>
                     </div>
-                    <div class="candidate-info">
-                        <h3>{{ candidate.first_name }} {{ candidate.last_name }}</h3>
-                        <p>{{ candidate.position }}</p>
+                    <div class="match-progress">
+                        <div class="progress-bar" style="width: {{ candidate.match_percentage }}%"></div>
                     </div>
                 </div>
-                <div class="match-score">
-                    Match Score: <span class="percentage-box">{{ candidate.overall_match }}</span>
-                </div>
-                <div class="view-profile-btn">
-                    <a href="/api/candidate/{{ candidate.row_id }}">View Profile</a>
+                
+                <div style="margin-top: 1rem;">
+                    <p style="color: var(--medium-gray);">Matched {{ candidate.score }} out of {{ candidate.total_keywords }} keywords</p>
                 </div>
             </div>
-            {% endfor %}
         </div>
-    </section>
+        
+        <div class="view-profile-btn">
+            <a href="/api/candidate/{{ candidate.row_id }}">View Profile →</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+    </main>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Animation for match percentages
-        const percentageBoxes = document.querySelectorAll('.percentage-box');
-        percentageBoxes.forEach(box => {
-            const targetValue = parseInt(box.textContent);
-            let currentValue = 0;
-            const increment = targetValue / 20;
-            
-            const animate = () => {
-                currentValue += increment;
-                if (currentValue >= targetValue) {
-                    box.textContent = targetValue;
+        // Animate the progress bars on load
+        const progressBars = document.querySelectorAll('.progress-bar');
+        progressBars.forEach(bar => {
+            const targetWidth = bar.style.width;
+            bar.style.width = '0';
+            setTimeout(() => {
+                bar.style.width = targetWidth;
+            }, 100);
+        });
+        
+        // Animate the stat numbers if you want counting-up effect
+        const animateValue = (element, start, end, duration) => {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const value = Math.floor(progress * (end - start) + start);
+                if (element.id === 'match-percentage') {
+                    element.textContent = value + '%';
                 } else {
-                    box.textContent = Math.round(currentValue);
-                    requestAnimationFrame(animate);
+                    element.textContent = value;
+                }
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
                 }
             };
-            
-            animate();
-        });
-
-        // Error handling for images (fallback to default)
-        document.querySelectorAll('.candidate-image img').forEach(img => {
-            img.onerror = function() {
-                this.src = '/static/default-profile.png';
-            };
-        });
+            window.requestAnimationFrame(step);
+        };
+        
+        {% if top_candidate %}
+        animateValue(document.getElementById('match-percentage'), 0, {{ top_candidate.match_percentage }}, 1000);
+        animateValue(document.getElementById('keywords-matched'), 0, {{ top_candidate.score }}, 1000);
+        {% endif %}
     });
     </script>
 </body>
