@@ -176,8 +176,8 @@
         <h1>ADD NEW PILLAR</h1>
         <form id="pillarForm">
             <input type="text" id="pillarName" placeholder="Enter pillar name">
-            <button type="button" id="addPillar">Add Pillar</button>
-        </form>
+            <button type="button" id="addPillarButton">Add Pillar</button>
+            </form>
 
         <h2>Current Pillars</h2>
         <ul id="pillarList"></ul>
@@ -186,7 +186,7 @@
     <script>
         let pillars = [];
 
-        document.getElementById('addPillar').addEventListener('click', function() {
+        document.getElementById('addPillarButton').addEventListener('click', function() {
             const pillarName = document.getElementById('pillarName').value;
             if (pillarName) {
                 pillars.push(pillarName);
@@ -255,23 +255,27 @@
             }
         }
 
-        function savePillarToSheet(pillar) {
+    function savePillarToSheet(pillar) {
         fetch('/api/add-pillar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ pillarName: pillar }),
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
                 alert(data.message);
-                loadPillars(); // Reload the pillars list
+                loadPillars();
             } else {
                 alert('Error: ' + data.message);
             }
         })
         .catch((error) => {
             console.error('Error:', error);
+            alert('Failed to save pillar: ' + error.message);
         });
     }
 
