@@ -32,8 +32,9 @@ def get_location_name(code, endpoint):
 app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'
 scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-google_creds_json = os.environ.get('GOOGLE_CREDENTIALS')
+#google_creds_json = os.environ.get('GOOGLE_CREDENTIALS')
 #creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
+google_creds_json = os.environ.get('GOOGLE_CREDENTIALS')
 creds = Credentials.from_service_account_info(json.loads(google_creds_json), scopes=scopes)
 client = gspread.authorize(creds)
 
@@ -662,6 +663,15 @@ def submit_candidate():
             upload_result = cloudinary.uploader.upload(photo, folder="candidates")
             photo_url = upload_result.get("secure_url", "")
 
+        # Calculate age from the provided birthdate
+        birthdate = data.get("bday", "")
+        age = ""
+        if birthdate:
+            from datetime import datetime
+            birthdate_obj = datetime.strptime(birthdate, "%Y-%m-%d")
+            today = datetime.today()
+            age = today.year - birthdate_obj.year - ((today.month, today.day) < (birthdate_obj.month, birthdate_obj.day))
+
         # Write candidate data to the candidates sheet
         candidate_data = [
             data.get("FirstName", ""),
@@ -672,19 +682,27 @@ def submit_candidate():
             data.get("province", ""),
             data.get("city", ""),
             data.get("biography", ""),
-            data.get("bday", ""),
-            data.get("Party", ""),
+            birthdate,
+            age,  # Save calculated age in column J
+            data.get("Party", ""),  # Save political party in column K
         ]
         candidatesSheet.append_row(candidate_data)
 
         # Save platforms to the pillarsSheet
         pillar_titles = [pillar.strip() for pillar in sheet2.row_values(1)]
         platform_row = [platforms.get(pillar, "") for pillar in pillar_titles]
-        sheet2.insert_row(platform_row, len(candidatesSheet.get_all_values()))
+        sheet2.insert_row(platform_row, len(sheet2.get_all_values()) + 1)
+
+        # Save platforms dynamically to the candidatesSheet (starting at column L)
+        candidate_row_index = len(candidatesSheet.get_all_values())  # Get the row index of the newly added candidate
+        candidatesSheet.update(
+            f"L{candidate_row_index}:{chr(64 + len(pillar_titles) + 12)}{candidate_row_index}",
+            [platform_row]
+        )
 
         # Save stances to the stancesSheet
         stances_row = [stances.get(issue, "No Answer") for issue in issue_titles]
-        stancesSheet.insert_row(stances_row, len(candidatesSheet.get_all_values()))
+        stancesSheet.insert_row(stances_row, len(stancesSheet.get_all_values()) + 1)
 
         # Save education to the educationsSheet
         for edu in education:
@@ -1055,14 +1073,19 @@ def add_pillar():
         if pillar_name in existing_pillars:
             return jsonify({"success": False, "message": f"Pillar '{pillar_name}' already exists."}), 400
 
-        # Add the new pillar to the next empty column
+        # Add the new pillar to the next empty column in the pillarsSheet
         next_column = len(existing_pillars) + 1
         sheet2.update_cell(1, next_column, pillar_name)
 
-        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully."})
+        # Add the new pillar to the next empty column in the candidatesSheet
+        candidates_existing_pillars = candidatesSheet.row_values(1)[11:]  # Starting from column L (index 11)
+        candidates_next_column = len(candidates_existing_pillars) + 12  # Adjust for column L (index 12)
+        candidatesSheet.update_cell(1, candidates_next_column, pillar_name)
+
+        return jsonify({"success": True, "message": f"Pillar '{pillar_name}' added successfully to both sheets."})
     except Exception as e:
         print(f"Error adding pillar: {e}")
-        return jsonify({"success": False, "message": "An error occurred while adding the pillar."}), 500
+        return jsonify({"success": False, "message": "An error occurred while adding the pillar."}), 50
 
 @app.route('/api/delete-pillar', methods=['POST'])
 def delete_pillar():
