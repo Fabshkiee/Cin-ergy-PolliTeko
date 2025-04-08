@@ -40,11 +40,58 @@
         .quescard.active {
             display: block;
         }
+
+        /* Updated styles for options */
+        .question {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .question li {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        .question li a {
+            display: block;
+            padding: 12px 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s ease;
+            border: 1px solid #ddd;
+            word-wrap: break-word;
+            white-space: normal;
+            text-align: left;
+        }
+
+        .question li a:hover {
+            background-color: #e9e9e9;
+        }
+
+        .question li a.selected {
+            background-color: #4caf50;
+            color: white;
+            border-color: #3e8e41;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .question li a {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+        }
     </style>
-  </head>
+</head>
 
 <body>
-    <!-- Navbar Section -->
+    <!-- Navbar Section (unchanged) -->
     <header>
         <nav class="navbar">
             <ul>
@@ -93,6 +140,7 @@
         </div>
     </section>
 
+    <!-- Exit modal (unchanged) -->
     <div id="exit-modal" class="modal">
         <div class="modal-content">
             <svg xmlns="http://www.w3.org/2000/svg" width="144" height="144" viewBox="0 0 144 144" fill="none">
@@ -109,6 +157,7 @@
         </div>
     </div>
 
+    <!-- JavaScript (unchanged) -->
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         const questions = document.querySelectorAll(".quescard");
@@ -181,7 +230,6 @@
             });
 
         // Finish button
-        // In question.html, update the finish button click handler:
         finishBtn.addEventListener("click", (e) => {
           e.preventDefault();
 
@@ -258,5 +306,4 @@
         });
     </script>
 </body>
-
 </html>
