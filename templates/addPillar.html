@@ -20,8 +20,8 @@
         body {
             font-family: 'Poppins', sans-serif;
             background-color: #FAF9F6;
-            display: flex;
-            flex-direction: row;
+            display: grid;
+            grid-template-columns: auto;
             min-height: 100vh;
             overflow: hidden;
             overflow-y: auto;
@@ -31,9 +31,10 @@
             display: none;
         }
 
-        .title {
+
+        .title{
             background-color: #FAF9F6;
-            margin: 1rem 2rem 1rem 1rem;
+            margin: 1rem 0rem 0rem 10px;
             color: #3A7CA5;
         }
 
@@ -42,8 +43,8 @@
             width: 23rem;
             padding: 2rem;
             border-right: 0.15rem solid #bababa;
-            position: sticky;
-            height: auto; /* Allow height to adjust dynamically */
+            position: fixed;
+            height: 100vh;
         }
 
         .button {
@@ -54,7 +55,8 @@
             padding: 1rem;
             text-align: left;
             text-decoration: none;
-            display: inline-block;
+            display: flex;
+            align-items: center;
             font-size: 1.25rem;
             height: 4rem;
             cursor: pointer;
@@ -66,28 +68,72 @@
             background-color: #67bdc8;
         }
 
-        .button-logout {
+        .logout{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+            margin-left: 20px;
+            margin-top: 50%;
+        }
+        .button-logout{
             background-color: #FAF9F6;
-            color: black;
-            padding: 1rem;
+            color: black;   
             text-align: left;
             text-decoration: none;
-            display: inline-block;
             font-size: 1.25rem;
             height: 4rem;
             cursor: pointer;
-            margin: 13rem 0rem 0.5rem 0rem;
             border-radius: 1rem;
         }
 
+        .main-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .title1 {
+            font-size: 3.5rem;
+            color: #3A7CA5;
+            margin-top: -10rem;
+        }   
+
+        .title2 {
+            font-size: 2rem;
+            color: black;
+            margin-bottom: 1rem;
+        }
+        .description {
+            font-size: 1rem;
+            font-style: italic;
+            color: black;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .navicon{
+            width: 30px;
+            margin-right: 10px;
+        }
+
+        .adminprof{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+        }
+
+
         .main-content {
-            flex-grow: 1; /* Allow the main content to take up the remaining space */
             padding: 2rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-top: 2rem;
+            width: 800px; 
         }
 
         #pillarForm {
             width: 90%;
-            max-width: 800px;
             margin: 0 auto;
             background-color: #FFFFFF;
             padding: 2rem 3rem;
@@ -134,19 +180,21 @@
         }
 
         ul#pillarList li {
-            margin-bottom: 0.5rem;
+            margin-bottom: 2rem;
             font-size: 1rem;
             color: #333;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 10px;
+            border: 1px solid #bababa;
+            padding: 1rem;
         }
 
         ul#pillarList li button {
-            background-color: #FFC964;
+            background-color: #ff4d4d;
             color: #fff;
             border: none;
-            margin-bottom: 2rem;
             padding: 0.5rem 1rem;
             border-radius: 0.5rem;
             cursor: pointer;
@@ -155,34 +203,56 @@
 
         ul#pillarList li button:hover {
             transform: scale(1.05);
+            opacity: 80%;
+        }
+
+        .title3 {
+            font-size: 2rem;
+            color: #3A7CA5;
+            margin-top: 2rem;
+            text-align: center;
+        }
+        
+        #pillarList {
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            width: 90%;
+            margin: 0 auto; /* Centers the element horizontally */
         }
     </style>
 </head>
 <body>
-    <section class="admin_controls" id="adminControls">
-        <h1 class="title">Admin</h1>
-        <button id="listPosition" class="button" onclick="location.href='/list-positions'">List Positions</button>
-        <button id="addCandidate" class="button" onclick="location.href='/adminAddCandi'">Add New Candidate</button>
-        <button id="createQuestion" class="button" onclick="location.href='/add-question'">Create New Questions</button>
-        <button id="addPillar" class="button" onclick="location.href='/add-pillar'">Add Pillar</button>
-        <button id="publishQuestions" class="button">Publish Questions</button>
-        <button id="openVoting" class="button">Open Voting</button>
+    <section class="admin_controls">    
+        <div class="adminprof">
+            <img class="profile" src="static/adminprofile.png"> <h1 class="title">  Admin </h1>
+        </div>
+        <button id="listPosition" class="button"><img class ="navicon" src="static/listpositions.png"> Positions</button>
+        <button id="addCandidate" class="button"><img class ="navicon" src="static/addcandidate.png">Add New Candidate</button>
+        <button id="createQuestion" class="button"><img class ="navicon" src="static/createnewquestion.png">Create New Questions</button>
+        <button id="addPillar" class="button"><img class ="navicon" src="static/pillar.png">Add Pillar</button>
+        <button id="Open Voting" class="button"><img class ="navicon" src="static/voting.png">Voting</button>
+
         <div class="logout">
-            <a class="button-logout" href="/logout">Logout</a>
+            <img class ="navicon" src="static/logout.png">
+            <a class="button-logout" href="/">Logout</a>
         </div>
     </section>
 
+
     <section class="main-content">
-        <h1>ADD NEW PILLAR</h1>
+        <h1 class="title3">ADD NEW PILLAR</h1>
         <form id="pillarForm">
             <input type="text" id="pillarName" placeholder="Enter pillar name">
             <button type="button" id="addPillar">Add Pillar</button>
         </form>
 
-        <h2>Current Pillars</h2>
+        <h1 class="title3">Current Pillars</h2>
         <ul id="pillarList"></ul>
     </section>
-
+</body>
+    <script src="/static/backend.js"></script>
     <script>
         let pillars = [];
 
@@ -280,5 +350,5 @@
         // Load pillars when the page loads
         document.addEventListener('DOMContentLoaded', loadPillars);
     </script>
-</body>
+
 </html>

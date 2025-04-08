@@ -56,9 +56,145 @@
             font-size: 0.9em;
             margin-top: 5px;
         }
+
+
+        .body1 {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            display: grid;
+            min-height: 100vh;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        body::-webkit-scrollbar {
+            display: none;
+        }
+
+
+        .title4 {
+            background-color: #FAF9F6;
+            margin: 1rem 0rem 0rem 10px;
+            color: #3A7CA5;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .admin_controls {
+            display: grid;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            position: fixed;
+            top: 0;
+            height: 100vh;
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+
+        .logout{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+            margin-left: 20px;
+            margin-top: 50%;
+        }
+        .button-logout{
+            background-color: #FAF9F6;
+            color: black;   
+            text-align: left;
+            text-decoration: none;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 1rem;
+        }
+
+        .main-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            flex-grow: 1;
+        }
+
+        .title1 {
+            font-size: 3.5rem;
+            color: #3A7CA5;
+            margin-top: -10rem;
+        }   
+
+        .title2 {
+            font-size: 2rem;
+            color: black;
+            margin-bottom: 1rem;
+        }
+        .description {
+            font-size: 1rem;
+            font-style: italic;
+            color: black;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .navicon{
+            width: 30px;
+            margin-right: 10px;
+        }
+
+        .adminprof{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+        }
+
+        .form-container{
+            margin-left: 40rem;
+            margin-right: auto;
+            width: 1000px;
+        }
+
+        button .btn-add{
+            background-color: transparent;
+        }
+
     </style>
 </head>
-<body>
+<div class ="body1">
+    <section class="admin_controls">    
+        <div class="adminprof">
+            <img class="profile" src="static/adminprofile.png"> <p class="title4">  Admin </p>
+        </div>
+        <button id="listPosition" class="button"><img class ="navicon" src="static/listpositions.png"> Positions</button>
+        <button id="addCandidate" class="button"><img class ="navicon" src="static/addcandidate.png">Add New Candidate</button>
+        <button id="createQuestion" class="button"><img class ="navicon" src="static/createnewquestion.png">Create New Questions</button>
+        <button id="addPillar" class="button"><img class ="navicon" src="static/pillar.png">Add Pillar</button>
+        <button id="Open Voting" class="button"><img class ="navicon" src="static/voting.png">Voting</button>
+
+        <div class="logout">
+            <img class ="navicon" src="static/logout.png">
+            <a class="button-logout" href="/">Logout</a>
+        </div>
+    </section>
+
     <div class="form-container">
         <h1>ADD NEW CANDIDATE</h1>
         <form id="candidateForm" onsubmit="submitForm(event)" autocomplete="off" enctype="multipart/form-data">
@@ -136,7 +272,7 @@
                     <label for="education">ADD EDUCATION</label>
                     <div class="input-group">
                         <input type="text" id="education" placeholder="Enter Educational Background">
-                        <button type="button" id="addEducation" class="btn-add">ADD</button>
+                        <button type="button" id="addEducation" class="btn-add">Add</button>
                     </div>
                     <div class="listed-items">
                         <p>Listed Educational Background</p>
@@ -152,7 +288,7 @@
                     <label for="experience">ADD EXPERIENCE</label>
                     <div class="input-group">
                         <input type="text" id="experience" placeholder="Enter Leadership Experience">
-                        <button type="button" id="addExperience" class="btn-add">ADD</button>
+                        <button type="button" id="addExperience" class="btn-add">Add</button>
                     </div>
                     <div class="listed-items">
                         <p>Listed Leadership Experience</p>
@@ -168,7 +304,7 @@
                     <label for="achievements">ADD ACHIEVEMENTS</label>
                     <div class="input-group">
                         <input type="text" id="achievements" placeholder="Enter Achievements">
-                        <button type="button" id="addAchievements" class="btn-add">ADD</button>
+                        <button type="button" id="addAchievements" class="btn-add">Add</button>
                     </div>
                     <div class="listed-items">
                         <p>Listed Achievements</p>
@@ -210,6 +346,8 @@
             </div>
         </form>
     </div>
+</div> 
+    <script src="/static/backend.js"></script>
 
     <script>
         // Arrays to store multiple entries

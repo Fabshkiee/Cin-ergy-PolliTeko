@@ -30,119 +30,6 @@
             display: none;
         }
 
-        .admin_controls {
-            display: grid;
-            width: 23rem;
-            padding: 2rem;
-            border-right: 0.15rem solid #bababa;
-            position: sticky;
-            height: 100vh;
-        }
-
-        .button {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FAF9F6;
-            color: black;
-            border: none;
-            padding: 1rem;
-            text-align: left;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.25rem;
-            height: 4rem;
-            cursor: pointer;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .button:hover {
-            background-color: #67bdc8;
-        }
-
-        .button-logout{
-            background-color: #FAF9F6;
-            color: black;
-            padding: 1rem;
-            text-align: left;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.25rem;
-            height: 4rem;
-            cursor: pointer;
-            margin: 13rem 0rem 0.5rem 0rem;
-            border-radius: 1rem;
-        }
-
-        .title {
-            background-color: #FAF9F6;
-            margin: 1rem 2rem 1rem 1rem;
-            color: #3A7CA5;
-        }
-        
-
-        .navbar {
-            width: 100%;
-            background-color: #3A7CA5;
-            padding: 1rem;
-        }
-
-        .navbar ul {
-            display: flex;
-            list-style: none;
-            justify-content: space-around;
-            align-items: center;
-        }
-
-        .navbar ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.2rem;
-        }
-
-        .admin_controls {
-            display: flex;
-            flex-direction: column;
-            width: 23rem;
-            padding: 2rem;
-            border-right: 0.15rem solid #bababa;
-            height: auto; /* Adjust height dynamically */
-        }
-
-        .button {
-            font-family: 'Poppins', sans-serif;
-            background-color: #FAF9F6;
-            color: black;
-            border: none;
-            padding: 1rem;
-            text-align: left;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.25rem;
-            height: 4rem;
-            cursor: pointer;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .button:hover {
-            background-color: #67bdc8;
-        }
-
-        .button-logout {
-            background-color: #FAF9F6;
-            color: black;
-            padding: 1rem;
-            text-align: left;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 1.25rem;
-            height: 4rem;
-            cursor: pointer;
-            margin-top: auto; /* Push logout button to the bottom */
-            border-radius: 1rem;
-            margin: 13rem 0rem 0.5rem 0rem;
-        }
-
         .main-content {
             flex-grow: 1; /* Allow the main content to take up the remaining space */
             padding: 2rem;
@@ -224,20 +111,25 @@
 
         /* Listed Positions */
         #positionsList {
-            width: 90%;
             max-width: 800px;
-            margin: 2rem auto;
-            padding: 1rem 2rem;
+            padding: 2rem;
             background-color: #FFFFFF;
             border-radius: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-left: auto;
+            margin-right: auto;
         }
 
         #positionsList li {
+            display: grid;
+            grid-template-columns: 1fr auto;
             font-size: 1.2rem;
             font-weight: 500;
             color: #333;
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            border-radius: 20px;
+            border: 1px solid #bababa;
+            padding: 1rem;
         }
 
         /* Success and Error Messages */
@@ -262,21 +154,123 @@
             background-color: #f44336;
             /* Red for error */
         }
+
+        .title{
+            background-color: #FAF9F6;
+            margin: 1rem 0rem 0rem 10px;
+            color: #3A7CA5;
+        }
+
+        .admin_controls {
+            display: grid;
+            width: 23rem;
+            padding: 2rem;
+            border-right: 0.15rem solid #bababa;
+            position: sticky;
+            height: 100vh;
+        }
+
+        .button {
+            font-family: 'Poppins', sans-serif;
+            background-color: #FAF9F6;
+            color: black;
+            border: none;
+            padding: 1rem;
+            text-align: left;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .button:hover {
+            background-color: #67bdc8;
+        }
+        
+        .logout{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+            margin-left: 20px;
+            margin-top: 50%;
+        }
+        .button-logout{
+            background-color: #FAF9F6;
+            color: black;   
+            text-align: left;
+            text-decoration: none;
+            font-size: 1.25rem;
+            height: 4rem;
+            cursor: pointer;
+            border-radius: 1rem;
+        }
+
+        .title1 {
+            font-size: 3.5rem;
+            color: #3A7CA5;
+            margin-top: -10rem;
+        }   
+        
+        .title2 {
+            font-size: 2rem;
+            color: black;
+            margin-bottom: 1rem;
+        }
+        .description {
+            font-size: 1rem;
+            font-style: italic;
+            color: black;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+        }
+
+        .navicon{
+            width: 30px;
+            margin-right: 10px;
+        }
+
+        .adminprof{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+        }
+
+        .delete-btn {
+        background-color: #ff4d4d;
+        margin-left: auto;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+    .delete-btn:hover {
+        opacity: 80%;
+        transform: scale(1.05); /* Slightly enlarge on hover */
+        }
+
     </style>
 </head>
 
 <body>
     <!-- Admin Controls and Main Content -->
-    <section class="admin_controls" id="adminControls">
-        <h1 class="title">Admin</h1>
-        <button id="listPosition" class="button" onclick="location.href='/list-positions'">List Positions</button>
-        <button id="addCandidate" class="button" onclick="location.href='/adminAddCandi'">Add New Candidate</button>
-        <button id="createQuestion" class="button" onclick="location.href='/add-question'">Create New Questions</button>
-        <button id="addPillar" class="button" onclick="location.href='/add-pillar'">Add Pillar</button>
-        <button id="publishQuestions" class="button">Publish Questions</button>
-        <button id="openVoting" class="button">Open Voting</button>
+    <section class="admin_controls">    
+        <div class="adminprof">
+            <img class="profile" src="static/adminprofile.png"> <h1 class="title">  Admin </h1>
+        </div>
+        <button id="listPosition" class="button"><img class ="navicon" src="static/listpositions.png"> Positions</button>
+        <button id="addCandidate" class="button"><img class ="navicon" src="static/addcandidate.png">Add New Candidate</button>
+        <button id="createQuestion" class="button"><img class ="navicon" src="static/createnewquestion.png">Create New Questions</button>
+        <button id="addPillar" class="button"><img class ="navicon" src="static/pillar.png">Add Pillar</button>
+        <button id="Open Voting" class="button"><img class ="navicon" src="static/voting.png">Voting</button>
+
         <div class="logout">
-            <a class="button-logout" href="/logout">Logout</a>
+            <img class ="navicon" src="static/logout.png">
+            <a class="button-logout" href="/">Logout</a>
         </div>
     </section>
 
@@ -305,9 +299,11 @@
             </li>
             {% endfor %}
         </ol>
+        <script src="/static/backend.js"></script>
     </section>
 
     <script>
+
         document.getElementById("positionsForm").addEventListener("submit", function (event) {
             event.preventDefault();
 

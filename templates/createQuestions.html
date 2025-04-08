@@ -5,31 +5,282 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Questions</title>
 </head>
-<body>
-    <h1>CREATE NEW QUESTIONS</h1>
-    <form id="createQuestionsForm" method="POST" action="/save-question">
-        <div>
-            <label for="chooseQuestion">CHOOSE QUESTION</label>
-            <select id="chooseQuestion" name="chooseQuestion" required>
-                <option value="choose" disabled selected>Select</option>
-                <option value="multipleChoice">Multiple Choice Question</option>
-                <option value="issuesAndStances">Issues and Controversies</option>
-            </select>
-        </div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;900&display=swap');
 
-        <div id="dynamicFields"></div>
-    </form>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
 
-    <div id="questionList">
-        <h2>Stored Questions</h2>
-        <ul id="questionsContainer"></ul>
-    </div>
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        font-family: 'Poppins', sans-serif;
+        background-color: #FAF9F6;
+        display: flex;
+        flex-direction: column  ;
+        min-height: 100vh;
+        overflow: hidden;
+        overflow-y: auto;
+    }
+
+    body::-webkit-scrollbar {
+        display: none;
+    }
+
+
+    .title{
+        background-color: #FAF9F6;
+        margin: 1rem 0rem 0rem 10px;
+        color: #3A7CA5;
+    }
+
+    .admin_controls {
+        display: grid;
+        width: 23rem;
+        padding: 2rem;
+        border-right: 0.15rem solid #bababa;
+        position: fixed;
+        height: 100vh;
+    }
+
+    .button {
+        font-family: 'Poppins', sans-serif;
+        background-color: #FAF9F6;
+        color: black;
+        border: none;
+        padding: 1rem;
+        text-align: left;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+        height: 4rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .button:hover {
+        background-color: #67bdc8;
+    }
     
-    <div id="issuesList" style="display: none;">
-        <h2>Stored Issues</h2>
-        <ul id="issuesContainer"></ul>
-    </div>
+    .logout{
+        display: grid;
+        grid-template-columns: 1fr 8fr;
+        margin-left: 20px;
+        margin-top: 50%;
+    }
+    .button-logout{
+        background-color: #FAF9F6;
+        color: black;   
+        text-align: left;
+        text-decoration: none;
+        font-size: 1.25rem;
+        height: 4rem;
+        cursor: pointer;
+        border-radius: 1rem;
+    }
 
+    .main-text {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        flex-grow: 1;
+    }
+
+    .title1 {
+        font-size: 3.5rem;
+        color: #3A7CA5;
+        margin-top: -10rem;
+    }   
+    
+    .title2 {
+        font-size: 2rem;
+        color: black;
+        margin-bottom: 1rem;
+    }
+    .description {
+        font-size: 1rem;
+        font-style: italic;
+        color: black;
+        margin-bottom: 2rem;
+        margin-top: 1rem;
+    }
+
+    .navicon{
+        width: 30px;
+        margin-right: 10px;
+    }
+
+    .adminprof{
+        display: grid;
+        grid-template-columns: 1fr 8fr;
+    }
+
+    .main-section {
+        display: grid;
+        grid-template-rows: auto auto 1fr;
+        justify-items: center;
+        align-items: start;
+        text-align: center;
+        gap: 2rem;
+        margin-top: 5rem;
+    }
+
+    .title3 {
+        font-size: 2rem;
+        color: #3A7CA5;
+        margin-bottom: 1rem;
+    }
+
+    #createQuestionsForm {
+        display: grid;
+        grid-template-rows: auto auto auto;
+        gap: 1.5rem;
+        width: 100%;
+        max-width: 600px;
+        background-color: white;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #createQuestionsForm label {
+        font-size: 1.2rem;
+        color: #3A7CA5;
+    }
+
+    #createQuestionsForm p {
+        font-size: 1.2rem;
+        color: #3A7CA5;
+    }
+
+    #createQuestionsForm select, 
+    #createQuestionsForm input[type="text"] {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        outline: none;
+        transition: border-color 0.2s ease-in-out;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    #createQuestionsForm select:focus, 
+    #createQuestionsForm input[type="text"]:focus {
+        border-color: #3A7CA5;
+    }
+
+    #createQuestionsForm button {
+        font-family: 'Poppins', sans-serif;
+        background-color: #81C3D7;
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        border-radius: 30px;
+        cursor: pointer;
+        transition: scale 0.2s ease-in-out;
+        margin-top: 1rem;
+    }
+
+    #createQuestionsForm button:hover {
+        opacity: 80%;
+        scale: 1.05;
+    }
+    
+    #questionsContainer, #issuesContainer {
+        list-style-type: none;
+        width: auto;
+        background-color: white;
+        height: auto;
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #questionsContainer li, #issuesContainer li {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 20rem;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        text-align: left;
+    }
+
+    #questionsContainer li button, #issuesContainer li button {
+        background-color: #ff4d4d;
+        margin-left: auto;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    #questionsContainer li button:hover, #issuesContainer li button:hover {
+        transform: scale(1.05);
+        opacity: 80%;
+    }
+
+</style>
+<body>
+    <section class="admin_controls">    
+        <div class="adminprof">
+            <img class="profile" src="static/adminprofile.png"> <h1 class="title">  Admin </h1>
+        </div>
+        <button id="listPosition" class="button"><img class ="navicon" src="static/listpositions.png"> Positions</button>
+        <button id="addCandidate" class="button"><img class ="navicon" src="static/addcandidate.png">Add New Candidate</button>
+        <button id="createQuestion" class="button"><img class ="navicon" src="static/createnewquestion.png">Create New Questions</button>
+        <button id="addPillar" class="button"><img class ="navicon" src="static/pillar.png">Add Pillar</button>
+        <button id="Open Voting" class="button"><img class ="navicon" src="static/voting.png">Voting</button>
+
+        <div class="logout">
+            <img class ="navicon" src="static/logout.png">
+            <a class="button-logout" href="/">Logout</a>
+        </div>
+    </section>
+
+    <section class="main-section">
+        <h1 class="title3">CREATE NEW QUESTIONS</h1>
+        <form id="createQuestionsForm" method="POST" action="/save-question">
+            <div>
+                <label for="chooseQuestion">CHOOSE QUESTION</label>
+                <select id="chooseQuestion" name="chooseQuestion" required>
+                    <option value="choose" disabled selected>Select</option>
+                    <option value="multipleChoice">Multiple Choice Question</option>
+                    <option value="issuesAndStances">Issues and Controversies</option>
+                </select>
+            </div>
+
+            <div id="dynamicFields"></div>
+        </form>
+
+        <div id="questionList">
+            <h1 class="title3">Stored Questions</h1>
+            <ul id="questionsContainer"></ul>
+        </div>
+        
+        <div id="issuesList" style="display: none;">
+            <h1 class="title3">Stored Issues</h1>
+            <ul id="issuesContainer"></ul>
+        </div>
+    </section>
+</body>
+    <script src="/static/backend.js"></script>
     <script>
         const chooseQuestion = document.getElementById("chooseQuestion");
         const dynamicFields = document.getElementById("dynamicFields");
@@ -143,8 +394,8 @@
                 });
             } else if (selectedQuestion === "issuesAndStances") {
                 // Add dynamic fields for "Issues and Controversies"
-                const head = document.createElement("h2");
-                head.textContent = "ISSUES AND CONTROVERSIES";
+                const head = document.createElement("p");
+                head.textContent = "Issues and Controversies";
                 dynamicFields.appendChild(head);
 
                 const newInput = document.createElement("input");
@@ -349,5 +600,4 @@
             document.getElementById("issuesList").style.display = "none";
         });
     </script>
-</body>
 </html>

@@ -118,16 +118,20 @@ p{
     margin-left: 1rem;
 }
 
-#candidateForm button:hover {
-    transform: scale(1.05);
-}
-
 /* Buttons for Adding Dynamic Items */
 #candidateForm button[type="button"] {
-    background-color: #FFC964;
+    background-color: #81C3D7;
     color: #fff;
+    transition: transform 0.3s ease;
     margin-top: 0.5rem;
 }
+
+#candidateForm button:hover {
+    transform: scale(1.05);
+    opacity: 80%;
+}
+
+
 
 /* Listed Items (e.g., Education, Experience, Achievements) */
 ol {
@@ -145,29 +149,4 @@ ol li button{
     margin-left: 3.5rem;
 }
 
-/* Responsive Adjustments */
-@media (max-width: 600px) {
-    #candidateForm {
-        width: 95%;
-        padding: 1.5rem 1rem;
-    }
-    
-    h1 {
-        font-size: 2rem;
-    }
-    
-    #candidateForm label {
-        font-size: 1rem;
-    }
-    
-    #candidateForm input[type="text"],
-    #candidateForm input[type="date"],
-    #candidateForm select,
-    #candidateForm textarea {
-        font-size: 0.9rem;
-    }
-    
-    #candidateForm button {
-        font-size: 0.9rem;
-    }
-}
+

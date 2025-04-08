@@ -35,7 +35,7 @@
 
         .title{
             background-color: #FAF9F6;
-            margin: 1rem 2rem 1rem 1rem;
+            margin: 1rem 0rem 0rem 10px;
             color: #3A7CA5;
         }
 
@@ -44,7 +44,7 @@
             width: 23rem;
             padding: 2rem;
             border-right: 0.15rem solid #bababa;
-            position: sticky;
+            position: fixed;
             height: 100vh;
         }
 
@@ -56,7 +56,8 @@
             padding: 1rem;
             text-align: left;
             text-decoration: none;
-            display: inline-block;
+            display: flex;
+            align-items: center;
             font-size: 1.25rem;
             height: 4rem;
             cursor: pointer;
@@ -67,18 +68,21 @@
         .button:hover {
             background-color: #67bdc8;
         }
-
+        
+        .logout{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+            margin-left: 20px;
+            margin-top: 50%;
+        }
         .button-logout{
             background-color: #FAF9F6;
-            color: black;
-            padding: 1rem;
+            color: black;   
             text-align: left;
             text-decoration: none;
-            display: inline-block;
             font-size: 1.25rem;
             height: 4rem;
             cursor: pointer;
-            margin: 13rem 0rem 0.5rem 0rem;
             border-radius: 1rem;
         }
 
@@ -110,21 +114,33 @@
             margin-top: 1rem;
         }
 
+        .navicon{
+            width: 30px;
+            margin-right: 10px;
+        }
+
+        .adminprof{
+            display: grid;
+            grid-template-columns: 1fr 8fr;
+        }
+
     </style>
 </head>
 <body>
 
     <section class="admin_controls">    
-        <h1 class="title"> Admin </h1>
+        <div class="adminprof">
+            <img class="profile" src="static/adminprofile.png"> <h1 class="title">  Admin </h1>
+        </div>
         <button id="listPosition" class="button"><img class ="navicon" src="static/listpositions.png"> Positions</button>
-        <button id="addCandidate" class="button">Add New Candidate</button>
-        <button id="createQuestion" class="button">Create New Questions</button>
-        <button id="addPillar" class="button">Add Pillar</button>
-        <button id="Publish Questions" class="button">Publish Questions</button>
-        <button id="Open Voting" class="button">Voting</button>
+        <button id="addCandidate" class="button"><img class ="navicon" src="static/addcandidate.png">Add New Candidate</button>
+        <button id="createQuestion" class="button"><img class ="navicon" src="static/createnewquestion.png">Create New Questions</button>
+        <button id="addPillar" class="button"><img class ="navicon" src="static/pillar.png">Add Pillar</button>
+        <button id="Open Voting" class="button"><img class ="navicon" src="static/voting.png">Voting</button>
 
         <div class="logout">
-            <a class="button-logout">Logout</a>
+            <img class ="navicon" src="static/logout.png">
+            <a class="button-logout" href="/">Logout</a>
         </div>
     </section>
 
