@@ -27,10 +27,14 @@ The Voting Page allows the users to vote for their candidate of choice. This wil
 The Results Page presents the total number of votes for each candidate and position, ranking candidates from highest to lowest based on vote count.
 
 
-## Technologies Used
+## 💻Technologies Used
 - Frontend: HTML, CSS, JavaScript
 - Backend: Python
 - Framework: Flask
+
+## 💂 Admin and Voter Credentials
+- ID: 10344, Password: voter
+- ID: adminadmin, Password: 1234 
 
 ## Authors
 **Cin>>ergy Team**
